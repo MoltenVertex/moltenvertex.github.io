@@ -904,7 +904,7 @@
     //  Car 
     Blockly.Blocks['car'] = {
       init: function () {
-        this.appendDummyInput().appendField('Car');
+        this.appendDummyInput().appendField('Car').appendField(textField(''), 'FILE_PATH').appendField('(External File Path)');
         this.appendStatementInput('PROPERTIES').setCheck('car_property');
         this.appendStatementInput('CAMERA_RESTRICTION').setCheck('camera_restriction').appendField('Camera Restriction');
         this.appendStatementInput('POWER').setCheck('power').appendField('Power');
@@ -1531,37 +1531,42 @@
           break;
 
         case 'car':
-          xml += ind(n) + '<Car>\n';
-          // Camera restriction
-          var crBlock = block.getInputTargetBlock('CAMERA_RESTRICTION');
-          if (crBlock) xml += generateXml(crBlock, ni);
-          // Modular properties
-          var propBlock = block.getInputTargetBlock('PROPERTIES');
-          while (propBlock) {
-            xml += generateXml(propBlock, ni);
-            propBlock = propBlock.getNextBlock();
+          var filePath = block.getFieldValue('FILE_PATH');
+          if (filePath && filePath.trim() !== '') {
+            xml += textEl('Car', filePath.trim(), n);
+          } else {
+            xml += ind(n) + '<Car>\n';
+            // Camera restriction
+            var crBlock = block.getInputTargetBlock('CAMERA_RESTRICTION');
+            if (crBlock) xml += generateXml(crBlock, ni);
+            // Modular properties
+            var propBlock = block.getInputTargetBlock('PROPERTIES');
+            while (propBlock) {
+              xml += generateXml(propBlock, ni);
+              propBlock = propBlock.getNextBlock();
+            }
+            // Sub-sections
+            var powerBlock = block.getInputTargetBlock('POWER');
+            if (powerBlock) xml += generateXml(powerBlock, ni);
+            var brakeBlock = block.getInputTargetBlock('BRAKE');
+            if (brakeBlock) xml += generateXml(brakeBlock, ni);
+            var engineBlock = block.getInputTargetBlock('ENGINE');
+            if (engineBlock) xml += generateXml(engineBlock, ni);
+            var doorsBlock = block.getInputTargetBlock('DOORS');
+            if (doorsBlock) xml += generateXml(doorsBlock, ni);
+            var sandersBlock = block.getInputTargetBlock('SANDERS');
+            if (sandersBlock) xml += generateXml(sandersBlock, ni);
+            var windscreenBlock = block.getInputTargetBlock('WINDSCREEN');
+            if (windscreenBlock) xml += generateXml(windscreenBlock, ni);
+            var psBlock = block.getInputTargetBlock('PARTICLE_SOURCES');
+            while (psBlock) {
+              xml += generateXml(psBlock, ni);
+              psBlock = psBlock.getNextBlock();
+            }
+            var dsdBlock = block.getInputTargetBlock('DSD');
+            if (dsdBlock) xml += generateXml(dsdBlock, ni);
+            xml += ind(n) + '</Car>\n';
           }
-          // Sub-sections
-          var powerBlock = block.getInputTargetBlock('POWER');
-          if (powerBlock) xml += generateXml(powerBlock, ni);
-          var brakeBlock = block.getInputTargetBlock('BRAKE');
-          if (brakeBlock) xml += generateXml(brakeBlock, ni);
-          var engineBlock = block.getInputTargetBlock('ENGINE');
-          if (engineBlock) xml += generateXml(engineBlock, ni);
-          var doorsBlock = block.getInputTargetBlock('DOORS');
-          if (doorsBlock) xml += generateXml(doorsBlock, ni);
-          var sandersBlock = block.getInputTargetBlock('SANDERS');
-          if (sandersBlock) xml += generateXml(sandersBlock, ni);
-          var windscreenBlock = block.getInputTargetBlock('WINDSCREEN');
-          if (windscreenBlock) xml += generateXml(windscreenBlock, ni);
-          var psBlock = block.getInputTargetBlock('PARTICLE_SOURCES');
-          while (psBlock) {
-            xml += generateXml(psBlock, ni);
-            psBlock = psBlock.getNextBlock();
-          }
-          var dsdBlock = block.getInputTargetBlock('DSD');
-          if (dsdBlock) xml += generateXml(dsdBlock, ni);
-          xml += ind(n) + '</Car>\n';
           break;
 
         case 'car_length':
@@ -1918,7 +1923,11 @@
         var tagName = child.tagName;
         if (tagName === 'Car') {
           var carBlock = workspace.newBlock('car');
-          importCarElement(carBlock, child);
+          if (child.children.length === 0 && child.textContent.trim() !== '') {
+            carBlock.setFieldValue(child.textContent.trim(), 'FILE_PATH');
+          } else {
+            importCarElement(carBlock, child);
+          }
           appendToStack(block, 'CARS', carBlock);
         } else if (tagName === 'Coupler') {
           var cBlock = workspace.newBlock('coupler');
