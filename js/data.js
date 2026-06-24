@@ -72,6 +72,16 @@ const PROJECTS = [
     section: 'operational',
   },
   {
+    name: 'OpenBVE sound.xml Editor',
+    href: './soundxmleditor/openbve_sound_xml_editor.html',
+    description: 'A visual Blockly-based configuration editor for OpenBVE sound.xml files.',
+    tech: 'HTML/Blockly',
+    line: 'purple',
+    lineName: 'PURPLE LINE',
+    platform: '2',
+    section: 'operational',
+  },
+  {
     name: 'Project Four',
     href: '/project4',
     description: 'A weekend hack turned into something people actually use.',

@@ -1,0 +1,1388 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>sound.xml Editor — OpenBVE</title>
+  <script src="https://cdn.jsdelivr.net/npm/blockly/blockly.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f0f0f0;
+      --sign-white: #ffffff;
+      --fg: #1a1a1a;
+      --fg-secondary: #444;
+      --muted: #999;
+      --border: #d4d4d4;
+      --border-dark: #bbb;
+      --red: #D71920;
+      --blue: #00A1E9;
+      --green: #009944;
+      --orange: #F39700;
+      --purple: #9C7DB8;
+      --teal: #00A7A7;
+    }
+
+    body, h1, h2, h3, p, main, .top-bar, .name-board, .direction-bar, #outputPanel, #statusBar, .modal, .modal-content {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      height: 100%;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Inter', 'Noto Sans JP', sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .top-bar {
+      background: var(--red);
+      color: #fff;
+      padding: 5px 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      flex-shrink: 0;
+      animation: fadeDown 0.5s ease both;
+    }
+
+    .top-bar .train-icon {
+      width: 14px;
+      height: 14px;
+      fill: #fff;
+    }
+
+    .top-bar .meta {
+      margin-left: auto;
+      font-weight: 500;
+      letter-spacing: 1px;
+      opacity: 0.85;
+    }
+
+    /* Station name board */
+    .name-board {
+      background: var(--sign-white);
+      border-bottom: 3px solid var(--fg);
+      padding: 14px 18px 12px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-shrink: 0;
+      animation: fadeDown 0.5s ease 0.05s both;
+    }
+
+    .station-medallion {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: var(--purple);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      line-height: 1;
+    }
+
+    .station-medallion .letter {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      font-family: 'Noto Sans JP', sans-serif;
+    }
+
+    .station-medallion .number {
+      font-size: 20px;
+      font-weight: 800;
+      font-family: 'Noto Sans JP', sans-serif;
+      margin-top: 1px;
+    }
+
+    .name-board .title-group {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .name-board h1 {
+      font-family: 'Noto Sans JP', 'Inter', sans-serif;
+      font-size: clamp(22px, 3.5vw, 30px);
+      font-weight: 900;
+      letter-spacing: 3px;
+      line-height: 1.1;
+      color: var(--fg);
+    }
+
+    .name-board .subtitle {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 3px;
+    }
+
+    .name-board .toolbar {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .toolbar button {
+      background: var(--sign-white);
+      color: var(--fg);
+      border: 2px solid var(--border);
+      padding: 6px 13px;
+      border-radius: 0;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-family: 'Inter', sans-serif;
+      transition: border-color 0.15s, background 0.15s, color 0.15s;
+      white-space: nowrap;
+    }
+
+    .toolbar button:hover {
+      border-color: var(--border-dark);
+      background: #fafafa;
+    }
+
+    .toolbar button.primary {
+      background: var(--purple);
+      color: #fff;
+      border-color: var(--purple);
+    }
+
+    .toolbar button.primary:hover {
+      background: #7d5e9c;
+      border-color: #7d5e9c;
+    }
+
+    .toolbar button.danger {
+      color: var(--red);
+      border-color: var(--border);
+    }
+
+    .toolbar button.danger:hover {
+      border-color: var(--red);
+      background: #fff5f5;
+    }
+
+    /* Direction bar */
+    .direction-bar {
+      background: var(--sign-white);
+      border-bottom: 1px solid var(--border);
+      padding: 7px 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--fg-secondary);
+      flex-shrink: 0;
+      animation: fadeDown 0.5s ease 0.1s both;
+    }
+
+    .direction-bar .arrow {
+      font-weight: 700;
+      color: var(--purple);
+      font-size: 14px;
+    }
+
+    .direction-bar .label {
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-size: 11px;
+    }
+
+    .direction-bar .dest {
+      color: var(--fg-secondary);
+    }
+
+    .direction-bar .line-stripe {
+      width: 4px;
+      height: 16px;
+      background: var(--purple);
+      margin-right: 4px;
+    }
+
+    /* === Main split === */
+    main {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+
+    #blocklyContainer {
+      flex: 1;
+      position: relative;
+      min-width: 0;
+      background: var(--bg);
+    }
+
+    #blocklyDiv {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    #blocklyDiv .blocklyToolboxDiv {
+      background: var(--sign-white);
+      border-right: 2px solid var(--border);
+    }
+
+    #blocklyDiv .blocklyTreeRow {
+      border-bottom: 1px solid #eee;
+    }
+
+    #blocklyDiv .blocklyTreeRow:hover {
+      background: #fafafa;
+    }
+
+    #blocklyDiv .blocklyTreeLabel {
+      font-family: 'Inter', 'Noto Sans JP', sans-serif;
+      font-weight: 600;
+      font-size: 12px;
+      letter-spacing: 0.5px;
+    }
+
+    /* Resizer */
+    .resizer {
+      width: 8px;
+      background: var(--border);
+      cursor: col-resize;
+      flex-shrink: 0;
+      border-left: 3px solid var(--sign-white);
+      border-right: 3px solid var(--sign-white);
+      transition: background 0.15s;
+    }
+
+    .resizer:hover {
+      background: var(--purple);
+    }
+
+    /* Output panel — departure board style */
+    #outputPanel {
+      width: 40%;
+      min-width: 300px;
+      background: var(--sign-white);
+      display: flex;
+      flex-direction: column;
+      border-left: 2px solid var(--fg);
+    }
+
+    #outputPanel .panel-header {
+      padding: 9px 14px;
+      background: var(--fg);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    #outputPanel .panel-header .line-badge {
+      background: var(--purple);
+      color: #fff;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      padding: 2px 6px;
+      border-radius: 2px;
+      text-transform: uppercase;
+      font-family: 'Inter', sans-serif;
+    }
+
+    #outputPanel .panel-header .panel-title {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-family: 'Noto Sans JP', 'Inter', sans-serif;
+    }
+
+    #outputPanel .panel-header .actions {
+      margin-left: auto;
+      display: flex;
+      gap: 4px;
+    }
+
+    #outputPanel .panel-header .actions button {
+      background: transparent;
+      color: #fff;
+      border: 1px solid #555;
+      padding: 3px 9px;
+      border-radius: 0;
+      cursor: pointer;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      font-family: 'Inter', sans-serif;
+      transition: border-color 0.15s, color 0.15s;
+    }
+
+    #outputPanel .panel-header .actions button:hover {
+      border-color: var(--purple);
+      color: var(--purple);
+    }
+
+    #xmlOutput {
+      flex: 1;
+      overflow: auto;
+      padding: 12px 16px;
+      font-family: 'JetBrains Mono', 'Consolas', monospace;
+      font-size: 11.5px;
+      line-height: 1.65;
+      white-space: pre-wrap;
+      word-break: break-word;
+      color: var(--fg);
+      background: var(--sign-white);
+      border-bottom: 1px solid var(--border);
+    }
+
+    #xmlOutput .xml-tag {
+      color: var(--purple);
+      font-weight: 500;
+    }
+
+    #xmlOutput .xml-attr {
+      color: var(--blue);
+    }
+
+    #xmlOutput .xml-comment {
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    #xmlOutput .xml-decl {
+      color: var(--muted);
+    }
+
+    #statusBar {
+      background: var(--sign-white);
+      color: var(--fg-secondary);
+      padding: 5px 16px;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      border-top: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    #statusBar #statusText.error {
+      color: var(--red);
+    }
+
+    #statusBar #statusText.ok {
+      color: var(--green);
+    }
+
+    #statusBar #blockCount {
+      margin-left: auto;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(26, 26, 26, 0.5);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal.show {
+      display: flex;
+      animation: fadeIn 0.2s ease;
+    }
+
+    .modal-content {
+      background: var(--sign-white);
+      border: 3px solid var(--fg);
+      padding: 20px 24px;
+      border-radius: 0;
+      max-width: 460px;
+      width: 90%;
+      color: var(--fg);
+    }
+
+    .modal-content h3 {
+      font-family: 'Noto Sans JP', 'Inter', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--purple);
+    }
+
+    .modal-content p {
+      font-size: 13px;
+      line-height: 1.6;
+      margin-bottom: 16px;
+      color: var(--fg-secondary);
+    }
+
+    .modal-content button {
+      background: var(--fg);
+      color: #fff;
+      border: none;
+      padding: 8px 20px;
+      border-radius: 0;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-family: 'Inter', sans-serif;
+      transition: background 0.15s;
+    }
+
+    .modal-content button:hover {
+      background: var(--purple);
+    }
+
+    /* Animations */
+    @keyframes fadeDown {
+      from {
+        opacity: 0;
+        transform: translateY(-8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    /* Responsive */
+    @media (max-width: 860px) {
+      .name-board {
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .name-board .toolbar {
+        width: 100%;
+        justify-content: flex-start;
+      }
+      .toolbar button {
+        padding: 5px 10px;
+        font-size: 10px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      main {
+        flex-direction: column;
+      }
+      #outputPanel {
+        width: 100%;
+        min-width: 0;
+        height: 42%;
+        border-left: none;
+        border-top: 2px solid var(--fg);
+      }
+      .resizer {
+        display: none;
+      }
+      .station-medallion {
+        width: 40px;
+        height: 40px;
+      }
+      .station-medallion .number {
+        font-size: 16px;
+      }
+    }
+
+    /* Blockly overrides */
+    .blocklyFlyoutBackground {
+      fill: var(--sign-white) !important;
+    }
+
+    .blocklyFlyoutButton {
+      fill: var(--sign-white) !important;
+    }
+
+    .blocklyFlyoutLabelText {
+      font-family: 'Inter', sans-serif !important;
+      font-weight: 700 !important;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="top-bar">
+    <svg class="train-icon" viewBox="0 0 24 24" style="width:14px; height:14px; fill:#fff;">
+      <path d="M12 2C8 2 4 3.5 4 7v10c0 1.5 2 3 5 3v1h1v-1h4v1h1v-1c3 0 5-1.5 5-3V7c0-3.5-4-5-8-5zm-4 15c-.8 0-1.5-.7-1.5-1.5S7.2 14 8 14s1.5.7 1.5 1.5S8.8 17 8 17zm8 0c-.8 0-1.5-.7-1.5-1.5s.7-1.5 1.5-1.5 1.5.7 1.5 1.5-.7 1.5-1.5 1.5zm2-6H6V7h12v4z"/>
+    </svg>
+    <span>OpenBVE Projects Index</span>
+    <span class="meta">SYSTEM NORMAL</span>
+  </div>
+
+  <div class="name-board">
+    <div class="station-medallion">
+      <span class="letter">S</span>
+      <span class="number">01</span>
+    </div>
+    <div class="title-group">
+      <h1>sound.xml Editor</h1>
+      <div class="subtitle">Sound Configuration Interface</div>
+    </div>
+    <div class="toolbar">
+      <input type="file" id="fileInput" accept=".xml" style="display:none">
+      <button id="importBtn">Import XML</button>
+      <button class="primary" id="exportBtn">Save sound.xml</button>
+      <button class="danger" id="clearBtn">Clear Workspace</button>
+    </div>
+  </div>
+
+  <div class="direction-bar">
+    <div class="line-stripe"></div>
+    <span class="arrow">&gt;&gt;</span>
+    <span class="label">Direction:</span>
+    <span class="dest">Consist Sounds &amp; Cab Audio Config</span>
+  </div>
+
+  <main>
+    <div id="blocklyContainer">
+      <div id="blocklyDiv"></div>
+    </div>
+    <div class="resizer" id="resizer"></div>
+    <div id="outputPanel">
+      <div class="panel-header">
+        <span class="line-badge">OUT</span>
+        <span class="panel-title">XML Output Preview</span>
+        <div class="actions">
+          <button id="copyBtn">Copy</button>
+        </div>
+      </div>
+      <div id="xmlOutput"></div>
+    </div>
+  </main>
+
+  <div id="statusBar">
+    <span id="statusText" class="ok">Ready</span>
+    <span id="blockCount">0 blocks</span>
+  </div>
+
+  <!-- Error Modal -->
+  <div class="modal" id="errorModal">
+    <div class="modal-content">
+      <h3 id="errorTitle">Import Failed</h3>
+      <p id="errorMessage">Invalid XML format or unsupported node structure.</p>
+      <button onclick="document.getElementById('errorModal').classList.remove('show')">Close</button>
+    </div>
+  </div>
+
+  <xml xmlns="https://developers.google.com/blockly/xml" id="toolbox" style="display: none">
+    <category name="General &amp; Loose" colour="230">
+      <block type="sound_root"></block>
+      <block type="indexed_sound"></block>
+      <block type="misc_sound_node"></block>
+    </category>
+    <category name="Plugin &amp; Rails" colour="290">
+      <block type="ats_container"></block>
+      <block type="run_container"></block>
+      <block type="flange_container"></block>
+      <block type="switch_container"></block>
+      <block type="motor_container"></block>
+    </category>
+    <category name="Horn &amp; Compressor" colour="20">
+      <block type="horn_container"></block>
+      <block type="horn_element"></block>
+      <block type="horn_sub_sound"></block>
+      <block type="compressor_container"></block>
+      <block type="compressor_sub_sound"></block>
+    </category>
+    <category name="Controls" colour="120">
+      <block type="power_handle_container"></block>
+      <block type="brake_handle_container"></block>
+      <block type="handle_sub_sound"></block>
+      <block type="reverser_container"></block>
+      <block type="reverser_sub_sound"></block>
+    </category>
+    <category name="Brake &amp; Doors" colour="50">
+      <block type="brake_container"></block>
+      <block type="brake_sub_sound"></block>
+      <block type="doors_container"></block>
+      <block type="doors_sub_sound"></block>
+    </category>
+    <category name="Mechanical Systems" colour="160">
+      <block type="suspension_container"></block>
+      <block type="suspension_sub_sound"></block>
+      <block type="breaker_container"></block>
+      <block type="breaker_sub_sound"></block>
+      <block type="coupler_container"></block>
+      <block type="coupler_sub_sound"></block>
+      <block type="pantograph_container"></block>
+      <block type="pantograph_sub_sound"></block>
+    </category>
+    <category name="Cab &amp; Weather" colour="80">
+      <block type="windscreen_container"></block>
+      <block type="windscreen_sub_sound"></block>
+      <block type="sanders_container"></block>
+      <block type="sanders_sub_sound"></block>
+    </category>
+  </xml>
+
+  <script>
+    const xmlGenerator = new Blockly.Generator('XML');
+    xmlGenerator.scrub_ = function(block, code, opt_thisOnly) {
+      const nextBlock = block.nextConnection && block.nextConnection.targetBlock();
+      let nextCode = '';
+      if (nextBlock) {
+        nextCode = opt_thisOnly ? '' : xmlGenerator.blockToCode(nextBlock);
+      }
+      return code + nextCode;
+    };
+
+    // Keep syntax colors in XML output
+    function escapeXml(unsafe) {
+      if (!unsafe) return '';
+      return unsafe.replace(/[<>&'"]/g, function (c) {
+        switch (c) {
+          case '<': return '&lt;';
+          case '>': return '&gt;';
+          case '&': return '&amp;';
+          case '\'': return '&apos;';
+          case '"': return '&quot;';
+        }
+      });
+    }
+
+    function formatSoundNode(nodeName, fileName, radius, usePosition, posX, posY, posZ, indent) {
+      let xml = indent + '<' + nodeName + '>\n';
+      xml += indent + '  <FileName>' + escapeXml(fileName) + '</FileName>\n';
+      if (radius !== null && radius !== undefined && radius !== '') {
+        xml += indent + '  <Radius>' + radius + '</Radius>\n';
+      }
+      if (usePosition) {
+        xml += indent + '  <Position>' + posX + ',' + posY + ',' + posZ + '</Position>\n';
+      }
+      xml += indent + '</' + nodeName + '>\n';
+      return xml;
+    }
+
+    Blockly.Blocks['sound_root'] = {
+      init: function() {
+        this.appendDummyInput().appendField("openBVE <Sound> Root");
+        this.appendStatementInput("SUB_NODES").setCheck(null);
+        this.setColour(230);
+      }
+    };
+    xmlGenerator['sound_root'] = function(block) {
+      const subNodes = xmlGenerator.statementToCode(block, 'SUB_NODES');
+      return '<?xml version="1.0" encoding="utf-8"?>\n' +
+             '<openBVE xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">\n' +
+             '  <Sound>\n' + subNodes + '  </Sound>\n' +
+             '</openBVE>\n';
+    };
+
+    Blockly.Blocks['indexed_sound'] = {
+      init: function() {
+        this.appendDummyInput()
+            .appendField("Sound Entry Index:").appendField(new Blockly.FieldNumber(0, 0), "INDEX");
+        this.appendDummyInput()
+            .appendField("File:").appendField(new Blockly.FieldInput("sound.wav"), "FILENAME")
+            .appendField("Radius:").appendField(new Blockly.FieldNumber(10.0, 0.1), "RADIUS");
+        this.appendDummyInput()
+            .appendField("Position:").appendField(new Blockly.FieldCheckbox("FALSE"), "USE_POSITION")
+            .appendField("X:").appendField(new Blockly.FieldNumber(0), "POS_X")
+            .appendField("Y:").appendField(new Blockly.FieldNumber(0), "POS_Y")
+            .appendField("Z:").appendField(new Blockly.FieldNumber(0), "POS_Z");
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(160);
+      }
+    };
+    xmlGenerator['indexed_sound'] = function(block) {
+      const index = block.getFieldValue('INDEX');
+      const fileName = block.getFieldValue('FILENAME');
+      const radius = block.getFieldValue('RADIUS');
+      const usePosition = block.getFieldValue('USE_POSITION') === 'TRUE';
+      const posX = block.getFieldValue('POS_X');
+      const posY = block.getFieldValue('POS_Y');
+      const posZ = block.getFieldValue('POS_Z');
+
+      let xml = '      <Sound>\n';
+      xml += '        <Index>' + index + '</Index>\n';
+      xml += '        <FileName>' + escapeXml(fileName) + '</FileName>\n';
+      if (radius !== '') xml += '        <Radius>' + radius + '</Radius>\n';
+      if (usePosition) xml += '        <Position>' + posX + ',' + posY + ',' + posZ + '</Position>\n';
+      xml += '      </Sound>\n';
+      return xml;
+    };
+
+    function defineListContainerBlock(blockName, displayName, tag, colour) {
+      Blockly.Blocks[blockName] = {
+        init: function() {
+          this.appendDummyInput().appendField(displayName + " (<" + tag + ">)");
+          this.appendStatementInput("SOUNDS").setCheck("indexed_sound");
+          this.setPreviousStatement(true, null);
+          this.setNextStatement(true, null);
+          this.setColour(colour);
+        }
+      };
+      xmlGenerator[blockName] = function(block) {
+        const sounds = xmlGenerator.statementToCode(block, 'SOUNDS');
+        return '    <' + tag + '>\n' + sounds + '    </' + tag + '>\n';
+      };
+    }
+    defineListContainerBlock('ats_container', 'ATS Plugin Sounds', 'ATS', 290);
+    defineListContainerBlock('run_container', 'Track Run Sounds', 'Run', 290);
+    defineListContainerBlock('flange_container', 'Flange Squeals', 'Flange', 290);
+    defineListContainerBlock('switch_container', 'Point Switches', 'Switch', 290);
+    defineListContainerBlock('motor_container', 'Motor Sound Table', 'Motor', 290);
+
+    Blockly.Blocks['horn_container'] = {
+      init: function() {
+        this.appendDummyInput().appendField("Train Horns (<Horn>)");
+        this.appendStatementInput("HORNS").setCheck("horn_element");
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(20);
+      }
+    };
+    xmlGenerator['horn_container'] = function(block) {
+      return '    <Horn>\n' + xmlGenerator.statementToCode(block, 'HORNS') + '    </Horn>\n';
+    };
+
+    Blockly.Blocks['horn_element'] = {
+      init: function() {
+        this.appendDummyInput().appendField("Horn:")
+            .appendField(new Blockly.FieldDropdown([["Primary", "Primary"], ["Secondary", "Secondary"], ["Music", "Music"]]), "TYPE");
+        this.appendStatementInput("SUB_SOUNDS").setCheck("horn_sub_sound");
+        this.setPreviousStatement(true, "horn_element");
+        this.setNextStatement(true, "horn_element");
+        this.setColour(35);
+      }
+    };
+    xmlGenerator['horn_element'] = function(block) {
+      const type = block.getFieldValue('TYPE');
+      return '      <' + type + '>\n' + xmlGenerator.statementToCode(block, 'SUB_SOUNDS') + '      </' + type + '>\n';
+    };
+
+    Blockly.Blocks['horn_sub_sound'] = {
+      init: function() {
+        this.appendDummyInput().appendField("Horn Node:")
+            .appendField(new Blockly.FieldDropdown([["Loop", "Loop"], ["Start", "Start"], ["End", "End"]]), "SUB_TYPE");
+        this.appendDummyInput()
+            .appendField("File:").appendField(new Blockly.FieldInput("horn.wav"), "FILENAME")
+            .appendField("Radius:").appendField(new Blockly.FieldNumber(30.0, 0.1), "RADIUS");
+        this.appendDummyInput()
+            .appendField("Position:").appendField(new Blockly.FieldCheckbox("FALSE"), "USE_POSITION")
+            .appendField("X:").appendField(new Blockly.FieldNumber(0), "POS_X")
+            .appendField("Y:").appendField(new Blockly.FieldNumber(0), "POS_Y")
+            .appendField("Z:").appendField(new Blockly.FieldNumber(0), "POS_Z");
+        this.setPreviousStatement(true, "horn_sub_sound");
+        this.setNextStatement(true, "horn_sub_sound");
+        this.setColour(50);
+      }
+    };
+    xmlGenerator['horn_sub_sound'] = function(block) {
+      return formatSoundNode(block.getFieldValue('SUB_TYPE'), block.getFieldValue('FILENAME'), block.getFieldValue('RADIUS'), block.getFieldValue('USE_POSITION') === 'TRUE', block.getFieldValue('POS_X'), block.getFieldValue('POS_Y'), block.getFieldValue('POS_Z'), '        ');
+    };
+
+    function defineSubSoundBlock(blockName, displayName, options, defaultRadius, colour) {
+      Blockly.Blocks[blockName] = {
+        init: function() {
+          this.appendDummyInput().appendField(displayName + ":")
+              .appendField(new Blockly.FieldDropdown(options), "SUB_TYPE");
+          this.appendDummyInput()
+              .appendField("File:").appendField(new Blockly.FieldInput("sound.wav"), "FILENAME")
+              .appendField("Radius:").appendField(new Blockly.FieldNumber(defaultRadius, 0.1), "RADIUS");
+          this.appendDummyInput()
+              .appendField("Position:").appendField(new Blockly.FieldCheckbox("FALSE"), "USE_POSITION")
+              .appendField("X:").appendField(new Blockly.FieldNumber(0), "POS_X")
+              .appendField("Y:").appendField(new Blockly.FieldNumber(0), "POS_Y")
+              .appendField("Z:").appendField(new Blockly.FieldNumber(0), "POS_Z");
+          this.setPreviousStatement(true, blockName);
+          this.setNextStatement(true, blockName);
+          this.setColour(colour);
+        }
+      };
+      xmlGenerator[blockName] = function(block) {
+        return formatSoundNode(block.getFieldValue('SUB_TYPE'), block.getFieldValue('FILENAME'), block.getFieldValue('RADIUS'), block.getFieldValue('USE_POSITION') === 'TRUE', block.getFieldValue('POS_X'), block.getFieldValue('POS_Y'), block.getFieldValue('POS_Z'), '      ');
+      };
+    }
+
+    function defineContainerBlock(blockName, displayName, subCheck, colour, tag) {
+      Blockly.Blocks[blockName] = {
+        init: function() {
+          this.appendDummyInput().appendField(displayName + " (<" + tag + ">)");
+          this.appendStatementInput("SUB_SOUNDS").setCheck(subCheck);
+          this.setPreviousStatement(true, null);
+          this.setNextStatement(true, null);
+          this.setColour(colour);
+        }
+      };
+      xmlGenerator[blockName] = function(block) {
+        return '    <' + tag + '>\n' + xmlGenerator.statementToCode(block, 'SUB_SOUNDS') + '    </' + tag + '>\n';
+      };
+    }
+
+    defineSubSoundBlock('compressor_sub_sound', 'Compressor', [["Start", "Start"], ["Loop", "Loop"], ["End", "End"]], 10.0, 50);
+    defineContainerBlock('compressor_container', 'Compressor', 'compressor_sub_sound', 120, 'Compressor');
+
+    defineSubSoundBlock('handle_sub_sound', 'Handle', [["Minimum", "Minimum"], ["Apply", "Apply"], ["Maximum", "Maximum"]], 2.0, 50);
+    defineContainerBlock('power_handle_container', 'Power Handle', 'handle_sub_sound', 120, 'PowerHandle');
+    defineContainerBlock('brake_handle_container', 'Brake Handle', 'handle_sub_sound', 120, 'BrakeHandle');
+
+    defineSubSoundBlock('reverser_sub_sound', 'Reverser', [["Switch On", "On"], ["Switch Off", "Off"]], 2.0, 50);
+    defineContainerBlock('reverser_container', 'Reverser', 'reverser_sub_sound', 120, 'Reverser');
+
+    defineSubSoundBlock('brake_sub_sound', 'Brake', [["ReleaseFull", "ReleaseFull"], ["ReleaseHigh", "ReleaseHigh"], ["Release", "Release"], ["Emergency", "Emergency"], ["Application", "Application"]], 5.0, 50);
+    defineContainerBlock('brake_container', 'Brake Systems', 'brake_sub_sound', 120, 'Brake');
+
+    defineSubSoundBlock('doors_sub_sound', 'Door', [["Open Left", "OpenLeft"], ["Close Left", "CloseLeft"], ["Open Right", "OpenRight"], ["Close Right", "CloseRight"]], 5.0, 50);
+    defineContainerBlock('doors_container', 'Doors', 'doors_sub_sound', 120, 'Doors');
+
+    defineSubSoundBlock('suspension_sub_sound', 'Suspension', [["Sway Left", "Left"], ["Sway Right", "Right"]], 5.0, 50);
+    defineContainerBlock('suspension_container', 'Suspension', 'suspension_sub_sound', 120, 'Suspension');
+
+    defineSubSoundBlock('breaker_sub_sound', 'Breaker', [["Connected (On)", "On"], ["Disconnected (Off)", "Off"]], 2.0, 50);
+    defineContainerBlock('breaker_container', 'Breaker', 'breaker_sub_sound', 120, 'Breaker');
+
+    defineSubSoundBlock('windscreen_sub_sound', 'Windscreen', [["RainDrop", "RainDrop"], ["WetWipe", "WetWipe"], ["DryWipe", "DryWipe"], ["Switch", "Switch"]], 2.0, 50);
+    defineContainerBlock('windscreen_container', 'Windscreen', 'windscreen_sub_sound', 120, 'Windscreen');
+
+    defineSubSoundBlock('sanders_sub_sound', 'Sanders', [["Activate", "Activate"], ["EmptyActivate", "EmptyActivate"], ["DeActivate", "DeActivate"], ["Loop", "Loop"], ["Empty", "Empty"]], 2.0, 50);
+    defineContainerBlock('sanders_container', 'Sanders', 'sanders_sub_sound', 120, 'Sanders');
+
+    defineSubSoundBlock('coupler_sub_sound', 'Coupler', [["Uncouple", "Uncouple"], ["Couple", "Couple"], ["CoupleCab", "CoupleCab"], ["UncoupleCab", "UncoupleCab"]], 5.0, 50);
+    defineContainerBlock('coupler_container', 'Coupler', 'coupler_sub_sound', 120, 'Coupler');
+
+    defineSubSoundBlock('headlights_sub_sound', 'Headlights', [["Switch", "Switch"]], 2.0, 50);
+    defineContainerBlock('headlights_container', 'Headlights', 'headlights_sub_sound', 120, 'Headlights');
+
+    defineSubSoundBlock('pantograph_sub_sound', 'Pantograph', [["Raise", "Raise"], ["Lower", "Lower"]], 5.0, 50);
+    defineContainerBlock('pantograph_container', 'Pantograph', 'pantograph_sub_sound', 120, 'Pantograph');
+
+    Blockly.Blocks['misc_sound_node'] = {
+      init: function() {
+        this.appendDummyInput().appendField("Background Loop:")
+            .appendField(new Blockly.FieldDropdown([["Constant (<Loop>)", "Loop"], ["Brake Rub (<Rub>)", "Rub"], ["Station Warn (<Halt>)", "Halt"]]), "SUB_TYPE");
+        this.appendDummyInput()
+            .appendField("File:").appendField(new Blockly.FieldInput("loop.wav"), "FILENAME")
+            .appendField("Radius:").appendField(new Blockly.FieldNumber(10.0, 0.1), "RADIUS");
+        this.appendDummyInput()
+            .appendField("Position:").appendField(new Blockly.FieldCheckbox("FALSE"), "USE_POSITION")
+            .appendField("X:").appendField(new Blockly.FieldNumber(0), "POS_X")
+            .appendField("Y:").appendField(new Blockly.FieldNumber(0), "POS_Y")
+            .appendField("Z:").appendField(new Blockly.FieldNumber(0), "POS_Z");
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(210);
+      }
+    };
+    xmlGenerator['misc_sound_node'] = function(block) {
+      return formatSoundNode(block.getFieldValue('SUB_TYPE'), block.getFieldValue('FILENAME'), block.getFieldValue('RADIUS'), block.getFieldValue('USE_POSITION') === 'TRUE', block.getFieldValue('POS_X'), block.getFieldValue('POS_Y'), block.getFieldValue('POS_Z'), '    ');
+    };
+
+    let workspace;
+
+    // Custom Blockly theme matching the Japanese train signage aesthetic
+    var signageTheme = Blockly.Theme.defineTheme('signage', {
+      base: Blockly.Themes.Classic,
+      componentStyles: {
+        workspaceBackgroundColour: '#f0f0f0',
+        toolboxBackgroundColour: '#ffffff',
+        toolboxForegroundColour: '#1a1a1a',
+        flyoutBackgroundColour: '#ffffff',
+        flyoutForegroundColour: '#1a1a1a',
+        flyoutOpacity: 1,
+        scrollbarColour: '#d4d4d4',
+        insertionMarkerColour: '#9C7DB8',
+        insertionMarkerOpacity: 0.4,
+        markerColour: '#9C7DB8',
+        cursorColour: '#9C7DB8',
+        selectedGlowColour: '#9C7DB8',
+        selectedGlowOpacity: 0.7,
+        replacementGlowColour: '#00A1E9',
+        replacementGlowOpacity: 0.5,
+        Hat: 'cap'
+      }
+    });
+
+    window.onload = function() {
+      workspace = Blockly.inject('blocklyDiv', {
+        toolbox: document.getElementById('toolbox'),
+        trashcan: true,
+        zoom: {
+          controls: true,
+          wheel: true,
+          startScale: 0.85,
+          maxScale: 2.5,
+          minScale: 0.25,
+          pinch: true
+        },
+        grid: {
+          spacing: 28,
+          length: 1,
+          colour: '#d4d4d4',
+          snap: false
+        },
+        theme: signageTheme,
+        renderer: 'geras',
+        move: {
+          scrollbars: true,
+          drag: true,
+          wheel: false
+        }
+      });
+
+      workspace.addChangeListener(function() {
+        scheduleUpdate();
+      });
+
+      window.addEventListener('resize', false, function() {
+        Blockly.svgResize(workspace);
+      });
+      
+      const rootBlock = workspace.newBlock('sound_root');
+      rootBlock.initSvg();
+      rootBlock.render();
+      rootBlock.moveBy(50, 50);
+
+      // Trigger initial rendering
+      setTimeout(function () { Blockly.svgResize(workspace); }, 100);
+      updateOutput();
+    };
+
+    // Debounced update
+    var updateTimer = null;
+    function scheduleUpdate() {
+      if (updateTimer) clearTimeout(updateTimer);
+      updateTimer = setTimeout(updateOutput, 150);
+    }
+
+    // XML syntax highlighter — produces HTML spans for the output panel
+    function highlightXml(xml) {
+      var esc = xml.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      esc = esc.replace(/^(&lt;\?xml[^]*?\?&gt;)/, '<span class="xml-decl">$1</span>');
+      esc = esc.replace(/(&lt;!--[^]*?--&gt;)/g, '<span class="xml-comment">$1</span>');
+      esc = esc.replace(/(&lt;\/?)([a-zA-Z_][a-zA-Z0-9_]*)([^&]*?)(\/?&gt;)/g,
+        function (m, p1, p2, p3, p4) {
+          return '<span class="xml-tag">' + p1 + p2 + '</span>' + p3 + '<span class="xml-tag">' + p4 + '</span>';
+        });
+      return esc;
+    }
+
+    function updateOutput() {
+      var topBlocks = workspace.getTopBlocks(false);
+      var soundBlock = null;
+      for (var i = 0; i < topBlocks.length; i++) {
+        if (topBlocks[i].type === 'sound_root') { soundBlock = topBlocks[i]; break; }
+      }
+      var output = '';
+      var statusClass = 'ok';
+      var statusMsg = 'Ready';
+      if (soundBlock) {
+        try {
+          output = xmlGenerator.workspaceToCode(workspace);
+          statusMsg = 'XML generated successfully';
+        } catch (e) {
+          output = 'Error generating XML:\n' + e.message;
+          statusClass = 'error';
+          statusMsg = 'Error: ' + e.message;
+        }
+      } else {
+        output = '<!-- No Sound root block found. Drag one from the General & Loose category. -->';
+        statusMsg = 'No Sound root block';
+        statusClass = 'error';
+      }
+      
+      document.getElementById('xmlOutput').dataset.raw = output;
+      document.getElementById('xmlOutput').innerHTML = highlightXml(output);
+      var statusEl = document.getElementById('statusText');
+      statusEl.textContent = statusMsg;
+      statusEl.className = statusClass;
+      
+      var count = workspace.getAllBlocks(false).length;
+      document.getElementById('blockCount').textContent = count + ' blocks';
+    }
+
+    function showError(title, msg) {
+      document.getElementById('errorTitle').textContent = title;
+      document.getElementById('errorMessage').textContent = msg;
+      document.getElementById('errorModal').classList.add('show');
+    }
+
+    function clearWorkspace() {
+      if (window.confirm && typeof window.confirm === "function") {
+        if(confirm("Are you sure you want to clear the workspace? This cannot be undone.")) {
+           resetBlocks();
+        }
+      } else {
+        resetBlocks();
+      }
+    }
+    
+    function resetBlocks() {
+      Blockly.Events.disable();
+      workspace.clear();
+      const rootBlock = workspace.newBlock('sound_root');
+      rootBlock.initSvg();
+      rootBlock.render();
+      rootBlock.moveBy(50, 50);
+      Blockly.Events.enable();
+      updateOutput();
+    }
+
+    function exportXml() {
+      var xml = document.getElementById('xmlOutput').dataset.raw || '';
+      if (!xml || xml.startsWith('<!--')) {
+        showError('Nothing to Download', 'No valid XML to download. Add a Sound root block first.');
+        return;
+      }
+      const blob = new Blob([xml], { type: 'text/xml;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "sound.xml");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function copyXml() {
+      var xml = document.getElementById('xmlOutput').dataset.raw || '';
+      if (!xml) return;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(xml).then(function () {
+          flashStatus('Copied to clipboard!');
+        }).catch(function () {
+          fallbackCopy(xml);
+        });
+      } else {
+        fallbackCopy(xml);
+      }
+    }
+
+    function fallbackCopy(text) {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try { 
+        document.execCommand('copy'); 
+        flashStatus('Copied to clipboard!'); 
+      } catch (e) { 
+        showError('Copy Failed', 'Could not copy to clipboard.'); 
+      }
+      document.body.removeChild(ta);
+    }
+
+    function flashStatus(msg) {
+      var el = document.getElementById('statusText');
+      var oldText = el.textContent;
+      var oldClass = el.className;
+      el.textContent = msg;
+      el.className = 'ok';
+      setTimeout(function () { el.textContent = oldText; el.className = oldClass; }, 1500);
+    }
+
+    function handleFileUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          importXmlToWorkspace(e.target.result);
+          flashStatus('Imported ' + file.name);
+        } catch (err) {
+          showError('Import Failed', err.message);
+          console.error("Error parsing XML: " + err.message);
+        }
+      };
+      reader.readAsText(file);
+      event.target.value = '';
+    }
+
+    function importXmlToWorkspace(xmlText) {
+      const parser = new DOMParser();
+      const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
+      
+      let soundNode = xmlDoc.querySelector('Sound');
+      if (!soundNode) {
+        if (xmlDoc.documentElement.nodeName === 'Sound') soundNode = xmlDoc.documentElement;
+        else throw new Error("Missing <Sound> root tag.");
+      }
+
+      Blockly.Events.disable();
+      workspace.clear();
+      const rootBlock = workspace.newBlock('sound_root');
+      rootBlock.initSvg();
+      rootBlock.render();
+      rootBlock.moveBy(50, 50);
+      let currentParentConnection = rootBlock.getInput('SUB_NODES').connection;
+
+      function createSubSoundBlock(subType, childNode, blockName) {
+        const fileName = childNode.querySelector('FileName')?.textContent || 'sound.wav';
+        const radius = childNode.querySelector('Radius')?.textContent || '';
+        const positionText = childNode.querySelector('Position')?.textContent || '';
+        
+        const block = workspace.newBlock(blockName);
+        block.setFieldValue(subType, 'SUB_TYPE');
+        block.setFieldValue(fileName, 'FILENAME');
+        if (radius !== '') block.setFieldValue(Number(radius), 'RADIUS');
+
+        if (positionText) {
+          const coords = positionText.split(',');
+          if (coords.length === 3) {
+            block.setFieldValue('TRUE', 'USE_POSITION');
+            block.setFieldValue(Number(coords[0]), 'POS_X');
+            block.setFieldValue(Number(coords[1]), 'POS_Y');
+            block.setFieldValue(Number(coords[2]), 'POS_Z');
+          }
+        } else {
+          block.setFieldValue('FALSE', 'USE_POSITION');
+        }
+        block.initSvg();
+        block.render();
+        return block;
+      }
+
+      const children = soundNode.children;
+      for (let i = 0; i < children.length; i++) {
+        const node = children[i];
+        const nodeName = node.nodeName;
+
+        if (['ATS', 'Run', 'Flange', 'Switch', 'Motor'].includes(nodeName)) {
+          let containerBlockName = '';
+          if (nodeName === 'ATS') containerBlockName = 'ats_container';
+          else if (nodeName === 'Run') containerBlockName = 'run_container';
+          else if (nodeName === 'Flange') containerBlockName = 'flange_container';
+          else if (nodeName === 'Switch') containerBlockName = 'switch_container';
+          else if (nodeName === 'Motor') containerBlockName = 'motor_container';
+
+          const containerBlock = workspace.newBlock(containerBlockName);
+          containerBlock.initSvg();
+          containerBlock.render();
+
+          currentParentConnection.connect(containerBlock.previousConnection);
+          currentParentConnection = containerBlock.nextConnection;
+          let childConnection = containerBlock.getInput('SOUNDS').connection;
+
+          const soundNodes = node.querySelectorAll('Sound');
+          soundNodes.forEach(sNode => {
+            const index = sNode.querySelector('Index')?.textContent || '0';
+            const fileName = sNode.querySelector('FileName')?.textContent || '';
+            const radius = sNode.querySelector('Radius')?.textContent || '';
+            const positionText = sNode.querySelector('Position')?.textContent || '';
+
+            const sBlock = workspace.newBlock('indexed_sound');
+            sBlock.setFieldValue(Number(index), 'INDEX');
+            sBlock.setFieldValue(fileName, 'FILENAME');
+            if (radius !== '') sBlock.setFieldValue(Number(radius), 'RADIUS');
+            
+            if (positionText) {
+              const coords = positionText.split(',');
+              if (coords.length === 3) {
+                sBlock.setFieldValue('TRUE', 'USE_POSITION');
+                sBlock.setFieldValue(Number(coords[0]), 'POS_X');
+                sBlock.setFieldValue(Number(coords[1]), 'POS_Y');
+                sBlock.setFieldValue(Number(coords[2]), 'POS_Z');
+              }
+            } else {
+              sBlock.setFieldValue('FALSE', 'USE_POSITION');
+            }
+            sBlock.initSvg();
+            sBlock.render();
+
+            childConnection.connect(sBlock.previousConnection);
+            childConnection = sBlock.nextConnection;
+          });
+
+        } else if (nodeName === 'Horn') {
+          const containerBlock = workspace.newBlock('horn_container');
+          containerBlock.initSvg();
+          containerBlock.render();
+          currentParentConnection.connect(containerBlock.previousConnection);
+          currentParentConnection = containerBlock.nextConnection;
+          let childConnection = containerBlock.getInput('HORNS').connection;
+
+          ['Primary', 'Secondary', 'Music'].forEach(hornType => {
+            const hNode = node.querySelector(hornType);
+            if (hNode) {
+              const hBlock = workspace.newBlock('horn_element');
+              hBlock.setFieldValue(hornType, 'TYPE');
+              hBlock.initSvg();
+              hBlock.render();
+              childConnection.connect(hBlock.previousConnection);
+              childConnection = hBlock.nextConnection;
+              let subChildConnection = hBlock.getInput('SUB_SOUNDS').connection;
+
+              ['Start', 'Loop', 'End'].forEach(subType => {
+                const subNode = hNode.querySelector(subType);
+                if (subNode) {
+                  const subBlock = createSubSoundBlock(subType, subNode, 'horn_sub_sound');
+                  subChildConnection.connect(subBlock.previousConnection);
+                  subChildConnection = subBlock.nextConnection;
+                }
+              });
+            }
+          });
+
+        } else if (['Loop', 'Rub', 'Halt'].includes(nodeName)) {
+          const block = createSubSoundBlock(nodeName, node, 'misc_sound_node');
+          currentParentConnection.connect(block.previousConnection);
+          currentParentConnection = block.nextConnection;
+
+        } else {
+          let containerBlockName = '';
+          let subBlockName = '';
+          let subTypes = [];
+
+          if (nodeName === 'Compressor') { containerBlockName = 'compressor_container'; subBlockName = 'compressor_sub_sound'; subTypes = ['Start', 'Loop', 'End']; }
+          else if (nodeName === 'PowerHandle') { containerBlockName = 'power_handle_container'; subBlockName = 'handle_sub_sound'; subTypes = ['Minimum', 'Apply', 'Maximum']; }
+          else if (nodeName === 'BrakeHandle') { containerBlockName = 'brake_handle_container'; subBlockName = 'handle_sub_sound'; subTypes = ['Minimum', 'Apply', 'Maximum']; }
+          else if (nodeName === 'Reverser') { containerBlockName = 'reverser_container'; subBlockName = 'reverser_sub_sound'; subTypes = ['On', 'Off']; }
+          else if (nodeName === 'Brake') { containerBlockName = 'brake_container'; subBlockName = 'brake_sub_sound'; subTypes = ['ReleaseFull', 'ReleaseHigh', 'Release', 'Emergency', 'Application']; }
+          else if (nodeName === 'Doors') { containerBlockName = 'doors_container'; subBlockName = 'doors_sub_sound'; subTypes = ['OpenLeft', 'CloseLeft', 'OpenRight', 'CloseRight']; }
+          else if (nodeName === 'Suspension') { containerBlockName = 'suspension_container'; subBlockName = 'suspension_sub_sound'; subTypes = ['Left', 'Right']; }
+          else if (nodeName === 'Breaker') { containerBlockName = 'breaker_container'; subBlockName = 'breaker_sub_sound'; subTypes = ['On', 'Off']; }
+          else if (nodeName === 'Windscreen') { containerBlockName = 'windscreen_container'; subBlockName = 'windscreen_sub_sound'; subTypes = ['RainDrop', 'WetWipe', 'DryWipe', 'Switch']; }
+          else if (nodeName === 'Sanders') { containerBlockName = 'sanders_container'; subBlockName = 'sanders_sub_sound'; subTypes = ['Activate', 'EmptyActivate', 'DeActivate', 'Loop', 'Empty']; }
+          else if (nodeName === 'Coupler') { containerBlockName = 'coupler_container'; subBlockName = 'coupler_sub_sound'; subTypes = ['Uncouple', 'Couple', 'CoupleCab', 'UncoupleCab']; }
+          else if (nodeName === 'Headlights') { containerBlockName = 'headlights_container'; subBlockName = 'headlights_sub_sound'; subTypes = ['Switch']; }
+          else if (nodeName === 'Pantograph') { containerBlockName = 'pantograph_container'; subBlockName = 'pantograph_sub_sound'; subTypes = ['Raise', 'Lower']; }
+
+          if (containerBlockName) {
+            const containerBlock = workspace.newBlock(containerBlockName);
+            containerBlock.initSvg();
+            containerBlock.render();
+            currentParentConnection.connect(containerBlock.previousConnection);
+            currentParentConnection = containerBlock.nextConnection;
+            let childConnection = containerBlock.getInput('SUB_SOUNDS').connection;
+
+            subTypes.forEach(subType => {
+              const sNode = node.querySelector(subType);
+              if (sNode) {
+                const subBlock = createSubSoundBlock(subType, sNode, subBlockName);
+                childConnection.connect(subBlock.previousConnection);
+                childConnection = subBlock.nextConnection;
+              }
+            });
+          }
+        }
+      }
+      Blockly.Events.enable();
+      updateOutput();
+    }
+
+    // Set up import button trigger mapping
+    document.getElementById('importBtn').addEventListener('click', function () {
+      document.getElementById('fileInput').click();
+    });
+    document.getElementById('fileInput').addEventListener('change', handleFileUpload);
+    document.getElementById('exportBtn').addEventListener('click', exportXml);
+    document.getElementById('clearBtn').addEventListener('click', clearWorkspace);
+    document.getElementById('copyBtn').addEventListener('click', copyXml);
+
+    // Resizer for the split between Blockly and output panel
+    (function setupResizer() {
+      var resizer = document.getElementById('resizer');
+      var panel = document.getElementById('outputPanel');
+      var container = document.querySelector('main');
+      var dragging = false;
+
+      resizer.addEventListener('mousedown', function (e) {
+        dragging = true;
+        document.body.style.cursor = 'col-resize';
+        document.body.style.userSelect = 'none';
+        e.preventDefault();
+      });
+
+      document.addEventListener('mousemove', function (e) {
+        if (!dragging) return;
+        var rect = container.getBoundingClientRect();
+        var panelWidth = rect.right - e.clientX;
+        if (panelWidth < 280) panelWidth = 280;
+        if (panelWidth > rect.width - 300) panelWidth = rect.width - 300;
+        panel.style.width = panelWidth + 'px';
+        Blockly.svgResize(workspace);
+      });
+
+      document.addEventListener('mouseup', function () {
+        if (dragging) {
+          dragging = false;
+          document.body.style.cursor = '';
+          document.body.style.userSelect = '';
+          Blockly.svgResize(workspace);
+        }
+      });
+    })();
+  </script>
+</body>
+
+</html>
