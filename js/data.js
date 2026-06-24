@@ -62,10 +62,10 @@ const STATION_CONFIG = {
 const PROJECTS = [
   // ── Operational ──
   {
-    name: 'Project One',
-    href: '/project1',
-    description: 'A full-featured web application serving real users in production.',
-    tech: 'Next.js',
+    name: 'OpenBVE train.xml Editor',
+    href: './trainxmleditor/openbve_train_editor.html',
+    description: 'A visual Blockly-based configuration editor for OpenBVE train.xml files.',
+    tech: 'HTML/Blockly',
     line: 'blue',
     lineName: 'BLUE LINE',
     platform: '1',

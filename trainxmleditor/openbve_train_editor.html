@@ -1,0 +1,2640 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>train.xml Editor — OpenBVE</title>
+  <script src="https://cdn.jsdelivr.net/npm/blockly/blockly.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f0f0f0;
+      --sign-white: #ffffff;
+      --fg: #1a1a1a;
+      --fg-secondary: #444;
+      --muted: #999;
+      --border: #d4d4d4;
+      --border-dark: #bbb;
+      --red: #D71920;
+      --blue: #00A1E9;
+      --green: #009944;
+      --orange: #F39700;
+      --purple: #9C7DB8;
+      --teal: #00A7A7;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      height: 100%;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Inter', 'Noto Sans JP', sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+
+    .top-bar {
+      background: var(--red);
+      color: #fff;
+      padding: 5px 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      flex-shrink: 0;
+      animation: fadeDown 0.5s ease both;
+    }
+
+    .top-bar .train-icon {
+      width: 14px;
+      height: 14px;
+      fill: #fff;
+    }
+
+    .top-bar .meta {
+      margin-left: auto;
+      font-weight: 500;
+      letter-spacing: 1px;
+      opacity: 0.85;
+    }
+
+    /* Station name board */
+    .name-board {
+      background: var(--sign-white);
+      border-bottom: 3px solid var(--fg);
+      padding: 14px 18px 12px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-shrink: 0;
+      animation: fadeDown 0.5s ease 0.05s both;
+    }
+
+    .station-medallion {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: var(--red);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      line-height: 1;
+    }
+
+    .station-medallion .letter {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      font-family: 'Noto Sans JP', sans-serif;
+    }
+
+    .station-medallion .number {
+      font-size: 20px;
+      font-weight: 800;
+      font-family: 'Noto Sans JP', sans-serif;
+      margin-top: 1px;
+    }
+
+    .name-board .title-group {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .name-board h1 {
+      font-family: 'Noto Sans JP', 'Inter', sans-serif;
+      font-size: clamp(22px, 3.5vw, 30px);
+      font-weight: 900;
+      letter-spacing: 3px;
+      line-height: 1.1;
+      color: var(--fg);
+    }
+
+    .name-board .subtitle {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 3px;
+    }
+
+    .name-board .toolbar {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .toolbar button {
+      background: var(--sign-white);
+      color: var(--fg);
+      border: 2px solid var(--border);
+      padding: 6px 13px;
+      border-radius: 0;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-family: 'Inter', sans-serif;
+      transition: border-color 0.15s, background 0.15s, color 0.15s;
+      white-space: nowrap;
+    }
+
+    .toolbar button:hover {
+      border-color: var(--border-dark);
+      background: #fafafa;
+    }
+
+    .toolbar button.primary {
+      background: var(--red);
+      color: #fff;
+      border-color: var(--red);
+    }
+
+    .toolbar button.primary:hover {
+      background: #bf151b;
+      border-color: #bf151b;
+    }
+
+    .toolbar button.danger {
+      color: var(--red);
+      border-color: var(--border);
+    }
+
+    .toolbar button.danger:hover {
+      border-color: var(--red);
+      background: #fff5f5;
+    }
+
+    /* Direction bar */
+    .direction-bar {
+      background: var(--sign-white);
+      border-bottom: 1px solid var(--border);
+      padding: 7px 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--fg-secondary);
+      flex-shrink: 0;
+      animation: fadeDown 0.5s ease 0.1s both;
+    }
+
+    .direction-bar .arrow {
+      font-weight: 700;
+      color: var(--red);
+      font-size: 14px;
+    }
+
+    .direction-bar .label {
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-size: 11px;
+    }
+
+    .direction-bar .dest {
+      color: var(--fg-secondary);
+    }
+
+    .direction-bar .line-stripe {
+      width: 4px;
+      height: 16px;
+      background: var(--blue);
+      margin-right: 4px;
+    }
+
+    /* === Main split  */
+    main {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+
+    #blocklyContainer {
+      flex: 1;
+      position: relative;
+      min-width: 0;
+      background: var(--bg);
+    }
+
+    #blocklyDiv {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    #blocklyDiv .blocklyToolboxDiv {
+      background: var(--sign-white);
+      border-right: 2px solid var(--border);
+    }
+
+    #blocklyDiv .blocklyTreeRow {
+      border-bottom: 1px solid #eee;
+    }
+
+    #blocklyDiv .blocklyTreeRow:hover {
+      background: #fafafa;
+    }
+
+    #blocklyDiv .blocklyTreeLabel {
+      font-family: 'Inter', 'Noto Sans JP', sans-serif;
+      font-weight: 600;
+      font-size: 12px;
+      letter-spacing: 0.5px;
+    }
+
+    /*  Resizer  */
+    .resizer {
+      width: 2px;
+      background: var(--border);
+      cursor: col-resize;
+      flex-shrink: 0;
+      transition: background 0.15s;
+    }
+
+    .resizer:hover {
+      background: var(--red);
+    }
+
+    /*  Output panel — departure board style  */
+    #outputPanel {
+      width: 40%;
+      min-width: 300px;
+      background: var(--sign-white);
+      display: flex;
+      flex-direction: column;
+      border-left: 2px solid var(--fg);
+    }
+
+    #outputPanel .panel-header {
+      padding: 9px 14px;
+      background: var(--fg);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    #outputPanel .panel-header .line-badge {
+      background: var(--red);
+      color: #fff;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      padding: 2px 6px;
+      border-radius: 2px;
+      text-transform: uppercase;
+      font-family: 'Inter', sans-serif;
+    }
+
+    #outputPanel .panel-header .panel-title {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-family: 'Noto Sans JP', 'Inter', sans-serif;
+    }
+
+    #outputPanel .panel-header .actions {
+      margin-left: auto;
+      display: flex;
+      gap: 4px;
+    }
+
+    #outputPanel .panel-header .actions button {
+      background: transparent;
+      color: #fff;
+      border: 1px solid #555;
+      padding: 3px 9px;
+      border-radius: 0;
+      cursor: pointer;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      font-family: 'Inter', sans-serif;
+      transition: border-color 0.15s, color 0.15s;
+    }
+
+    #outputPanel .panel-header .actions button:hover {
+      border-color: var(--red);
+      color: var(--red);
+    }
+
+    #xmlOutput {
+      flex: 1;
+      overflow: auto;
+      padding: 12px 16px;
+      font-family: 'JetBrains Mono', 'Consolas', monospace;
+      font-size: 11.5px;
+      line-height: 1.65;
+      white-space: pre-wrap;
+      word-break: break-word;
+      color: var(--fg);
+      background: var(--sign-white);
+      border-bottom: 1px solid var(--border);
+    }
+
+    #xmlOutput .xml-tag {
+      color: var(--red);
+      font-weight: 500;
+    }
+
+    #xmlOutput .xml-attr {
+      color: var(--blue);
+    }
+
+    #xmlOutput .xml-comment {
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    #xmlOutput .xml-decl {
+      color: var(--muted);
+    }
+
+    #statusBar {
+      background: var(--sign-white);
+      color: var(--fg-secondary);
+      padding: 5px 16px;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      flex-shrink: 0;
+      border-top: 1px solid var(--border);
+    }
+
+    #statusBar::before {
+      content: '';
+      display: inline-block;
+      width: 4px;
+      height: 12px;
+      background: var(--green);
+      flex-shrink: 0;
+    }
+
+    #statusBar .error::before {
+      background: var(--red);
+    }
+
+    #statusBar #statusText.error {
+      color: var(--red);
+    }
+
+    #statusBar #statusText.ok {
+      color: var(--green);
+    }
+
+    #statusBar #blockCount {
+      margin-left: auto;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    /*  Modal  */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(26, 26, 26, 0.5);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal.show {
+      display: flex;
+      animation: fadeIn 0.2s ease;
+    }
+
+    .modal-content {
+      background: var(--sign-white);
+      border: 3px solid var(--fg);
+      padding: 20px 24px;
+      border-radius: 0;
+      max-width: 460px;
+      width: 90%;
+      color: var(--fg);
+    }
+
+    .modal-content h3 {
+      font-family: 'Noto Sans JP', 'Inter', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--red);
+    }
+
+    .modal-content p {
+      font-size: 13px;
+      line-height: 1.6;
+      margin-bottom: 16px;
+      color: var(--fg-secondary);
+    }
+
+    .modal-content button {
+      background: var(--fg);
+      color: #fff;
+      border: none;
+      padding: 8px 20px;
+      border-radius: 0;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-family: 'Inter', sans-serif;
+      transition: background 0.15s;
+    }
+
+    .modal-content button:hover {
+      background: var(--red);
+    }
+
+    /*  Animations  */
+    @keyframes fadeDown {
+      from {
+        opacity: 0;
+        transform: translateY(-8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    /*  Responsive  */
+    @media (max-width: 860px) {
+      .name-board {
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .name-board .toolbar {
+        width: 100%;
+        justify-content: flex-start;
+      }
+
+      .toolbar button {
+        padding: 5px 10px;
+        font-size: 10px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      main {
+        flex-direction: column;
+      }
+
+      #outputPanel {
+        width: 100%;
+        min-width: 0;
+        height: 42%;
+        border-left: none;
+        border-top: 2px solid var(--fg);
+      }
+
+      .resizer {
+        display: none;
+      }
+
+      .station-medallion {
+        width: 40px;
+        height: 40px;
+      }
+
+      .station-medallion .number {
+        font-size: 16px;
+      }
+    }
+
+    /*  Blockly overrides  */
+    .blocklyFlyoutBackground {
+      fill: var(--sign-white) !important;
+    }
+
+    .blocklyFlyoutButton {
+      fill: var(--sign-white) !important;
+    }
+
+    .blocklyFlyoutLabelText {
+      font-family: 'Inter', sans-serif !important;
+      font-weight: 700 !important;
+    }
+
+    .blocklyTooltipDiv {
+      border: 2px solid var(--fg) !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+      font-family: 'Inter', sans-serif !important;
+      font-size: 11px !important;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="top-bar">
+    <svg class="train-icon" viewBox="0 0 24 24">
+      <path
+        d="M12 2C8 2 6 4 6 8v8c0 2 1 3 3 3l-1 3h2l1-2h2l1 2h2l-1-3c2 0 3-1 3-3V8c0-4-2-6-6-6zm-3 5h6v3H9V7zm0 5h6v2H9v-2z" />
+    </svg>
+    <span>OpenBVE train.xml Editor</span>
+    <span class="meta">Blockly Visual Programming</span>
+  </div>
+
+  <div class="name-board">
+    <div class="station-medallion">
+      <span class="letter">T</span>
+      <span class="number">01</span>
+    </div>
+    <div class="title-group">
+      <h1>train.xml</h1>
+      <div class="subtitle">Visual Configuration Editor</div>
+    </div>
+    <div class="toolbar">
+      <button id="sampleBtn" title="Load a sample train configuration">Sample</button>
+      <button id="importBtn" title="Import an existing train.xml file">Import</button>
+      <button id="copyBtn" title="Copy XML to clipboard">Copy</button>
+      <button id="clearBtn" class="danger" title="Clear the workspace">Clear</button>
+      <button id="exportBtn" class="primary" title="Download the generated train.xml">Download</button>
+      <input type="file" id="fileInput" accept=".xml,text/xml" style="display:none">
+    </div>
+  </div>
+
+  <div class="direction-bar">
+    <span class="line-stripe"></span>
+    <span class="arrow">→</span>
+    <span class="label">for</span>
+    <span class="dest">Import / Export / Edit train.xml configuration files</span>
+  </div>
+
+  <main>
+    <div id="blocklyContainer">
+      <div id="blocklyDiv"></div>
+    </div>
+    <div class="resizer" id="resizer"></div>
+    <div id="outputPanel">
+      <div class="panel-header">
+        <span class="line-badge">XML</span>
+        <span class="panel-title">Generated Output</span>
+        <div class="actions">
+          <button id="copyBtn2">Copy</button>
+          <button id="downloadBtn2">Download</button>
+        </div>
+      </div>
+      <pre id="xmlOutput"></pre>
+      <div id="statusBar">
+        <span id="statusText">Ready</span>
+        <span id="blockCount"></span>
+      </div>
+    </div>
+  </main>
+
+  <div class="modal" id="errorModal">
+    <div class="modal-content">
+      <h3 id="errorTitle">Error</h3>
+      <p id="errorMessage"></p>
+      <button onclick="document.getElementById('errorModal').classList.remove('show')">OK</button>
+    </div>
+  </div>
+
+  <xml id="toolbox" style="display:none">
+    <category name="Train" colour="#D71920">
+      <block type="train_root"></block>
+    </category>
+    <category name="Cars &amp; Couplers" colour="#00A1E9">
+      <block type="car"></block>
+      <block type="coupler"></block>
+    </category>
+    <category name="Car Properties" colour="#00A7A7">
+      <block type="camera_restriction"></block>
+      <block type="car_length"></block>
+      <block type="car_width"></block>
+      <block type="car_height"></block>
+      <block type="car_mass"></block>
+      <block type="car_axles"></block>
+      <block type="car_center_of_gravity"></block>
+      <block type="car_frontal_area"></block>
+      <block type="car_reversed"></block>
+      <block type="car_motor_car"></block>
+      <block type="car_visible_interior"></block>
+      <block type="car_loading_sway"></block>
+      <block type="car_object"></block>
+      <block type="car_interior_view"></block>
+      <block type="car_driver_position"></block>
+      <block type="car_cargo"></block>
+    </category>
+    <category name="Power" colour="#F39700">
+      <block type="power"></block>
+      <block type="acceleration_curve"></block>
+      <block type="power_handle"></block>
+    </category>
+    <category name="Brake" colour="#D71920">
+      <block type="brake"></block>
+      <block type="brake_compressor"></block>
+      <block type="brake_main_reservoir"></block>
+      <block type="brake_aux_reservoir"></block>
+      <block type="brake_equal_reservoir"></block>
+      <block type="brake_pipe"></block>
+      <block type="brake_straight_pipe"></block>
+      <block type="brake_cylinder"></block>
+      <block type="brake_handle"></block>
+    </category>
+    <category name="Electric Engine" colour="#009944">
+      <block type="electric_engine"></block>
+      <block type="traction_motor"></block>
+      <block type="regenerative_traction_motor"></block>
+    </category>
+    <category name="Other Sections" colour="#9C7DB8">
+      <block type="doors"></block>
+      <block type="sanders"></block>
+      <block type="windscreen"></block>
+      <block type="particle_source"></block>
+      <block type="driver_supervision_device"></block>
+    </category>
+    <category name="Train Properties" colour="#00A7A7">
+      <block type="plugin"></block>
+      <block type="notch_descriptions"></block>
+      <block type="driver_body"></block>
+    </category>
+  </xml>
+
+  <script>
+    'use strict';
+
+    // Field & XML Helper Functions
+
+
+    // Numeric field that allows empty values (so optional properties can be omitted)
+    function numField(def, min, max) {
+      return new Blockly.FieldTextInput(
+        def !== undefined && def !== null ? String(def) : '',
+        function (input) {
+          if (input === null || input === '') return '';
+          var n = Number(input);
+          if (isNaN(n)) return null;
+          if (min !== undefined && n < min) return null;
+          if (max !== undefined && n > max) return null;
+          return input;
+        }
+      );
+    }
+
+    function textField(def) {
+      return new Blockly.FieldTextInput(def || '');
+    }
+
+    function checkboxField(def) {
+      return new Blockly.FieldCheckbox(def ? 'TRUE' : 'FALSE');
+    }
+
+    function dropdownField(options) {
+      return new Blockly.FieldDropdown(options);
+    }
+
+    // XML generation helpers
+    function escapeXml(s) {
+      return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;');
+    }
+
+    function ind(n) { return '  '.repeat(n); }
+
+    // Element generators - return XML string (or empty if value is empty)
+    function numEl(tag, val, n) {
+      if (val === null || val === undefined || val === '') return '';
+      return ind(n) + '<' + tag + '>' + val + '</' + tag + '>\n';
+    }
+
+    function textEl(tag, val, n) {
+      if (val === null || val === undefined || val === '') return '';
+      return ind(n) + '<' + tag + '>' + escapeXml(val) + '</' + tag + '>\n';
+    }
+
+    function boolEl(tag, val, n) {
+      if (val !== 'TRUE') return '';
+      return ind(n) + '<' + tag + '>true</' + tag + '>\n';
+    }
+
+    function enumEl(tag, val, n) {
+      if (val === null || val === undefined || val === '') return '';
+      return ind(n) + '<' + tag + '>' + val + '</' + tag + '>\n';
+    }
+
+    function vec3El(tag, x, y, z, n) {
+      if ((x === '' || x === null) && (y === '' || y === null) && (z === '' || z === null)) return '';
+      var parts = [x || '', y || '', z || ''];
+      return ind(n) + '<' + tag + '>' + parts.join(',') + '</' + tag + '>\n';
+    }
+
+    // XML parsing helpers
+    function getChild(parent, tag) {
+      if (!parent || !parent.children) return null;
+      for (var i = 0; i < parent.children.length; i++) {
+        if (parent.children[i].tagName === tag) return parent.children[i];
+      }
+      return null;
+    }
+
+    function getChildren(parent, tag) {
+      var results = [];
+      if (!parent || !parent.children) return results;
+      for (var i = 0; i < parent.children.length; i++) {
+        if (parent.children[i].tagName === tag) results.push(parent.children[i]);
+      }
+      return results;
+    }
+
+    function getText(parent, tag) {
+      var el = getChild(parent, tag);
+      return el ? el.textContent.trim() : '';
+    }
+
+    // Import field setters - clear field to empty if element is not present,
+    // so only explicitly-set values are re-exported (clean round-trip).
+    function setNum(block, field, parent, tag) {
+      var el = getChild(parent, tag);
+      block.setFieldValue(el ? el.textContent.trim() : '', field);
+    }
+
+    function setText(block, field, parent, tag) {
+      var el = getChild(parent, tag);
+      block.setFieldValue(el ? el.textContent.trim() : '', field);
+    }
+
+    function setBool(block, field, parent, tag) {
+      var el = getChild(parent, tag);
+      if (el) {
+        var v = el.textContent.trim().toLowerCase();
+        block.setFieldValue(v === 'true' || v === '1' ? 'TRUE' : 'FALSE', field);
+      }
+    }
+
+    function setEnum(block, field, parent, tag) {
+      var el = getChild(parent, tag);
+      if (el) block.setFieldValue(el.textContent.trim(), field);
+    }
+
+    function setVec3(block, fx, fy, fz, parent, tag) {
+      var el = getChild(parent, tag);
+      if (el) {
+        var parts = el.textContent.split(',').map(function (s) { return s.trim(); });
+        block.setFieldValue(parts[0] || '', fx);
+        block.setFieldValue(parts[1] || '', fy);
+        block.setFieldValue(parts[2] || '', fz);
+      } else {
+        block.setFieldValue('', fx);
+        block.setFieldValue('', fy);
+        block.setFieldValue('', fz);
+      }
+    }
+
+    // Append a block to the end of a statement-input stack
+    function appendToStack(parentBlock, inputName, newBlock) {
+      var input = parentBlock.getInput(inputName);
+      if (!input || !input.connection) return;
+      var existing = input.connection.targetBlock();
+      if (existing) {
+        var last = existing;
+        while (last.getNextBlock()) last = last.getNextBlock();
+        last.nextConnection.connect(newBlock.previousConnection);
+      } else {
+        input.connection.connect(newBlock.previousConnection);
+      }
+    }
+
+
+    // Block Definitions
+
+
+    //  Train Root 
+    Blockly.Blocks['train_root'] = {
+      init: function () {
+        this.appendDummyInput().appendField('Train (root)');
+        this.appendDummyInput()
+          .appendField('  Driver Car').appendField(numField(0, 0), 'DRIVER_CAR')
+          .appendField('  Headlight States').appendField(numField(0, 0), 'HEADLIGHT_STATES');
+        this.appendDummyInput()
+          .appendField('  Description').appendField(textField(''), 'DESCRIPTION');
+        this.appendStatementInput('CARS').setCheck(['car', 'coupler']).appendField('Cars & Couplers');
+        this.appendStatementInput('PLUGIN').setCheck('plugin').appendField('Plugin');
+        this.appendStatementInput('NOTCHES').setCheck('notch_descriptions').appendField('Notch Descriptions');
+        this.appendStatementInput('DRIVER_BODY').setCheck('driver_body').appendField('Driver Body');
+        this.setColour('#D71920');
+        this.setTooltip('Root element of train.xml. Contains cars, couplers, and train-level properties.');
+        this.setDeletable(false);
+      }
+    };
+
+    //  Car 
+    Blockly.Blocks['car'] = {
+      init: function () {
+        this.appendDummyInput().appendField('Car');
+        this.appendDummyInput()
+          .appendField('  Length (m)').appendField(numField(20, 0), 'LENGTH')
+          .appendField('  Width (m)').appendField(numField(2.6, 0), 'WIDTH')
+          .appendField('  Height (m)').appendField(numField(3.6, 0), 'HEIGHT');
+        this.appendDummyInput()
+          .appendField('  Mass (kg)').appendField(numField(30000, 0), 'MASS')
+          .appendField('  Center of Gravity (m)').appendField(numField(1.6, 0), 'CENTER_OF_GRAVITY_HEIGHT');
+        this.appendDummyInput()
+          .appendField('  Exposed Frontal Area (m²)').appendField(numField(0, 0), 'EXPOSED_FRONTAL_AREA')
+          .appendField('  Unexposed Frontal Area (m²)').appendField(numField(0, 0), 'UNEXPOSED_FRONTAL_AREA');
+        this.appendDummyInput()
+          .appendField('  Motor Car').appendField(checkboxField(false), 'MOTOR_CAR')
+          .appendField('  Reversed').appendField(checkboxField(false), 'REVERSED')
+          .appendField('  Visible From Interior').appendField(checkboxField(false), 'VISIBLE_FROM_INTERIOR')
+          .appendField('  Loading Sway').appendField(checkboxField(false), 'LOADING_SWAY');
+        this.appendDummyInput()
+          .appendField('  Front Axle (m)').appendField(numField(8), 'FRONT_AXLE')
+          .appendField('  Rear Axle (m)').appendField(numField(-8), 'REAR_AXLE');
+        this.appendDummyInput()
+          .appendField('  Object').appendField(textField(''), 'OBJECT');
+        this.appendDummyInput()
+          .appendField('  Interior View').appendField(textField(''), 'INTERIOR_VIEW');
+        this.appendDummyInput()
+          .appendField('  Interior Dir X°').appendField(numField(), 'INTERIOR_DIR_X')
+          .appendField('  Y°').appendField(numField(), 'INTERIOR_DIR_Y')
+          .appendField('  Z°').appendField(numField(), 'INTERIOR_DIR_Z');
+        this.appendDummyInput()
+          .appendField('  Driver Pos X').appendField(numField(), 'DRIVER_POS_X')
+          .appendField('  Y').appendField(numField(), 'DRIVER_POS_Y')
+          .appendField('  Z').appendField(numField(), 'DRIVER_POS_Z');
+        this.appendDummyInput()
+          .appendField('  Cargo').appendField(dropdownField([
+            ['Passenger', 'Passenger'],
+            ['Freight', 'Freight'],
+            ['None', 'None']
+          ]), 'CARGO');
+        this.appendStatementInput('PROPERTIES').setCheck('car_property').appendField('Modular Properties');
+        this.appendStatementInput('CAMERA_RESTRICTION').setCheck('camera_restriction').appendField('Camera Restriction');
+        this.appendStatementInput('POWER').setCheck('power').appendField('Power');
+        this.appendStatementInput('BRAKE').setCheck('brake').appendField('Brake');
+        this.appendStatementInput('ENGINE').setCheck('electric_engine').appendField('Electric Engine');
+        this.appendStatementInput('DOORS').setCheck('doors').appendField('Doors');
+        this.appendStatementInput('SANDERS').setCheck('sanders').appendField('Sanders');
+        this.appendStatementInput('WINDSCREEN').setCheck('windscreen').appendField('Windscreen');
+        this.appendStatementInput('PARTICLE_SOURCES').setCheck('particle_source').appendField('Particle Sources');
+        this.appendStatementInput('DSD').setCheck('driver_supervision_device').appendField('Driver Supervision Device');
+        this.setPreviousStatement(true, ['car', 'coupler']);
+        this.setNextStatement(true, ['car', 'coupler']);
+        this.setColour('#00A1E9');
+        this.setTooltip('A single car in the train. Contains dimensions, mass, and sub-sections.');
+      }
+    };
+
+    // --- Singular Car Properties ---
+    Blockly.Blocks['car_length'] = {
+      init: function () {
+        this.appendDummyInput().appendField('Length (m)').appendField(numField(20, 0), 'VALUE');
+        this.setPreviousStatement(true, 'car_property');
+        this.setNextStatement(true, 'car_property');
+        this.setColour('#00A7A7');
+        this.setTooltip('Length of this car in meters.');
+      }
+    };
+
+    Blockly.Blocks['car_width'] = {
+      init: function () {
+        this.appendDummyInput().appendField('Width (m)').appendField(numField(2.6, 0), 'VALUE');
+        this.setPreviousStatement(true, 'car_property');
+        this.setNextStatement(true, 'car_property');
+        this.setColour('#00A7A7');
+        this.setTooltip('Width of this car in meters.');
+      }
+    };
+
+    Blockly.Blocks['car_height'] = {
+      init: function () {
+        this.appendDummyInput().appendField('Height (m)').appendField(numField(3.6, 0), 'VALUE');
+        this.setPreviousStatement(true, 'car_property');
+        this.setNextStatement(true, 'car_property');
+        this.setColour('#00A7A7');
+        this.setTooltip('Height of this car in meters.');
+      }
+    };
+
+    Blockly.Blocks['car_mass'] = {
+      init: function () {
+        this.appendDummyInput().appendField('Mass (kg)').appendField(numField(30000, 0), 'VALUE');
+        this.setPreviousStatement(true, 'car_property');
+        this.setNextStatement(true, 'car_property');
+        this.setColour('#00A7A7');
+        this.setTooltip('Mass of this empty car in kilograms.');
+      }
+    };
+
+    Blockly.Blocks['car_axles'] = {
+      init: function () {
+        this.appendDummyInput()
+          .appendField('Axles: Front (m)').appendField(numField(8), 'FRONT')
+          .appendField('  Rear (m)').appendField(numField(-8), 'REAR');
+        this.setPreviousStatement(true, 'car_property');
+        this.setNextStatement(true, 'car_property');
+        this.setColour('#00A7A7');
+        this.setTooltip('Position of front and rear axles relative to car center.');
+      }
+    };
+
+    Blockly.Blocks['car_center_of_gravity'] = {
+      init: function () {
+        this.appendDummyInput().appendField('Center of Gravity Height (m)').appendField(numField(1.6, 0), 'VALUE');
+        this.setPreviousStatement(true, 'car_property');
+        this.setNextStatement(true, 'car_property');
+        this.setColour('#00A7A7');
+        this.setTooltip('Center of gravity height above rail level in meters.');
+      }
+    };
+
+    Blockly.Blocks['car_frontal_area'] = {
+      init: function () {
+        this.appendDummyInput()
+          .appendField('Frontal Area: Exposed (m²)').appendField(numField(0, 0), 'EXPOSED')
+          .appendField('  Unexposed (m²)').appendField(numField(0, 0), 'UNEXPOSED');
+        this.setPreviousStatement(true, 'car_property');
+        this.setNextStatement(true, 'car_property');
+        this.setColour('#00A7A7');
+        this.setTooltip('Exposed and unexposed frontal areas for aerodynamic drag.');
+      }
+    };
+
+    Blockly.Blocks['car_reversed'] = {
+      init: function () {
+        this.appendDummyInput().appendField('Reversed').appendField(checkboxField(false), 'VALUE');
+        this.setPreviousStatement(true, 'car_property');
+        this.setNextStatement(true, 'car_property');
+        this.setColour('#00A7A7');
+        this.setTooltip('Whether the 3D car object is reversed (turned 180 degrees).');
+      }
+    };
+
+    Blockly.Blocks['car_motor_car'] = {
+      init: function () {
+        this.appendDummyInput().appendField('Motor Car').appendField(checkboxField(false), 'VALUE');
+        this.setPreviousStatement(true, 'car_property');
+        this.setNextStatement(true, 'car_property');
+        this.setColour('#00A7A7');
+        this.setTooltip('Whether this car contains traction motors.');
+      }
+    };
+
+    Blockly.Blocks['car_visible_interior'] = {
+      init: function () {
+        this.appendDummyInput().appendField('Visible From Interior').appendField(checkboxField(false), 'VALUE');
+        this.setPreviousStatement(true, 'car_property');
+        this.setNextStatement(true, 'car_property');
+        this.setColour('#00A7A7');
+        this.setTooltip('Whether this car body is visible when inside the passenger compartment.');
+      }
+    };
+
+    Blockly.Blocks['car_loading_sway'] = {
+      init: function () {
+        this.appendDummyInput().appendField('Loading Sway').appendField(checkboxField(false), 'VALUE');
+        this.setPreviousStatement(true, 'car_property');
+        this.setNextStatement(true, 'car_property');
+        this.setColour('#00A7A7');
+        this.setTooltip('Whether passenger load shifts cause this car to sway or tilt.');
+      }
+    };
+
+    Blockly.Blocks['car_object'] = {
+      init: function () {
+        this.appendDummyInput().appendField('Object').appendField(textField(''), 'VALUE');
+        this.setPreviousStatement(true, 'car_property');
+        this.setNextStatement(true, 'car_property');
+        this.setColour('#00A7A7');
+        this.setTooltip('Path to the 3D object file representing this car.');
+      }
+    };
+
+    Blockly.Blocks['car_interior_view'] = {
+      init: function () {
+        this.appendDummyInput().appendField('Interior View').appendField(textField(''), 'OBJECT');
+        this.appendDummyInput()
+          .appendField('  Interior Dir X°').appendField(numField(), 'DIR_X')
+          .appendField('  Y°').appendField(numField(), 'DIR_Y')
+          .appendField('  Z°').appendField(numField(), 'DIR_Z');
+        this.setPreviousStatement(true, 'car_property');
+        this.setNextStatement(true, 'car_property');
+        this.setColour('#00A7A7');
+        this.setTooltip('Interior view object and viewing direction.');
+      }
+    };
+
+    Blockly.Blocks['car_driver_position'] = {
+      init: function () {
+        this.appendDummyInput()
+          .appendField('Driver Pos X').appendField(numField(), 'POS_X')
+          .appendField('  Y').appendField(numField(), 'POS_Y')
+          .appendField('  Z').appendField(numField(), 'POS_Z');
+        this.setPreviousStatement(true, 'car_property');
+        this.setNextStatement(true, 'car_property');
+        this.setColour('#00A7A7');
+        this.setTooltip('Driver position coordinate offset from center.');
+      }
+    };
+
+    Blockly.Blocks['car_cargo'] = {
+      init: function () {
+        this.appendDummyInput().appendField('Cargo').appendField(dropdownField([
+          ['Passenger', 'Passenger'],
+          ['Freight', 'Freight'],
+          ['None', 'None']
+        ]), 'VALUE');
+        this.setPreviousStatement(true, 'car_property');
+        this.setNextStatement(true, 'car_property');
+        this.setColour('#00A7A7');
+        this.setTooltip('Cargo/Passenger loading type.');
+      }
+    };
+
+    //  Coupler 
+    Blockly.Blocks['coupler'] = {
+      init: function () {
+        this.appendDummyInput().appendField('Coupler');
+        this.appendDummyInput()
+          .appendField('  Minimum (m)').appendField(numField(0.5, 0), 'MINIMUM')
+          .appendField('  Maximum (m)').appendField(numField(2, 0), 'MAXIMUM');
+        this.appendDummyInput()
+          .appendField('  Object').appendField(textField(''), 'OBJECT');
+        this.appendDummyInput()
+          .appendField('  Can Uncouple').appendField(checkboxField(false), 'CAN_UNCOUPLE');
+        this.setPreviousStatement(true, ['car', 'coupler']);
+        this.setNextStatement(true, ['car', 'coupler']);
+        this.setColour('#00A1E9');
+        this.setTooltip('Coupler between two cars. Must be placed between Car blocks.');
+      }
+    };
+
+    //  Camera Restriction 
+    Blockly.Blocks['camera_restriction'] = {
+      init: function () {
+        this.appendDummyInput().appendField('Camera Restriction');
+        this.appendDummyInput()
+          .appendField('  Backwards').appendField(numField(), 'BACKWARDS')
+          .appendField('  Forwards').appendField(numField(), 'FORWARDS');
+        this.appendDummyInput()
+          .appendField('  Left').appendField(numField(), 'LEFT')
+          .appendField('  Right').appendField(numField(), 'RIGHT');
+        this.appendDummyInput()
+          .appendField('  Down').appendField(numField(), 'DOWN')
+          .appendField('  Up').appendField(numField(), 'UP');
+        this.setPreviousStatement(true, 'camera_restriction');
+        this.setColour('#00A7A7');
+        this.setTooltip('Camera movement limits (distances in meters from origin).');
+      }
+    };
+
+    //  Power 
+    Blockly.Blocks['power'] = {
+      init: function () {
+        this.appendDummyInput().appendField('Power (motor car)');
+        this.appendStatementInput('ACCELERATION_CURVES').setCheck('acceleration_curve').appendField('Acceleration Curves');
+        this.appendStatementInput('HANDLE').setCheck('power_handle').appendField('Handle');
+        this.setPreviousStatement(true, 'power');
+        this.setColour('#F39700');
+        this.setTooltip('Power section for motor cars. Contains acceleration curves and handle config.');
+      }
+    };
+
+    //  Acceleration Curve 
+    Blockly.Blocks['acceleration_curve'] = {
+      init: function () {
+        this.appendDummyInput().appendField('Acceleration Curve (OpenBVE)');
+        this.appendDummyInput()
+          .appendField('  Stage0 Accel').appendField(numField(2.5, 0), 'STAGE_ZERO_ACCELERATION')
+          .appendField('  Stage1 Accel').appendField(numField(1.5, 0), 'STAGE_ONE_ACCELERATION');
+        this.appendDummyInput()
+          .appendField('  Stage1 Speed').appendField(numField(40, 0), 'STAGE_ONE_SPEED')
+          .appendField('  Stage2 Exponent').appendField(numField(1, 0), 'STAGE_TWO_EXPONENT');
+        this.appendDummyInput()
+          .appendField('  Stage2 Speed').appendField(numField(100, 0), 'STAGE_TWO_SPEED')
+          .appendField('  Multiplier').appendField(numField(1, 0), 'MULTIPLIER');
+        this.setPreviousStatement(true, 'acceleration_curve');
+        this.setNextStatement(true, 'acceleration_curve');
+        this.setColour('#F39700');
+        this.setTooltip('One acceleration curve entry (per power notch). Stage0=a0, Stage1=a1@v1, Stage2 uses exponent at v2.');
+      }
+    };
+
+    //  Power Handle 
+    Blockly.Blocks['power_handle'] = {
+      init: function () {
+        this.appendDummyInput().appendField('Power Handle');
+        this.appendDummyInput()
+          .appendField('  Notches').appendField(numField(8, 0), 'NOTCHES')
+          .appendField('  Spring Type').appendField(dropdownField([
+            ['None', 'None'], ['Single', 'Single'], ['AnyHandle', 'AnyHandle'], ['AnyKey', 'AnyKey']
+          ]), 'SPRING_TYPE');
+        this.setPreviousStatement(true, 'power_handle');
+        this.setColour('#F39700');
+        this.setTooltip('Power handle configuration. Only interpreted for the driver car.');
+      }
+    };
+
+    //  Brake 
+    Blockly.Blocks['brake'] = {
+      init: function () {
+        this.appendDummyInput().appendField('Brake');
+        this.appendStatementInput('COMPRESSOR').setCheck('brake_compressor').appendField('Compressor');
+        this.appendStatementInput('MAIN_RES').setCheck('brake_main_reservoir').appendField('Main Reservoir');
+        this.appendStatementInput('AUX_RES').setCheck('brake_aux_reservoir').appendField('Auxiliary Reservoir');
+        this.appendStatementInput('EQUAL_RES').setCheck('brake_equal_reservoir').appendField('Equalizing Reservoir');
+        this.appendStatementInput('BRAKE_PIPE').setCheck('brake_pipe').appendField('Brake Pipe');
+        this.appendStatementInput('STRAIGHT_PIPE').setCheck('brake_straight_pipe').appendField('Straight Air Pipe');
+        this.appendStatementInput('BRAKE_CYLINDER').setCheck('brake_cylinder').appendField('Brake Cylinder');
+        this.appendStatementInput('HANDLE').setCheck('brake_handle').appendField('Handle');
+        this.setPreviousStatement(true, 'brake');
+        this.setColour('#D71920');
+        this.setTooltip('Braking system. Models twin-pipe standard air brake.');
+      }
+    };
+
+    //  Brake Compressor 
+    Blockly.Blocks['brake_compressor'] = {
+      init: function () {
+        this.appendDummyInput().appendField('Compressor');
+        this.appendDummyInput()
+          .appendField('  Rate (Pa/s)').appendField(numField(5000, 0), 'RATE');
+        this.setPreviousStatement(true, 'brake_compressor');
+        this.setColour('#D71920');
+        this.setTooltip('Air compressor. Rate = compression rate in Pa/s.');
+      }
+    };
+
+    //  Brake Main Reservoir 
+    Blockly.Blocks['brake_main_reservoir'] = {
+      init: function () {
+        this.appendDummyInput().appendField('Main Reservoir');
+        this.appendDummyInput()
+          .appendField('  Min Pressure (Pa)').appendField(numField(690000, 0), 'MINIMUM_PRESSURE')
+          .appendField('  Max Pressure (Pa)').appendField(numField(780000, 0), 'MAXIMUM_PRESSURE');
+        this.setPreviousStatement(true, 'brake_main_reservoir');
+        this.setColour('#D71920');
+        this.setTooltip('Main reservoir. Compressor kicks in below min, cuts out above max.');
+      }
+    };
+
+    //  Brake Auxiliary Reservoir 
+    Blockly.Blocks['brake_aux_reservoir'] = {
+      init: function () {
+        this.appendDummyInput().appendField('Auxiliary Reservoir');
+        this.appendDummyInput()
+          .appendField('  Charge Rate (Pa/s)').appendField(numField(200000, 0), 'CHARGE_RATE');
+        this.setPreviousStatement(true, 'brake_aux_reservoir');
+        this.setColour('#D71920');
+        this.setTooltip('Auxiliary reservoir charge rate from main reservoir.');
+      }
+    };
+
+    //  Brake Equalizing Reservoir 
+    Blockly.Blocks['brake_equal_reservoir'] = {
+      init: function () {
+        this.appendDummyInput().appendField('Equalizing Reservoir');
+        this.appendDummyInput()
+          .appendField('  Normal Pressure (Pa)').appendField(numField(490000, 0), 'NORMAL_PRESSURE');
+        this.setPreviousStatement(true, 'brake_equal_reservoir');
+        this.setColour('#D71920');
+        this.setTooltip('Equalizing reservoir normal pressure.');
+      }
+    };
+
+    //  Brake Pipe 
+    Blockly.Blocks['brake_pipe'] = {
+      init: function () {
+        this.appendDummyInput().appendField('Brake Pipe');
+        this.appendDummyInput()
+          .appendField('  Normal Pressure (Pa)').appendField(numField(490000, 0), 'NORMAL_PRESSURE')
+          .appendField('  Charge Rate (Pa/s)').appendField(numField(1000000, 0), 'CHARGE_RATE');
+        this.appendDummyInput()
+          .appendField('  Service Rate (Pa/s)').appendField(numField(3000000, 0), 'SERVICE_RATE')
+          .appendField('  Emergency Rate (Pa/s)').appendField(numField(5000000, 0), 'EMERGENCY_RATE');
+        this.setPreviousStatement(true, 'brake_pipe');
+        this.setColour('#D71920');
+        this.setTooltip('Brake pipe pressures and rates.');
+      }
+    };
+
+    //  Brake Straight Pipe 
+    Blockly.Blocks['brake_straight_pipe'] = {
+      init: function () {
+        this.appendDummyInput().appendField('Straight Air Pipe');
+        this.appendDummyInput()
+          .appendField('  Service Rate (Pa/s)').appendField(numField(3000000, 0), 'SERVICE_RATE')
+          .appendField('  Emergency Rate (Pa/s)').appendField(numField(4000000, 0), 'EMERGENCY_RATE')
+          .appendField('  Release Rate (Pa/s)').appendField(numField(2000000, 0), 'RELEASE_RATE');
+        this.setPreviousStatement(true, 'brake_straight_pipe');
+        this.setColour('#D71920');
+        this.setTooltip('Straight air pipe rates.');
+      }
+    };
+
+    //  Brake Cylinder 
+    Blockly.Blocks['brake_cylinder'] = {
+      init: function () {
+        this.appendDummyInput().appendField('Brake Cylinder');
+        this.appendDummyInput()
+          .appendField('  Service Max Pressure (Pa)').appendField(numField(480000, 0), 'SERVICE_MAX_PRESSURE')
+          .appendField('  Emergency Max Pressure (Pa)').appendField(numField(480000, 0), 'EMERGENCY_MAX_PRESSURE');
+        this.appendDummyInput()
+          .appendField('  Emergency Rate (Pa/s)').appendField(numField(300000, 0), 'EMERGENCY_RATE')
+          .appendField('  Release Rate (Pa/s)').appendField(numField(200000, 0), 'RELEASE_RATE');
+        this.setPreviousStatement(true, 'brake_cylinder');
+        this.setColour('#D71920');
+        this.setTooltip('Brake cylinder pressures and rates.');
+      }
+    };
+
+    //  Brake Handle 
+    Blockly.Blocks['brake_handle'] = {
+      init: function () {
+        this.appendDummyInput().appendField('Brake Handle');
+        this.appendDummyInput()
+          .appendField('  Notches').appendField(numField(8, 0), 'NOTCHES')
+          .appendField('  Spring Type').appendField(dropdownField([
+            ['None', 'None'], ['Single', 'Single'], ['AnyHandle', 'AnyHandle'], ['AnyKey', 'AnyKey']
+          ]), 'SPRING_TYPE');
+        this.appendDummyInput()
+          .appendField('  Motor Brake Notch').appendField(numField(0, 0), 'MOTOR_BRAKE_NOTCH');
+        this.setPreviousStatement(true, 'brake_handle');
+        this.setColour('#D71920');
+        this.setTooltip('Brake handle config. MotorBrakeNotch = max notch for motor-assisted braking.');
+      }
+    };
+
+    //  Electric Engine 
+    Blockly.Blocks['electric_engine'] = {
+      init: function () {
+        this.appendDummyInput().appendField('Electric Engine');
+        this.appendDummyInput()
+          .appendField('  Pantograph').appendField(checkboxField(false), 'PANTOGRAPH')
+          .appendField('  Collector Shoe').appendField(checkboxField(false), 'COLLECTOR_SHOE');
+        this.appendStatementInput('MOTORS').setCheck(['traction_motor', 'regenerative_traction_motor']).appendField('Traction Motors');
+        this.setPreviousStatement(true, 'electric_engine');
+        this.setColour('#009944');
+        this.setTooltip('Electric traction system. Requires a raised pantograph for the train to move.');
+      }
+    };
+
+    //  Traction Motor 
+    Blockly.Blocks['traction_motor'] = {
+      init: function () {
+        this.appendDummyInput().appendField('Traction Motor');
+        this.appendDummyInput()
+          .appendField('  Max Amps').appendField(numField(0, 0), 'MAX_AMPS');
+        this.setPreviousStatement(true, ['traction_motor', 'regenerative_traction_motor']);
+        this.setNextStatement(true, ['traction_motor', 'regenerative_traction_motor']);
+        this.setColour('#009944');
+        this.setTooltip('Traction motor. MaxAmps = amps drawn at max acceleration.');
+      }
+    };
+
+    //  Regenerative Traction Motor 
+    Blockly.Blocks['regenerative_traction_motor'] = {
+      init: function () {
+        this.appendDummyInput().appendField('Regenerative Traction Motor');
+        this.appendDummyInput()
+          .appendField('  Max Amps').appendField(numField(0, 0), 'MAX_AMPS')
+          .appendField('  Max Regen Amps').appendField(numField(0, 0), 'MAX_REGEN_AMPS');
+        this.setPreviousStatement(true, ['traction_motor', 'regenerative_traction_motor']);
+        this.setNextStatement(true, ['traction_motor', 'regenerative_traction_motor']);
+        this.setColour('#009944');
+        this.setTooltip('Regenerative traction motor. MaxRegenerativeAmps = amps during max regen braking.');
+      }
+    };
+
+    //  Doors 
+    Blockly.Blocks['doors'] = {
+      init: function () {
+        this.appendDummyInput().appendField('Doors');
+        this.appendDummyInput()
+          .appendField('  Open Speed (s)').appendField(numField(5, 0), 'OPEN_SPEED')
+          .appendField('  Close Speed (s)').appendField(numField(5, 0), 'CLOSE_SPEED');
+        this.appendDummyInput()
+          .appendField('  Width (m)').appendField(numField(1.2, 0), 'WIDTH')
+          .appendField('  Tolerance (m)').appendField(numField(0.1, 0), 'TOLERANCE');
+        this.setPreviousStatement(true, 'doors');
+        this.setColour('#9C7DB8');
+        this.setTooltip('Door configuration. OpenSpeed/CloseSpeed = time in seconds.');
+      }
+    };
+
+    //  Sanders 
+    Blockly.Blocks['sanders'] = {
+      init: function () {
+        this.appendDummyInput().appendField('Sanders');
+        this.appendDummyInput()
+          .appendField('  Type').appendField(dropdownField([
+            ['NotFitted', 'NotFitted'], ['PressAndHold', 'PressAndHold'],
+            ['Toggle', 'Toggle'], ['NumberOfShots', 'NumberOfShots'], ['Automatic', 'Automatic']
+          ]), 'TYPE');
+        this.appendDummyInput()
+          .appendField('  Rate').appendField(numField(0), 'RATE')
+          .appendField('  Sand Level').appendField(numField(0), 'SAND_LEVEL');
+        this.appendDummyInput()
+          .appendField('  Number Of Shots').appendField(numField(0, 0), 'NUMBER_OF_SHOTS')
+          .appendField('  Application Time (s)').appendField(numField(0), 'APPLICATION_TIME')
+          .appendField('  Activation Time (s)').appendField(numField(0), 'ACTIVATION_TIME');
+        this.setPreviousStatement(true, 'sanders');
+        this.setColour('#9C7DB8');
+        this.setTooltip('Sander configuration.');
+      }
+    };
+
+    //  Windscreen 
+    Blockly.Blocks['windscreen'] = {
+      init: function () {
+        this.appendDummyInput().appendField('Windscreen');
+        this.appendDummyInput()
+          .appendField('  Number Of Drops').appendField(numField(0, 0), 'NUMBER_OF_DROPS')
+          .appendField('  Wipe Speed (s)').appendField(numField(0), 'WIPE_SPEED')
+          .appendField('  Hold Time (s)').appendField(numField(0), 'HOLD_TIME')
+          .appendField('  Drop Life (s)').appendField(numField(0), 'DROP_LIFE');
+        this.appendDummyInput()
+          .appendField('  Rest Position').appendField(dropdownField([['Left', 'Left'], ['Right', 'Right']]), 'REST_POSITION')
+          .appendField('  Hold Position').appendField(dropdownField([['Left', 'Left'], ['Right', 'Right']]), 'HOLD_POSITION');
+        this.setPreviousStatement(true, 'windscreen');
+        this.setColour('#9C7DB8');
+        this.setTooltip('Windscreen / wiper configuration.');
+      }
+    };
+
+    //  Particle Source 
+    Blockly.Blocks['particle_source'] = {
+      init: function () {
+        this.appendDummyInput().appendField('Particle Source');
+        this.appendDummyInput()
+          .appendField('  Location X').appendField(numField(), 'LOC_X')
+          .appendField('  Y').appendField(numField(), 'LOC_Y')
+          .appendField('  Z').appendField(numField(), 'LOC_Z');
+        this.appendDummyInput()
+          .appendField('  Max Size').appendField(numField(0), 'MAX_SIZE')
+          .appendField('  Max Grown Size').appendField(numField(0), 'MAX_GROWN_SIZE');
+        this.appendDummyInput()
+          .appendField('  Initial Dir X').appendField(numField(), 'DIR_X')
+          .appendField('  Y').appendField(numField(), 'DIR_Y')
+          .appendField('  Z').appendField(numField(), 'DIR_Z');
+        this.appendDummyInput()
+          .appendField('  Max Lifespan (s)').appendField(numField(0), 'MAX_LIFESPAN')
+          .appendField('  Emits At Idle').appendField(checkboxField(false), 'EMITS_AT_IDLE');
+        this.appendDummyInput()
+          .appendField('  Texture').appendField(textField(''), 'TEXTURE');
+        this.appendDummyInput()
+          .appendField('  Function').appendField(textField(''), 'FUNCTION');
+        this.setPreviousStatement(true, 'particle_source');
+        this.setNextStatement(true, 'particle_source');
+        this.setColour('#9C7DB8');
+        this.setTooltip('Particle source (e.g. exhaust smoke). Multiple allowed per car.');
+      }
+    };
+
+    //  Driver Supervision Device 
+    Blockly.Blocks['driver_supervision_device'] = {
+      init: function () {
+        this.appendDummyInput().appendField('Driver Supervision Device (DSD)');
+        this.appendDummyInput()
+          .appendField('  Type').appendField(dropdownField([
+            ['None', 'None'], ['CutsPower', 'CutsPower'],
+            ['ApplyBrake', 'ApplyBrake'], ['ApplyEmergencyBrake', 'ApplyEmergencyBrake']
+          ]), 'TYPE')
+          .appendField('  Mode').appendField(dropdownField([
+            ['Power', 'Power'], ['Brake', 'Brake'], ['AnyHandle', 'AnyHandle'],
+            ['Independant', 'Independant'], ['HeldKey', 'HeldKey']
+          ]), 'MODE');
+        this.appendDummyInput()
+          .appendField('  Alarm Time (s)').appendField(numField(0), 'ALARM_TIME')
+          .appendField('  Intervention Time (s)').appendField(numField(0), 'INTERVENTION_TIME')
+          .appendField('  Required Stop Time (s)').appendField(numField(0), 'REQUIRED_STOP_TIME');
+        this.appendDummyInput()
+          .appendField('  Looping Alert').appendField(checkboxField(false), 'LOOPING_ALERT')
+          .appendField('  Looping Alarm').appendField(checkboxField(false), 'LOOPING_ALARM');
+        this.setPreviousStatement(true, 'driver_supervision_device');
+        this.setColour('#D71920');
+        this.setTooltip('Driver vigilance device (dead-man switch).');
+      }
+    };
+
+    //  Plugin 
+    Blockly.Blocks['plugin'] = {
+      init: function () {
+        this.appendDummyInput().appendField('Plugin');
+        this.appendDummyInput()
+          .appendField('  File').appendField(textField(''), 'FILE');
+        this.appendDummyInput()
+          .appendField('  Supports AI').appendField(checkboxField(false), 'SUPPORTS_AI');
+        this.setPreviousStatement(true, 'plugin');
+        this.setColour('#00A7A7');
+        this.setTooltip('Security plugin (ATS/ATC). Player train only.');
+      }
+    };
+
+    //  Notch Descriptions 
+    Blockly.Blocks['notch_descriptions'] = {
+      init: function () {
+        this.appendDummyInput().appendField('Notch Descriptions');
+        this.appendDummyInput()
+          .appendField('  Power (comma-sep)').appendField(textField(''), 'POWER');
+        this.appendDummyInput()
+          .appendField('  Brake (comma-sep)').appendField(textField(''), 'BRAKE');
+        this.appendDummyInput()
+          .appendField('  Loco Brake (comma-sep)').appendField(textField(''), 'LOCO_BRAKE');
+        this.appendDummyInput()
+          .appendField('  Reverser').appendField(textField(''), 'REVERSER');
+        this.setPreviousStatement(true, 'notch_descriptions');
+        this.setColour('#00A7A7');
+        this.setTooltip('Overrides in-game UI notch labels. e.g. Power: "N,1,2,3,4,5"');
+      }
+    };
+
+    //  Driver Body 
+    Blockly.Blocks['driver_body'] = {
+      init: function () {
+        this.appendDummyInput().appendField('Driver Body');
+        this.appendDummyInput()
+          .appendField('  Shoulder Height (m)').appendField(numField(1.2, 0), 'SHOULDER_HEIGHT')
+          .appendField('  Head Height (m)').appendField(numField(0.3, 0), 'HEAD_HEIGHT');
+        this.setPreviousStatement(true, 'driver_body');
+        this.setColour('#00A7A7');
+        this.setTooltip('Driver body dimensions for head-bounce from track accuracy.');
+      }
+    };
+
+
+    // XML Generation (Export)
+
+
+    function generateXml(block, n) {
+      if (!block) return '';
+      var xml = '';
+      var ni = n + 1;
+
+      switch (block.type) {
+        case 'train_root':
+          xml += '<?xml version="1.0" encoding="UTF-8"?>\n';
+          xml += ind(n) + '<Train>\n';
+          xml += numEl('DriverCar', block.getFieldValue('DRIVER_CAR'), ni);
+          xml += textEl('Description', block.getFieldValue('DESCRIPTION'), ni);
+          xml += numEl('HeadlightStates', block.getFieldValue('HEADLIGHT_STATES'), ni);
+          // Cars and couplers (in order)
+          var carBlock = block.getInputTargetBlock('CARS');
+          while (carBlock) {
+            xml += generateXml(carBlock, ni);
+            carBlock = carBlock.getNextBlock();
+          }
+          var pluginBlock = block.getInputTargetBlock('PLUGIN');
+          if (pluginBlock) xml += generateXml(pluginBlock, ni);
+          var notchesBlock = block.getInputTargetBlock('NOTCHES');
+          if (notchesBlock) xml += generateXml(notchesBlock, ni);
+          var dbBlock = block.getInputTargetBlock('DRIVER_BODY');
+          if (dbBlock) xml += generateXml(dbBlock, ni);
+          xml += ind(n) + '</Train>\n';
+          break;
+
+        case 'car':
+          xml += ind(n) + '<Car>\n';
+          // Camera restriction
+          var crBlock = block.getInputTargetBlock('CAMERA_RESTRICTION');
+          if (crBlock) xml += generateXml(crBlock, ni);
+          // Modular properties
+          var propBlock = block.getInputTargetBlock('PROPERTIES');
+          while (propBlock) {
+            xml += generateXml(propBlock, ni);
+            propBlock = propBlock.getNextBlock();
+          }
+          // Dimensions and mass (inline fallback)
+          xml += numEl('Length', block.getFieldValue('LENGTH'), ni);
+          xml += numEl('Width', block.getFieldValue('WIDTH'), ni);
+          xml += numEl('Height', block.getFieldValue('HEIGHT'), ni);
+          xml += numEl('CenterOfGravityHeight', block.getFieldValue('CENTER_OF_GRAVITY_HEIGHT'), ni);
+          xml += numEl('ExposedFrontalArea', block.getFieldValue('EXPOSED_FRONTAL_AREA'), ni);
+          xml += numEl('UnexposedFrontalArea', block.getFieldValue('UNEXPOSED_FRONTAL_AREA'), ni);
+          xml += numEl('Mass', block.getFieldValue('MASS'), ni);
+          xml += boolEl('MotorCar', block.getFieldValue('MOTOR_CAR'), ni);
+          xml += numEl('FrontAxle', block.getFieldValue('FRONT_AXLE'), ni);
+          xml += numEl('RearAxle', block.getFieldValue('REAR_AXLE'), ni);
+          xml += textEl('Object', block.getFieldValue('OBJECT'), ni);
+          xml += boolEl('Reversed', block.getFieldValue('REVERSED'), ni);
+          xml += textEl('InteriorView', block.getFieldValue('INTERIOR_VIEW'), ni);
+          xml += vec3El('InteriorDirection', block.getFieldValue('INTERIOR_DIR_X'),
+            block.getFieldValue('INTERIOR_DIR_Y'), block.getFieldValue('INTERIOR_DIR_Z'), ni);
+          xml += boolEl('VisibleFromInterior', block.getFieldValue('VISIBLE_FROM_INTERIOR'), ni);
+          xml += boolEl('LoadingSway', block.getFieldValue('LOADING_SWAY'), ni);
+          xml += vec3El('DriverPosition', block.getFieldValue('DRIVER_POS_X'),
+            block.getFieldValue('DRIVER_POS_Y'), block.getFieldValue('DRIVER_POS_Z'), ni);
+          xml += enumEl('Cargo', block.getFieldValue('CARGO'), ni);
+          // Sub-sections
+          var powerBlock = block.getInputTargetBlock('POWER');
+          if (powerBlock) xml += generateXml(powerBlock, ni);
+          var brakeBlock = block.getInputTargetBlock('BRAKE');
+          if (brakeBlock) xml += generateXml(brakeBlock, ni);
+          var engineBlock = block.getInputTargetBlock('ENGINE');
+          if (engineBlock) xml += generateXml(engineBlock, ni);
+          var doorsBlock = block.getInputTargetBlock('DOORS');
+          if (doorsBlock) xml += generateXml(doorsBlock, ni);
+          var sandersBlock = block.getInputTargetBlock('SANDERS');
+          if (sandersBlock) xml += generateXml(sandersBlock, ni);
+          var windscreenBlock = block.getInputTargetBlock('WINDSCREEN');
+          if (windscreenBlock) xml += generateXml(windscreenBlock, ni);
+          var psBlock = block.getInputTargetBlock('PARTICLE_SOURCES');
+          while (psBlock) {
+            xml += generateXml(psBlock, ni);
+            psBlock = psBlock.getNextBlock();
+          }
+          var dsdBlock = block.getInputTargetBlock('DSD');
+          if (dsdBlock) xml += generateXml(dsdBlock, ni);
+          xml += ind(n) + '</Car>\n';
+          break;
+
+        case 'car_length':
+          xml += numEl('Length', block.getFieldValue('VALUE'), n);
+          break;
+        case 'car_width':
+          xml += numEl('Width', block.getFieldValue('VALUE'), n);
+          break;
+        case 'car_height':
+          xml += numEl('Height', block.getFieldValue('VALUE'), n);
+          break;
+        case 'car_mass':
+          xml += numEl('Mass', block.getFieldValue('VALUE'), n);
+          break;
+        case 'car_axles':
+          xml += numEl('FrontAxle', block.getFieldValue('FRONT'), n);
+          xml += numEl('RearAxle', block.getFieldValue('REAR'), n);
+          break;
+        case 'car_center_of_gravity':
+          xml += numEl('CenterOfGravityHeight', block.getFieldValue('VALUE'), n);
+          break;
+        case 'car_frontal_area':
+          xml += numEl('ExposedFrontalArea', block.getFieldValue('EXPOSED'), n);
+          xml += numEl('UnexposedFrontalArea', block.getFieldValue('UNEXPOSED'), n);
+          break;
+        case 'car_reversed':
+          xml += boolEl('Reversed', block.getFieldValue('VALUE'), n);
+          break;
+        case 'car_motor_car':
+          xml += boolEl('MotorCar', block.getFieldValue('VALUE'), n);
+          break;
+        case 'car_visible_interior':
+          xml += boolEl('VisibleFromInterior', block.getFieldValue('VALUE'), n);
+          break;
+        case 'car_loading_sway':
+          xml += boolEl('LoadingSway', block.getFieldValue('VALUE'), n);
+          break;
+        case 'car_object':
+          xml += textEl('Object', block.getFieldValue('VALUE'), n);
+          break;
+        case 'car_interior_view':
+          xml += textEl('InteriorView', block.getFieldValue('OBJECT'), n);
+          xml += vec3El('InteriorDirection', block.getFieldValue('DIR_X'),
+            block.getFieldValue('DIR_Y'), block.getFieldValue('DIR_Z'), n);
+          break;
+        case 'car_driver_position':
+          xml += vec3El('DriverPosition', block.getFieldValue('POS_X'),
+            block.getFieldValue('POS_Y'), block.getFieldValue('POS_Z'), n);
+          break;
+        case 'car_cargo':
+          xml += enumEl('Cargo', block.getFieldValue('VALUE'), n);
+          break;
+
+        case 'coupler':
+          xml += ind(n) + '<Coupler>\n';
+          xml += numEl('Minimum', block.getFieldValue('MINIMUM'), ni);
+          xml += numEl('Maximum', block.getFieldValue('MAXIMUM'), ni);
+          xml += textEl('Object', block.getFieldValue('OBJECT'), ni);
+          xml += boolEl('CanUncouple', block.getFieldValue('CAN_UNCOUPLE'), ni);
+          xml += ind(n) + '</Coupler>\n';
+          break;
+
+        case 'camera_restriction':
+          xml += ind(n) + '<CameraRestriction>\n';
+          xml += numEl('Backwards', block.getFieldValue('BACKWARDS'), ni);
+          xml += numEl('Forwards', block.getFieldValue('FORWARDS'), ni);
+          xml += numEl('Left', block.getFieldValue('LEFT'), ni);
+          xml += numEl('Right', block.getFieldValue('RIGHT'), ni);
+          xml += numEl('Down', block.getFieldValue('DOWN'), ni);
+          xml += numEl('Up', block.getFieldValue('UP'), ni);
+          xml += ind(n) + '</CameraRestriction>\n';
+          break;
+
+        case 'power':
+          xml += ind(n) + '<Power>\n';
+          var acBlock = block.getInputTargetBlock('ACCELERATION_CURVES');
+          if (acBlock) {
+            xml += ind(ni) + '<AccelerationCurves>\n';
+            while (acBlock) {
+              xml += generateXml(acBlock, ni + 1);
+              acBlock = acBlock.getNextBlock();
+            }
+            xml += ind(ni) + '</AccelerationCurves>\n';
+          }
+          var phBlock = block.getInputTargetBlock('HANDLE');
+          if (phBlock) xml += generateXml(phBlock, ni);
+          xml += ind(n) + '</Power>\n';
+          break;
+
+        case 'acceleration_curve':
+          xml += ind(n) + '<OpenBVE>\n';
+          xml += numEl('StageZeroAcceleration', block.getFieldValue('STAGE_ZERO_ACCELERATION'), ni);
+          xml += numEl('StageOneAcceleration', block.getFieldValue('STAGE_ONE_ACCELERATION'), ni);
+          xml += numEl('StageOneSpeed', block.getFieldValue('STAGE_ONE_SPEED'), ni);
+          xml += numEl('StageTwoExponent', block.getFieldValue('STAGE_TWO_EXPONENT'), ni);
+          xml += numEl('StageTwoSpeed', block.getFieldValue('STAGE_TWO_SPEED'), ni);
+          xml += numEl('Multiplier', block.getFieldValue('MULTIPLIER'), ni);
+          xml += ind(n) + '</OpenBVE>\n';
+          break;
+
+        case 'power_handle':
+          xml += ind(n) + '<Handle>\n';
+          xml += numEl('Notches', block.getFieldValue('NOTCHES'), ni);
+          xml += enumEl('SpringType', block.getFieldValue('SPRING_TYPE'), ni);
+          xml += ind(n) + '</Handle>\n';
+          break;
+
+        case 'brake':
+          xml += ind(n) + '<Brake>\n';
+          var compBlock = block.getInputTargetBlock('COMPRESSOR');
+          if (compBlock) xml += generateXml(compBlock, ni);
+          var mrBlock = block.getInputTargetBlock('MAIN_RES');
+          if (mrBlock) xml += generateXml(mrBlock, ni);
+          var arBlock = block.getInputTargetBlock('AUX_RES');
+          if (arBlock) xml += generateXml(arBlock, ni);
+          var erBlock = block.getInputTargetBlock('EQUAL_RES');
+          if (erBlock) xml += generateXml(erBlock, ni);
+          var bpBlock = block.getInputTargetBlock('BRAKE_PIPE');
+          if (bpBlock) xml += generateXml(bpBlock, ni);
+          var spBlock = block.getInputTargetBlock('STRAIGHT_PIPE');
+          if (spBlock) xml += generateXml(spBlock, ni);
+          var bcBlock = block.getInputTargetBlock('BRAKE_CYLINDER');
+          if (bcBlock) xml += generateXml(bcBlock, ni);
+          var bhBlock = block.getInputTargetBlock('HANDLE');
+          if (bhBlock) xml += generateXml(bhBlock, ni);
+          xml += ind(n) + '</Brake>\n';
+          break;
+
+        case 'brake_compressor':
+          xml += ind(n) + '<Compressor>\n';
+          xml += numEl('Rate', block.getFieldValue('RATE'), ni);
+          xml += ind(n) + '</Compressor>\n';
+          break;
+
+        case 'brake_main_reservoir':
+          xml += ind(n) + '<MainReservoir>\n';
+          xml += numEl('MinimumPressure', block.getFieldValue('MINIMUM_PRESSURE'), ni);
+          xml += numEl('MaximumPressure', block.getFieldValue('MAXIMUM_PRESSURE'), ni);
+          xml += ind(n) + '</MainReservoir>\n';
+          break;
+
+        case 'brake_aux_reservoir':
+          xml += ind(n) + '<AuxiliaryReservoir>\n';
+          xml += numEl('ChargeRate', block.getFieldValue('CHARGE_RATE'), ni);
+          xml += ind(n) + '</AuxiliaryReservoir>\n';
+          break;
+
+        case 'brake_equal_reservoir':
+          xml += ind(n) + '<EqualizingReservoir>\n';
+          xml += numEl('NormalPressure', block.getFieldValue('NORMAL_PRESSURE'), ni);
+          xml += ind(n) + '</EqualizingReservoir>\n';
+          break;
+
+        case 'brake_pipe':
+          xml += ind(n) + '<BrakePipe>\n';
+          xml += numEl('NormalPressure', block.getFieldValue('NORMAL_PRESSURE'), ni);
+          xml += numEl('ChargeRate', block.getFieldValue('CHARGE_RATE'), ni);
+          xml += numEl('ServiceRate', block.getFieldValue('SERVICE_RATE'), ni);
+          xml += numEl('EmergencyRate', block.getFieldValue('EMERGENCY_RATE'), ni);
+          xml += ind(n) + '</BrakePipe>\n';
+          break;
+
+        case 'brake_straight_pipe':
+          xml += ind(n) + '<StraightAirPipe>\n';
+          xml += numEl('ServiceRate', block.getFieldValue('SERVICE_RATE'), ni);
+          xml += numEl('EmergencyRate', block.getFieldValue('EMERGENCY_RATE'), ni);
+          xml += numEl('ReleaseRate', block.getFieldValue('RELEASE_RATE'), ni);
+          xml += ind(n) + '</StraightAirPipe>\n';
+          break;
+
+        case 'brake_cylinder':
+          xml += ind(n) + '<BrakeCylinder>\n';
+          xml += numEl('ServiceMaximumPressure', block.getFieldValue('SERVICE_MAX_PRESSURE'), ni);
+          xml += numEl('EmergencyMaximumPressure', block.getFieldValue('EMERGENCY_MAX_PRESSURE'), ni);
+          xml += numEl('EmergencyRate', block.getFieldValue('EMERGENCY_RATE'), ni);
+          xml += numEl('ReleaseRate', block.getFieldValue('RELEASE_RATE'), ni);
+          xml += ind(n) + '</BrakeCylinder>\n';
+          break;
+
+        case 'brake_handle':
+          xml += ind(n) + '<Handle>\n';
+          xml += numEl('Notches', block.getFieldValue('NOTCHES'), ni);
+          xml += enumEl('SpringType', block.getFieldValue('SPRING_TYPE'), ni);
+          xml += numEl('MotorBrakeNotch', block.getFieldValue('MOTOR_BRAKE_NOTCH'), ni);
+          xml += ind(n) + '</Handle>\n';
+          break;
+
+        case 'electric_engine':
+          xml += ind(n) + '<ElectricEngine>\n';
+          xml += boolEl('Pantograph', block.getFieldValue('PANTOGRAPH'), ni);
+          xml += boolEl('CollectorShoe', block.getFieldValue('COLLECTOR_SHOE'), ni);
+          var motorBlock = block.getInputTargetBlock('MOTORS');
+          while (motorBlock) {
+            xml += generateXml(motorBlock, ni);
+            motorBlock = motorBlock.getNextBlock();
+          }
+          xml += ind(n) + '</ElectricEngine>\n';
+          break;
+
+        case 'traction_motor':
+          xml += ind(n) + '<TractionMotor>\n';
+          xml += numEl('MaxAmps', block.getFieldValue('MAX_AMPS'), ni);
+          xml += ind(n) + '</TractionMotor>\n';
+          break;
+
+        case 'regenerative_traction_motor':
+          xml += ind(n) + '<RegenerativeTractionMotor>\n';
+          xml += numEl('MaxAmps', block.getFieldValue('MAX_AMPS'), ni);
+          xml += numEl('MaxRegenerativeAmps', block.getFieldValue('MAX_REGEN_AMPS'), ni);
+          xml += ind(n) + '</RegenerativeTractionMotor>\n';
+          break;
+
+        case 'doors':
+          xml += ind(n) + '<Doors>\n';
+          xml += numEl('OpenSpeed', block.getFieldValue('OPEN_SPEED'), ni);
+          xml += numEl('CloseSpeed', block.getFieldValue('CLOSE_SPEED'), ni);
+          xml += numEl('Width', block.getFieldValue('WIDTH'), ni);
+          xml += numEl('Tolerance', block.getFieldValue('TOLERANCE'), ni);
+          xml += ind(n) + '</Doors>\n';
+          break;
+
+        case 'sanders':
+          xml += ind(n) + '<Sanders>\n';
+          xml += enumEl('Type', block.getFieldValue('TYPE'), ni);
+          xml += numEl('Rate', block.getFieldValue('RATE'), ni);
+          xml += numEl('SandLevel', block.getFieldValue('SAND_LEVEL'), ni);
+          xml += numEl('NumberOfShots', block.getFieldValue('NUMBER_OF_SHOTS'), ni);
+          xml += numEl('ApplicationTime', block.getFieldValue('APPLICATION_TIME'), ni);
+          xml += numEl('ActivationTime', block.getFieldValue('ACTIVATION_TIME'), ni);
+          xml += ind(n) + '</Sanders>\n';
+          break;
+
+        case 'windscreen':
+          xml += ind(n) + '<Windscreen>\n';
+          xml += numEl('NumberOfDrops', block.getFieldValue('NUMBER_OF_DROPS'), ni);
+          xml += numEl('WipeSpeed', block.getFieldValue('WIPE_SPEED'), ni);
+          xml += numEl('HoldTime', block.getFieldValue('HOLD_TIME'), ni);
+          xml += numEl('DropLife', block.getFieldValue('DROP_LIFE'), ni);
+          xml += enumEl('RestPosition', block.getFieldValue('REST_POSITION'), ni);
+          xml += enumEl('HoldPosition', block.getFieldValue('HOLD_POSITION'), ni);
+          xml += ind(n) + '</Windscreen>\n';
+          break;
+
+        case 'particle_source':
+          xml += ind(n) + '<ParticleSource>\n';
+          xml += vec3El('Location', block.getFieldValue('LOC_X'), block.getFieldValue('LOC_Y'), block.getFieldValue('LOC_Z'), ni);
+          xml += numEl('MaximumSize', block.getFieldValue('MAX_SIZE'), ni);
+          xml += numEl('MaximumGrownSize', block.getFieldValue('MAX_GROWN_SIZE'), ni);
+          xml += vec3El('InitialDirection', block.getFieldValue('DIR_X'), block.getFieldValue('DIR_Y'), block.getFieldValue('DIR_Z'), ni);
+          xml += numEl('MaximumLifespan', block.getFieldValue('MAX_LIFESPAN'), ni);
+          xml += textEl('Texture', block.getFieldValue('TEXTURE'), ni);
+          xml += boolEl('EmitsAtIdle', block.getFieldValue('EMITS_AT_IDLE'), ni);
+          xml += textEl('Function', block.getFieldValue('FUNCTION'), ni);
+          xml += ind(n) + '</ParticleSource>\n';
+          break;
+
+        case 'driver_supervision_device':
+          xml += ind(n) + '<DriverSupervisionDevice>\n';
+          xml += enumEl('Type', block.getFieldValue('TYPE'), ni);
+          xml += enumEl('Mode', block.getFieldValue('MODE'), ni);
+          xml += numEl('AlarmTime', block.getFieldValue('ALARM_TIME'), ni);
+          xml += numEl('InterventionTime', block.getFieldValue('INTERVENTION_TIME'), ni);
+          xml += numEl('RequiredStopTime', block.getFieldValue('REQUIRED_STOP_TIME'), ni);
+          xml += boolEl('LoopingAlert', block.getFieldValue('LOOPING_ALERT'), ni);
+          xml += boolEl('LoopingAlarm', block.getFieldValue('LOOPING_ALARM'), ni);
+          xml += ind(n) + '</DriverSupervisionDevice>\n';
+          break;
+
+        case 'plugin':
+          // Plugin can be a simple string (path) or expanded form. We always use expanded form.
+          var file = block.getFieldValue('FILE');
+          var supportsAi = block.getFieldValue('SUPPORTS_AI');
+          if (file && supportsAi !== 'TRUE') {
+            // Simple string form
+            xml += ind(n) + '<Plugin>' + escapeXml(file) + '</Plugin>\n';
+          } else {
+            xml += ind(n) + '<Plugin>\n';
+            xml += textEl('File', file, ni);
+            xml += boolEl('SupportsAI', supportsAi, ni);
+            xml += ind(n) + '</Plugin>\n';
+          }
+          break;
+
+        case 'notch_descriptions':
+          xml += ind(n) + '<NotchDescriptions>\n';
+          xml += textEl('Power', block.getFieldValue('POWER'), ni);
+          xml += textEl('Brake', block.getFieldValue('BRAKE'), ni);
+          xml += textEl('LocoBrake', block.getFieldValue('LOCO_BRAKE'), ni);
+          xml += textEl('Reverser', block.getFieldValue('REVERSER'), ni);
+          xml += ind(n) + '</NotchDescriptions>\n';
+          break;
+
+        case 'driver_body':
+          xml += ind(n) + '<DriverBody>\n';
+          xml += numEl('ShoulderHeight', block.getFieldValue('SHOULDER_HEIGHT'), ni);
+          xml += numEl('HeadHeight', block.getFieldValue('HEAD_HEIGHT'), ni);
+          xml += ind(n) + '</DriverBody>\n';
+          break;
+
+        default:
+          console.warn('Unknown block type in generator: ' + block.type);
+      }
+
+      return xml;
+    }
+
+
+    // XML Import
+
+
+    function importFromXmlText(xmlText) {
+      var parser = new DOMParser();
+      var doc = parser.parseFromString(xmlText, 'text/xml');
+      var parseError = doc.querySelector('parsererror');
+      if (parseError) {
+        showError('XML Parse Error', parseError.textContent.substring(0, 500));
+        return false;
+      }
+      var trainEl = doc.documentElement;
+      if (!trainEl || trainEl.tagName !== 'Train') {
+        showError('Invalid Root', 'Root element must be <Train>, found <' + (trainEl ? trainEl.tagName : 'none') + '>');
+        return false;
+      }
+
+      Blockly.Events.disable();
+      try {
+        workspace.clear();
+        var trainBlock = workspace.newBlock('train_root');
+        importTrainElement(trainBlock, trainEl);
+        // Init all blocks
+        var allBlocks = workspace.getAllBlocks(false);
+        for (var i = 0; i < allBlocks.length; i++) {
+          if (!allBlocks[i].isSvgInitialized_) {
+            try { allBlocks[i].initSvg(); } catch (e) { }
+          }
+        }
+        workspace.render();
+        Blockly.svgResize(workspace);
+      } finally {
+        Blockly.Events.enable();
+      }
+      updateOutput();
+      return true;
+    }
+
+    function importTrainElement(block, el) {
+      setNum(block, 'DRIVER_CAR', el, 'DriverCar');
+      setText(block, 'DESCRIPTION', el, 'Description');
+      setNum(block, 'HEADLIGHT_STATES', el, 'HeadlightStates');
+
+      // Process children in order: Car, Coupler, Plugin, NotchDescriptions, DriverBody
+      for (var i = 0; i < el.children.length; i++) {
+        var child = el.children[i];
+        var tagName = child.tagName;
+        if (tagName === 'Car') {
+          var carBlock = workspace.newBlock('car');
+          importCarElement(carBlock, child);
+          appendToStack(block, 'CARS', carBlock);
+        } else if (tagName === 'Coupler') {
+          var cBlock = workspace.newBlock('coupler');
+          importCouplerElement(cBlock, child);
+          appendToStack(block, 'CARS', cBlock);
+        } else if (tagName === 'Plugin') {
+          var pBlock = workspace.newBlock('plugin');
+          importPluginElement(pBlock, child);
+          appendToStack(block, 'PLUGIN', pBlock);
+        } else if (tagName === 'NotchDescriptions') {
+          var nBlock = workspace.newBlock('notch_descriptions');
+          importNotchDescriptionsElement(nBlock, child);
+          appendToStack(block, 'NOTCHES', nBlock);
+        } else if (tagName === 'DriverBody') {
+          var dbBlock = workspace.newBlock('driver_body');
+          importDriverBodyElement(dbBlock, child);
+          appendToStack(block, 'DRIVER_BODY', dbBlock);
+        }
+      }
+    }
+
+    function importCarElement(block, el) {
+      setNum(block, 'LENGTH', el, 'Length');
+      setNum(block, 'WIDTH', el, 'Width');
+      setNum(block, 'HEIGHT', el, 'Height');
+      setNum(block, 'CENTER_OF_GRAVITY_HEIGHT', el, 'CenterOfGravityHeight');
+      setNum(block, 'EXPOSED_FRONTAL_AREA', el, 'ExposedFrontalArea');
+      setNum(block, 'UNEXPOSED_FRONTAL_AREA', el, 'UnexposedFrontalArea');
+      setNum(block, 'MASS', el, 'Mass');
+      setBool(block, 'MOTOR_CAR', el, 'MotorCar');
+      setNum(block, 'FRONT_AXLE', el, 'FrontAxle');
+      setNum(block, 'REAR_AXLE', el, 'RearAxle');
+      setText(block, 'OBJECT', el, 'Object');
+      setBool(block, 'REVERSED', el, 'Reversed');
+      setText(block, 'INTERIOR_VIEW', el, 'InteriorView');
+      setVec3(block, 'INTERIOR_DIR_X', 'INTERIOR_DIR_Y', 'INTERIOR_DIR_Z', el, 'InteriorDirection');
+      setBool(block, 'VISIBLE_FROM_INTERIOR', el, 'VisibleFromInterior');
+      setBool(block, 'LOADING_SWAY', el, 'LoadingSway');
+      setVec3(block, 'DRIVER_POS_X', 'DRIVER_POS_Y', 'DRIVER_POS_Z', el, 'DriverPosition');
+      setEnum(block, 'CARGO', el, 'Cargo');
+
+      // Camera restriction
+      var crEl = getChild(el, 'CameraRestriction');
+      if (crEl) {
+        var crBlock = workspace.newBlock('camera_restriction');
+        setNum(crBlock, 'BACKWARDS', crEl, 'Backwards');
+        setNum(crBlock, 'FORWARDS', crEl, 'Forwards');
+        setNum(crBlock, 'LEFT', crEl, 'Left');
+        setNum(crBlock, 'RIGHT', crEl, 'Right');
+        setNum(crBlock, 'DOWN', crEl, 'Down');
+        setNum(crBlock, 'UP', crEl, 'Up');
+        appendToStack(block, 'CAMERA_RESTRICTION', crBlock);
+      }
+
+      // Power
+      var powerEl = getChild(el, 'Power');
+      if (powerEl) {
+        var pBlock = workspace.newBlock('power');
+        importPowerElement(pBlock, powerEl);
+        appendToStack(block, 'POWER', pBlock);
+      }
+
+      // Brake
+      var brakeEl = getChild(el, 'Brake');
+      if (brakeEl) {
+        var bBlock = workspace.newBlock('brake');
+        importBrakeElement(bBlock, brakeEl);
+        appendToStack(block, 'BRAKE', bBlock);
+      }
+
+      // Electric Engine
+      var engineEl = getChild(el, 'ElectricEngine');
+      if (engineEl) {
+        var eBlock = workspace.newBlock('electric_engine');
+        importEngineElement(eBlock, engineEl);
+        appendToStack(block, 'ENGINE', eBlock);
+      }
+
+      // Doors
+      var doorsEl = getChild(el, 'Doors');
+      if (doorsEl) {
+        var dBlock = workspace.newBlock('doors');
+        setNum(dBlock, 'OPEN_SPEED', doorsEl, 'OpenSpeed');
+        setNum(dBlock, 'CLOSE_SPEED', doorsEl, 'CloseSpeed');
+        setNum(dBlock, 'WIDTH', doorsEl, 'Width');
+        setNum(dBlock, 'TOLERANCE', doorsEl, 'Tolerance');
+        appendToStack(block, 'DOORS', dBlock);
+      }
+
+      // Sanders
+      var sandersEl = getChild(el, 'Sanders');
+      if (sandersEl) {
+        var sBlock = workspace.newBlock('sanders');
+        setEnum(sBlock, 'TYPE', sandersEl, 'Type');
+        setNum(sBlock, 'RATE', sandersEl, 'Rate');
+        setNum(sBlock, 'SAND_LEVEL', sandersEl, 'SandLevel');
+        setNum(sBlock, 'NUMBER_OF_SHOTS', sandersEl, 'NumberOfShots');
+        setNum(sBlock, 'APPLICATION_TIME', sandersEl, 'ApplicationTime');
+        setNum(sBlock, 'ACTIVATION_TIME', sandersEl, 'ActivationTime');
+        appendToStack(block, 'SANDERS', sBlock);
+      }
+
+      // Windscreen
+      var windEl = getChild(el, 'Windscreen');
+      if (windEl) {
+        var wBlock = workspace.newBlock('windscreen');
+        setNum(wBlock, 'NUMBER_OF_DROPS', windEl, 'NumberOfDrops');
+        setNum(wBlock, 'WIPE_SPEED', windEl, 'WipeSpeed');
+        setNum(wBlock, 'HOLD_TIME', windEl, 'HoldTime');
+        setNum(wBlock, 'DROP_LIFE', windEl, 'DropLife');
+        setEnum(wBlock, 'REST_POSITION', windEl, 'RestPosition');
+        setEnum(wBlock, 'HOLD_POSITION', windEl, 'HoldPosition');
+        appendToStack(block, 'WINDSCREEN', wBlock);
+      }
+
+      // Particle Sources (multiple)
+      var psEls = getChildren(el, 'ParticleSource');
+      for (var i = 0; i < psEls.length; i++) {
+        var psBlock = workspace.newBlock('particle_source');
+        setVec3(psBlock, 'LOC_X', 'LOC_Y', 'LOC_Z', psEls[i], 'Location');
+        setNum(psBlock, 'MAX_SIZE', psEls[i], 'MaximumSize');
+        setNum(psBlock, 'MAX_GROWN_SIZE', psEls[i], 'MaximumGrownSize');
+        setVec3(psBlock, 'DIR_X', 'DIR_Y', 'DIR_Z', psEls[i], 'InitialDirection');
+        setNum(psBlock, 'MAX_LIFESPAN', psEls[i], 'MaximumLifespan');
+        setText(psBlock, 'TEXTURE', psEls[i], 'Texture');
+        setBool(psBlock, 'EMITS_AT_IDLE', psEls[i], 'EmitsAtIdle');
+        setText(psBlock, 'FUNCTION', psEls[i], 'Function');
+        appendToStack(block, 'PARTICLE_SOURCES', psBlock);
+      }
+
+      // Driver Supervision Device
+      var dsdEl = getChild(el, 'DriverSupervisionDevice');
+      if (dsdEl) {
+        var dsdBlock = workspace.newBlock('driver_supervision_device');
+        setEnum(dsdBlock, 'TYPE', dsdEl, 'Type');
+        setEnum(dsdBlock, 'MODE', dsdEl, 'Mode');
+        setNum(dsdBlock, 'ALARM_TIME', dsdEl, 'AlarmTime');
+        setNum(dsdBlock, 'INTERVENTION_TIME', dsdEl, 'InterventionTime');
+        setNum(dsdBlock, 'REQUIRED_STOP_TIME', dsdEl, 'RequiredStopTime');
+        setBool(dsdBlock, 'LOOPING_ALERT', dsdEl, 'LoopingAlert');
+        setBool(dsdBlock, 'LOOPING_ALARM', dsdEl, 'LoopingAlarm');
+        appendToStack(block, 'DSD', dsdBlock);
+      }
+    }
+
+    function importCouplerElement(block, el) {
+      setNum(block, 'MINIMUM', el, 'Minimum');
+      setNum(block, 'MAXIMUM', el, 'Maximum');
+      setText(block, 'OBJECT', el, 'Object');
+      setBool(block, 'CAN_UNCOUPLE', el, 'CanUncouple');
+    }
+
+    function importPowerElement(block, el) {
+      var curvesEl = getChild(el, 'AccelerationCurves');
+      if (curvesEl) {
+        var curveEls = getChildren(curvesEl, 'OpenBVE');
+        for (var i = 0; i < curveEls.length; i++) {
+          var cBlock = workspace.newBlock('acceleration_curve');
+          setNum(cBlock, 'STAGE_ZERO_ACCELERATION', curveEls[i], 'StageZeroAcceleration');
+          setNum(cBlock, 'STAGE_ONE_ACCELERATION', curveEls[i], 'StageOneAcceleration');
+          setNum(cBlock, 'STAGE_ONE_SPEED', curveEls[i], 'StageOneSpeed');
+          setNum(cBlock, 'STAGE_TWO_EXPONENT', curveEls[i], 'StageTwoExponent');
+          setNum(cBlock, 'STAGE_TWO_SPEED', curveEls[i], 'StageTwoSpeed');
+          setNum(cBlock, 'MULTIPLIER', curveEls[i], 'Multiplier');
+          appendToStack(block, 'ACCELERATION_CURVES', cBlock);
+        }
+      }
+      var handleEl = getChild(el, 'Handle');
+      if (handleEl) {
+        var hBlock = workspace.newBlock('power_handle');
+        setNum(hBlock, 'NOTCHES', handleEl, 'Notches');
+        setEnum(hBlock, 'SPRING_TYPE', handleEl, 'SpringType');
+        appendToStack(block, 'HANDLE', hBlock);
+      }
+    }
+
+    function importBrakeElement(block, el) {
+      var compEl = getChild(el, 'Compressor');
+      if (compEl) {
+        var cBlock = workspace.newBlock('brake_compressor');
+        setNum(cBlock, 'RATE', compEl, 'Rate');
+        appendToStack(block, 'COMPRESSOR', cBlock);
+      }
+      var mrEl = getChild(el, 'MainReservoir');
+      if (mrEl) {
+        var mBlock = workspace.newBlock('brake_main_reservoir');
+        setNum(mBlock, 'MINIMUM_PRESSURE', mrEl, 'MinimumPressure');
+        setNum(mBlock, 'MAXIMUM_PRESSURE', mrEl, 'MaximumPressure');
+        appendToStack(block, 'MAIN_RES', mBlock);
+      }
+      var arEl = getChild(el, 'AuxiliaryReservoir');
+      if (arEl) {
+        var aBlock = workspace.newBlock('brake_aux_reservoir');
+        setNum(aBlock, 'CHARGE_RATE', arEl, 'ChargeRate');
+        appendToStack(block, 'AUX_RES', aBlock);
+      }
+      var erEl = getChild(el, 'EqualizingReservoir');
+      if (erEl) {
+        var eBlock = workspace.newBlock('brake_equal_reservoir');
+        setNum(eBlock, 'NORMAL_PRESSURE', erEl, 'NormalPressure');
+        appendToStack(block, 'EQUAL_RES', eBlock);
+      }
+      var bpEl = getChild(el, 'BrakePipe');
+      if (bpEl) {
+        var bpBlock = workspace.newBlock('brake_pipe');
+        setNum(bpBlock, 'NORMAL_PRESSURE', bpEl, 'NormalPressure');
+        setNum(bpBlock, 'CHARGE_RATE', bpEl, 'ChargeRate');
+        setNum(bpBlock, 'SERVICE_RATE', bpEl, 'ServiceRate');
+        setNum(bpBlock, 'EMERGENCY_RATE', bpEl, 'EmergencyRate');
+        appendToStack(block, 'BRAKE_PIPE', bpBlock);
+      }
+      var spEl = getChild(el, 'StraightAirPipe');
+      if (spEl) {
+        var spBlock = workspace.newBlock('brake_straight_pipe');
+        setNum(spBlock, 'SERVICE_RATE', spEl, 'ServiceRate');
+        setNum(spBlock, 'EMERGENCY_RATE', spEl, 'EmergencyRate');
+        setNum(spBlock, 'RELEASE_RATE', spEl, 'ReleaseRate');
+        appendToStack(block, 'STRAIGHT_PIPE', spBlock);
+      }
+      var bcEl = getChild(el, 'BrakeCylinder');
+      if (bcEl) {
+        var bcBlock = workspace.newBlock('brake_cylinder');
+        setNum(bcBlock, 'SERVICE_MAX_PRESSURE', bcEl, 'ServiceMaximumPressure');
+        setNum(bcBlock, 'EMERGENCY_MAX_PRESSURE', bcEl, 'EmergencyMaximumPressure');
+        setNum(bcBlock, 'EMERGENCY_RATE', bcEl, 'EmergencyRate');
+        setNum(bcBlock, 'RELEASE_RATE', bcEl, 'ReleaseRate');
+        appendToStack(block, 'BRAKE_CYLINDER', bcBlock);
+      }
+      var handleEl = getChild(el, 'Handle');
+      if (handleEl) {
+        var hBlock = workspace.newBlock('brake_handle');
+        setNum(hBlock, 'NOTCHES', handleEl, 'Notches');
+        setEnum(hBlock, 'SPRING_TYPE', handleEl, 'SpringType');
+        setNum(hBlock, 'MOTOR_BRAKE_NOTCH', handleEl, 'MotorBrakeNotch');
+        appendToStack(block, 'HANDLE', hBlock);
+      }
+    }
+
+    function importEngineElement(block, el) {
+      setBool(block, 'PANTOGRAPH', el, 'Pantograph');
+      setBool(block, 'COLLECTOR_SHOE', el, 'CollectorShoe');
+      // Traction motors (either TractionMotor or RegenerativeTractionMotor)
+      for (var i = 0; i < el.children.length; i++) {
+        var child = el.children[i];
+        if (child.tagName === 'TractionMotor') {
+          var mBlock = workspace.newBlock('traction_motor');
+          setNum(mBlock, 'MAX_AMPS', child, 'MaxAmps');
+          appendToStack(block, 'MOTORS', mBlock);
+        } else if (child.tagName === 'RegenerativeTractionMotor') {
+          var rBlock = workspace.newBlock('regenerative_traction_motor');
+          setNum(rBlock, 'MAX_AMPS', child, 'MaxAmps');
+          setNum(rBlock, 'MAX_REGEN_AMPS', child, 'MaxRegenerativeAmps');
+          appendToStack(block, 'MOTORS', rBlock);
+        }
+      }
+    }
+
+    function importPluginElement(block, el) {
+      // Plugin can be a string (path) or have child elements
+      if (el.children.length === 0) {
+        // Simple string form
+        block.setFieldValue(el.textContent.trim(), 'FILE');
+      } else {
+        setText(block, 'FILE', el, 'File');
+        setBool(block, 'SUPPORTS_AI', el, 'SupportsAI');
+      }
+    }
+
+    function importNotchDescriptionsElement(block, el) {
+      setText(block, 'POWER', el, 'Power');
+      setText(block, 'BRAKE', el, 'Brake');
+      setText(block, 'LOCO_BRAKE', el, 'LocoBrake');
+      setText(block, 'REVERSER', el, 'Reverser');
+    }
+
+    function importDriverBodyElement(block, el) {
+      setNum(block, 'SHOULDER_HEIGHT', el, 'ShoulderHeight');
+      setNum(block, 'HEAD_HEIGHT', el, 'HeadHeight');
+    }
+
+
+    // Sample XML
+
+
+    var SAMPLE_XML = '<?xml version="1.0" encoding="UTF-8"?>\n\
+<Train>\n\
+  <DriverCar>0</DriverCar>\n\
+  <Description>Sample 2-car EMU</Description>\n\
+  <HeadlightStates>2</HeadlightStates>\n\
+  <Car>\n\
+    <Length>20</Length>\n\
+    <Width>2.8</Width>\n\
+    <Height>3.6</Height>\n\
+    <Mass>35000</Mass>\n\
+    <CenterOfGravityHeight>1.6</CenterOfGravityHeight>\n\
+    <ExposedFrontalArea>6</ExposedFrontalArea>\n\
+    <UnexposedFrontalArea>2</UnexposedFrontalArea>\n\
+    <MotorCar>true</MotorCar>\n\
+    <FrontAxle>8</FrontAxle>\n\
+    <RearAxle>-8</RearAxle>\n\
+    <DriverPosition>0,1.5,-5</DriverPosition>\n\
+    <Cargo>Passenger</Cargo>\n\
+    <Power>\n\
+      <AccelerationCurves>\n\
+        <OpenBVE>\n\
+          <StageZeroAcceleration>2.8</StageZeroAcceleration>\n\
+          <StageOneAcceleration>1.6</StageOneAcceleration>\n\
+          <StageOneSpeed>35</StageOneSpeed>\n\
+          <StageTwoExponent>1.2</StageTwoExponent>\n\
+          <StageTwoSpeed>100</StageTwoSpeed>\n\
+        </OpenBVE>\n\
+      </AccelerationCurves>\n\
+      <Handle>\n\
+        <Notches>8</Notches>\n\
+        <SpringType>None</SpringType>\n\
+      </Handle>\n\
+    </Power>\n\
+    <Brake>\n\
+      <Compressor>\n\
+        <Rate>5000</Rate>\n\
+      </Compressor>\n\
+      <MainReservoir>\n\
+        <MinimumPressure>690000</MinimumPressure>\n\
+        <MaximumPressure>780000</MaximumPressure>\n\
+      </MainReservoir>\n\
+      <BrakePipe>\n\
+        <NormalPressure>490000</NormalPressure>\n\
+      </BrakePipe>\n\
+      <BrakeCylinder>\n\
+        <ServiceMaximumPressure>480000</ServiceMaximumPressure>\n\
+        <EmergencyMaximumPressure>480000</EmergencyMaximumPressure>\n\
+      </BrakeCylinder>\n\
+      <Handle>\n\
+        <Notches>8</Notches>\n\
+        <SpringType>None</SpringType>\n\
+      </Handle>\n\
+    </Brake>\n\
+    <ElectricEngine>\n\
+      <Pantograph>true</Pantograph>\n\
+      <TractionMotor>\n\
+        <MaxAmps>400</MaxAmps>\n\
+      </TractionMotor>\n\
+    </ElectricEngine>\n\
+    <Doors>\n\
+      <OpenSpeed>5</OpenSpeed>\n\
+      <CloseSpeed>5</CloseSpeed>\n\
+      <Width>1.2</Width>\n\
+      <Tolerance>0.1</Tolerance>\n\
+    </Doors>\n\
+    <DriverSupervisionDevice>\n\
+      <Type>ApplyEmergencyBrake</Type>\n\
+      <Mode>AnyHandle</Mode>\n\
+      <AlarmTime>60</AlarmTime>\n\
+      <InterventionTime>5</InterventionTime>\n\
+      <RequiredStopTime>10</RequiredStopTime>\n\
+      <LoopingAlert>true</LoopingAlert>\n\
+    </DriverSupervisionDevice>\n\
+  </Car>\n\
+  <Coupler>\n\
+    <Minimum>0.5</Minimum>\n\
+    <Maximum>2</Maximum>\n\
+    <CanUncouple>false</CanUncouple>\n\
+  </Coupler>\n\
+  <Car>\n\
+    <Length>20</Length>\n\
+    <Width>2.8</Width>\n\
+    <Height>3.6</Height>\n\
+    <Mass>28000</Mass>\n\
+    <MotorCar>false</MotorCar>\n\
+    <FrontAxle>8</FrontAxle>\n\
+    <RearAxle>-8</RearAxle>\n\
+    <Cargo>Passenger</Cargo>\n\
+    <Doors>\n\
+      <OpenSpeed>5</OpenSpeed>\n\
+      <CloseSpeed>5</CloseSpeed>\n\
+      <Width>1.2</Width>\n\
+    </Doors>\n\
+  </Car>\n\
+</Train>';
+
+
+    // Workspace Initialization & UI
+
+
+    // Custom Blockly theme matching the Japanese train signage aesthetic
+    var signageTheme = Blockly.Theme.defineTheme('signage', {
+      base: Blockly.Themes.Classic,
+      componentStyles: {
+        workspaceBackgroundColour: '#f0f0f0',
+        toolboxBackgroundColour: '#ffffff',
+        toolboxForegroundColour: '#1a1a1a',
+        flyoutBackgroundColour: '#ffffff',
+        flyoutForegroundColour: '#1a1a1a',
+        flyoutOpacity: 1,
+        scrollbarColour: '#d4d4d4',
+        insertionMarkerColour: '#D71920',
+        insertionMarkerOpacity: 0.4,
+        markerColour: '#D71920',
+        cursorColour: '#D71920',
+        selectedGlowColour: '#D71920',
+        selectedGlowOpacity: 0.7,
+        replacementGlowColour: '#00A1E9',
+        replacementGlowOpacity: 0.5,
+        Hat: 'cap'
+      },
+      categoryStyles: {
+        list_category: { colour: '#1a1a1a' }
+      },
+      blockStyles: {
+        red_blocks: { colourPrimary: '#D71920', colourSecondary: '#fff', colourTertiary: '#bf151b' },
+        blue_blocks: { colourPrimary: '#00A1E9', colourSecondary: '#fff', colourTertiary: '#0085c4' },
+        green_blocks: { colourPrimary: '#009944', colourSecondary: '#fff', colourTertiary: '#007a35' },
+        orange_blocks: { colourPrimary: '#F39700', colourSecondary: '#fff', colourTertiary: '#c97a00' },
+        purple_blocks: { colourPrimary: '#9C7DB8', colourSecondary: '#fff', colourTertiary: '#7d5e9c' },
+        teal_blocks: { colourPrimary: '#00A7A7', colourSecondary: '#fff', colourTertiary: '#008585' }
+      }
+    });
+
+    var workspace = Blockly.inject('blocklyDiv', {
+      toolbox: document.getElementById('toolbox'),
+      trashcan: true,
+      zoom: {
+        controls: true,
+        wheel: true,
+        startScale: 0.85,
+        maxScale: 2.5,
+        minScale: 0.25,
+        pinch: true
+      },
+      grid: {
+        spacing: 28,
+        length: 1,
+        colour: '#d4d4d4',
+        snap: false
+      },
+      theme: signageTheme,
+      renderer: 'thrasos',
+      move: {
+        scrollbars: true,
+        drag: true,
+        wheel: false
+      }
+    });
+
+    // Create default train_root block
+    var rootBlock = workspace.newBlock('train_root');
+    rootBlock.initSvg();
+    rootBlock.render();
+    workspace.render();
+
+    // Debounced update
+    var updateTimer = null;
+    function scheduleUpdate() {
+      if (updateTimer) clearTimeout(updateTimer);
+      updateTimer = setTimeout(updateOutput, 150);
+    }
+
+    // XML syntax highlighter — produces HTML spans for the output panel
+    function highlightXml(xml) {
+      // Escape first
+      var esc = xml.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      // Declaration
+      esc = esc.replace(/^(&lt;\?xml[^]*?\?&gt;)/, '<span class="xml-decl">$1</span>');
+      // Comments
+      esc = esc.replace(/(&lt;!--[^]*?--&gt;)/g, '<span class="xml-comment">$1</span>');
+      // Tags (opening, closing, self-closing)
+      esc = esc.replace(/(&lt;\/?)([a-zA-Z_][a-zA-Z0-9_]*)([^&]*?)(\/?&gt;)/g,
+        function (m, p1, p2, p3, p4) {
+          return '<span class="xml-tag">' + p1 + p2 + '</span>' + p3 + '<span class="xml-tag">' + p4 + '</span>';
+        });
+      return esc;
+    }
+
+    function updateOutput() {
+      var topBlocks = workspace.getTopBlocks(false);
+      var trainBlock = null;
+      for (var i = 0; i < topBlocks.length; i++) {
+        if (topBlocks[i].type === 'train_root') { trainBlock = topBlocks[i]; break; }
+      }
+      var output = '';
+      var statusClass = 'ok';
+      var statusMsg = 'Ready';
+      if (trainBlock) {
+        try {
+          output = generateXml(trainBlock, 0);
+          statusMsg = 'XML generated successfully';
+        } catch (e) {
+          output = 'Error generating XML:\n' + e.message;
+          statusClass = 'error';
+          statusMsg = 'Error: ' + e.message;
+        }
+      } else {
+        output = '<!-- No Train root block found. Drag one from the Train category. -->';
+        statusMsg = 'No Train root block';
+        statusClass = 'error';
+      }
+      // Store raw text for copy/download, show highlighted HTML
+      document.getElementById('xmlOutput').dataset.raw = output;
+      document.getElementById('xmlOutput').innerHTML = highlightXml(output);
+      var statusEl = document.getElementById('statusText');
+      statusEl.textContent = statusMsg;
+      statusEl.className = statusClass;
+      // Block count
+      var count = workspace.getAllBlocks(false).length;
+      document.getElementById('blockCount').textContent = count + ' blocks';
+    }
+
+    workspace.addChangeListener(function (event) {
+      scheduleUpdate();
+    });
+
+    // Handle window resize
+    window.addEventListener('resize', function () {
+      Blockly.svgResize(workspace);
+    });
+
+    // Also call once to ensure correct sizing
+    setTimeout(function () { Blockly.svgResize(workspace); }, 100);
+
+    //  UI Button Handlers 
+
+    function showError(title, msg) {
+      document.getElementById('errorTitle').textContent = title;
+      document.getElementById('errorMessage').textContent = msg;
+      document.getElementById('errorModal').classList.add('show');
+    }
+
+    function downloadXml() {
+      var xml = document.getElementById('xmlOutput').dataset.raw || '';
+      if (!xml || xml.startsWith('<!--')) {
+        showError('Nothing to Download', 'No valid XML to download. Add a Train root block first.');
+        return;
+      }
+      var blob = new Blob([xml], { type: 'text/xml;charset=utf-8' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = 'train.xml';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(function () { URL.revokeObjectURL(url); }, 100);
+    }
+
+    function copyXml() {
+      var xml = document.getElementById('xmlOutput').dataset.raw || '';
+      if (!xml) return;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(xml).then(function () {
+          flashStatus('Copied to clipboard!');
+        }).catch(function () {
+          fallbackCopy(xml);
+        });
+      } else {
+        fallbackCopy(xml);
+      }
+    }
+
+    function fallbackCopy(text) {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); flashStatus('Copied to clipboard!'); }
+      catch (e) { showError('Copy Failed', 'Could not copy to clipboard.'); }
+      document.body.removeChild(ta);
+    }
+
+    function flashStatus(msg) {
+      var el = document.getElementById('statusText');
+      var oldText = el.textContent;
+      var oldClass = el.className;
+      el.textContent = msg;
+      el.className = 'ok';
+      setTimeout(function () { el.textContent = oldText; el.className = oldClass; }, 1500);
+    }
+
+    document.getElementById('importBtn').addEventListener('click', function () {
+      document.getElementById('fileInput').click();
+    });
+
+    document.getElementById('fileInput').addEventListener('change', function (e) {
+      var file = e.target.files[0];
+      if (!file) return;
+      var reader = new FileReader();
+      reader.onload = function (ev) {
+        var success = importFromXmlText(ev.target.result);
+        if (success) flashStatus('Imported ' + file.name);
+      };
+      reader.onerror = function () {
+        showError('Read Error', 'Could not read the file.');
+      };
+      reader.readAsText(file);
+      e.target.value = ''; // reset so same file can be re-imported
+    });
+
+    document.getElementById('exportBtn').addEventListener('click', downloadXml);
+    document.getElementById('downloadBtn2').addEventListener('click', downloadXml);
+    document.getElementById('copyBtn').addEventListener('click', copyXml);
+    document.getElementById('copyBtn2').addEventListener('click', copyXml);
+
+    document.getElementById('clearBtn').addEventListener('click', function () {
+      if (!confirm('Clear the entire workspace? This cannot be undone.')) return;
+      Blockly.Events.disable();
+      workspace.clear();
+      var rb = workspace.newBlock('train_root');
+      rb.initSvg();
+      rb.render();
+      workspace.render();
+      Blockly.Events.enable();
+      updateOutput();
+    });
+
+    document.getElementById('sampleBtn').addEventListener('click', function () {
+      importFromXmlText(SAMPLE_XML);
+      flashStatus('Sample loaded');
+    });
+
+    //  Resizer for the split between Blockly and output panel 
+
+    (function setupResizer() {
+      var resizer = document.getElementById('resizer');
+      var panel = document.getElementById('outputPanel');
+      var container = document.querySelector('main');
+      var dragging = false;
+
+      resizer.addEventListener('mousedown', function (e) {
+        dragging = true;
+        document.body.style.cursor = 'col-resize';
+        document.body.style.userSelect = 'none';
+        e.preventDefault();
+      });
+
+      document.addEventListener('mousemove', function (e) {
+        if (!dragging) return;
+        var rect = container.getBoundingClientRect();
+        var panelWidth = rect.right - e.clientX;
+        if (panelWidth < 280) panelWidth = 280;
+        if (panelWidth > rect.width - 300) panelWidth = rect.width - 300;
+        panel.style.width = panelWidth + 'px';
+        Blockly.svgResize(workspace);
+      });
+
+      document.addEventListener('mouseup', function () {
+        if (dragging) {
+          dragging = false;
+          document.body.style.cursor = '';
+          document.body.style.userSelect = '';
+          Blockly.svgResize(workspace);
+        }
+      });
+    })();
+
+    // Initial output
+    updateOutput();
+
+  </script>
+</body>
+
+</html>
