@@ -597,6 +597,7 @@
     </div>
     <div class="toolbar">
       <input type="file" id="fileInput" accept=".xml" style="display:none">
+      <button id="sampleBtn">Load Sample</button>
       <button id="importBtn">Import XML</button>
       <button class="primary" id="exportBtn">Save sound.xml</button>
       <button class="danger" id="clearBtn">Clear Workspace</button>
@@ -1333,6 +1334,37 @@
       updateOutput();
     }
 
+    const SAMPLE_XML = '<?xml version="1.0" encoding="utf-8"?>\n\
+<Sound>\n\
+  <Brake>\n\
+    <Release>\n\
+      <FileName>Brake/release.wav</FileName>\n\
+      <Radius>15</Radius>\n\
+    </Release>\n\
+  </Brake>\n\
+  <Doors>\n\
+    <OpenLeft>\n\
+      <FileName>Doors/open_left.wav</FileName>\n\
+      <Radius>10</Radius>\n\
+    </OpenLeft>\n\
+    <CloseLeft>\n\
+      <FileName>Doors/close_left.wav</FileName>\n\
+      <Radius>10</Radius>\n\
+    </CloseLeft>\n\
+  </Doors>\n\
+  <Run>\n\
+    <Sound>\n\
+      <Index>0</Index>\n\
+      <FileName>Run/run0.wav</FileName>\n\
+      <Position>0,0,-5</Position>\n\
+    </Sound>\n\
+  </Run>\n\
+  <Loop>\n\
+    <FileName>Loop/loop.wav</FileName>\n\
+    <Radius>5</Radius>\n\
+  </Loop>\n\
+</Sound>';
+
     // Set up import button trigger mapping
     document.getElementById('importBtn').addEventListener('click', function () {
       document.getElementById('fileInput').click();
@@ -1341,6 +1373,14 @@
     document.getElementById('exportBtn').addEventListener('click', exportXml);
     document.getElementById('clearBtn').addEventListener('click', clearWorkspace);
     document.getElementById('copyBtn').addEventListener('click', copyXml);
+    document.getElementById('sampleBtn').addEventListener('click', function() {
+      try {
+        importXmlToWorkspace(SAMPLE_XML);
+        flashStatus('Sample loaded');
+      } catch (err) {
+        showError('Sample Failed', err.message);
+      }
+    });
 
     window.onload = function() {
       workspace = Blockly.inject('blocklyDiv', {
