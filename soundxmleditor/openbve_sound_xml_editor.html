@@ -623,14 +623,13 @@
           <button id="copyBtn">Copy</button>
         </div>
       </div>
-      <div id="xmlOutput"></div>
+      <pre id="xmlOutput"></pre>
+      <div id="statusBar">
+        <span id="statusText">Ready</span>
+        <span id="blockCount"></span>
+      </div>
     </div>
   </main>
-
-  <div id="statusBar">
-    <span id="statusText" class="ok">Ready</span>
-    <span id="blockCount">0 blocks</span>
-  </div>
 
   <!-- Error Modal -->
   <div class="modal" id="errorModal">
@@ -1007,54 +1006,6 @@
       }
     });
 
-    window.onload = function() {
-      workspace = Blockly.inject('blocklyDiv', {
-        toolbox: document.getElementById('toolbox'),
-        trashcan: true,
-        zoom: {
-          controls: true,
-          wheel: true,
-          startScale: 0.85,
-          maxScale: 2.5,
-          minScale: 0.25,
-          pinch: true
-        },
-        grid: {
-          spacing: 28,
-          length: 1,
-          colour: '#d4d4d4',
-          snap: false
-        },
-        theme: signageTheme,
-        renderer: 'geras',
-        move: {
-          scrollbars: true,
-          drag: true,
-          wheel: false
-        }
-      });
-
-      workspace.addChangeListener(function() {
-        scheduleUpdate();
-      });
-
-      window.addEventListener('resize', false, function() {
-        Blockly.svgResize(workspace);
-      });
-      
-      const rootBlock = workspace.newBlock('sound_root');
-      rootBlock.initSvg();
-      rootBlock.render();
-      rootBlock.moveBy(50, 50);
-
-      // Trigger multiple initial resizing updates to prevent flex layout height/width being computed as 0
-      setTimeout(function () { Blockly.svgResize(workspace); }, 50);
-      setTimeout(function () { Blockly.svgResize(workspace); }, 150);
-      setTimeout(function () { Blockly.svgResize(workspace); }, 300);
-      setTimeout(function () { Blockly.svgResize(workspace); }, 600);
-      updateOutput();
-    };
-
     // Debounced update
     var updateTimer = null;
     function scheduleUpdate() {
@@ -1114,29 +1065,8 @@
       document.getElementById('errorModal').classList.add('show');
     }
 
-    // Prevents deselect closing on active category clicks
-    if (Blockly.Toolbox && Blockly.Toolbox.prototype) {
-      var originalSetSelected = Blockly.Toolbox.prototype.setSelected;
-      Blockly.Toolbox.prototype.setSelected = function(item) {
-        if (this.selectedItem_ === item && item) {
-          // If already selected, do not close or clear the selection
-          return;
-        }
-        originalSetSelected.call(this, item);
-      };
-    }
-
     function clearWorkspace() {
-      if (window.confirm && typeof window.confirm === "function") {
-        if(confirm("Are you sure you want to clear the workspace? This cannot be undone.")) {
-           resetBlocks();
-        }
-      } else {
-        resetBlocks();
-      }
-    }
-    
-    function resetBlocks() {
+      if (!confirm("Are you sure you want to clear the workspace? This cannot be undone.")) return;
       Blockly.Events.disable();
       workspace.clear();
       const rootBlock = workspace.newBlock('sound_root');
@@ -1146,7 +1076,7 @@
       Blockly.Events.enable();
       updateOutput();
     }
-
+    
     function exportXml() {
       var xml = document.getElementById('xmlOutput').dataset.raw || '';
       if (!xml || xml.startsWith('<!--')) {
@@ -1161,6 +1091,7 @@
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      setTimeout(function () { URL.revokeObjectURL(url); }, 100);
     }
 
     function copyXml() {
@@ -1405,6 +1336,51 @@
     document.getElementById('exportBtn').addEventListener('click', exportXml);
     document.getElementById('clearBtn').addEventListener('click', clearWorkspace);
     document.getElementById('copyBtn').addEventListener('click', copyXml);
+
+    window.onload = function() {
+      workspace = Blockly.inject('blocklyDiv', {
+        toolbox: document.getElementById('toolbox'),
+        trashcan: true,
+        zoom: {
+          controls: true,
+          wheel: true,
+          startScale: 0.85,
+          maxScale: 2.5,
+          minScale: 0.25,
+          pinch: true
+        },
+        grid: {
+          spacing: 28,
+          length: 1,
+          colour: '#d4d4d4',
+          snap: false
+        },
+        theme: signageTheme,
+        renderer: 'geras',
+        move: {
+          scrollbars: true,
+          drag: true,
+          wheel: false
+        }
+      });
+
+      workspace.addChangeListener(function() {
+        scheduleUpdate();
+      });
+
+      window.addEventListener('resize', function() {
+        Blockly.svgResize(workspace);
+      });
+      
+      const rootBlock = workspace.newBlock('sound_root');
+      rootBlock.initSvg();
+      rootBlock.render();
+      rootBlock.moveBy(50, 50);
+
+      // Trigger initial resize updates to align layout
+      setTimeout(function () { Blockly.svgResize(workspace); }, 100);
+      updateOutput();
+    };
 
     // Resizer for the split between Blockly and output panel
     (function setupResizer() {
