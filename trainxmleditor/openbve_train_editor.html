@@ -905,42 +905,6 @@
     Blockly.Blocks['car'] = {
       init: function () {
         this.appendDummyInput().appendField('Car');
-        this.appendDummyInput()
-          .appendField('  Length (m)').appendField(numField(20, 0), 'LENGTH')
-          .appendField('  Width (m)').appendField(numField(2.6, 0), 'WIDTH')
-          .appendField('  Height (m)').appendField(numField(3.6, 0), 'HEIGHT');
-        this.appendDummyInput()
-          .appendField('  Mass (kg)').appendField(numField(30000, 0), 'MASS')
-          .appendField('  Center of Gravity (m)').appendField(numField(1.6, 0), 'CENTER_OF_GRAVITY_HEIGHT');
-        this.appendDummyInput()
-          .appendField('  Exposed Frontal Area (m²)').appendField(numField(0, 0), 'EXPOSED_FRONTAL_AREA')
-          .appendField('  Unexposed Frontal Area (m²)').appendField(numField(0, 0), 'UNEXPOSED_FRONTAL_AREA');
-        this.appendDummyInput()
-          .appendField('  Motor Car').appendField(checkboxField(false), 'MOTOR_CAR')
-          .appendField('  Reversed').appendField(checkboxField(false), 'REVERSED')
-          .appendField('  Visible From Interior').appendField(checkboxField(false), 'VISIBLE_FROM_INTERIOR')
-          .appendField('  Loading Sway').appendField(checkboxField(false), 'LOADING_SWAY');
-        this.appendDummyInput()
-          .appendField('  Front Axle (m)').appendField(numField(8), 'FRONT_AXLE')
-          .appendField('  Rear Axle (m)').appendField(numField(-8), 'REAR_AXLE');
-        this.appendDummyInput()
-          .appendField('  Object').appendField(textField(''), 'OBJECT');
-        this.appendDummyInput()
-          .appendField('  Interior View').appendField(textField(''), 'INTERIOR_VIEW');
-        this.appendDummyInput()
-          .appendField('  Interior Dir X°').appendField(numField(), 'INTERIOR_DIR_X')
-          .appendField('  Y°').appendField(numField(), 'INTERIOR_DIR_Y')
-          .appendField('  Z°').appendField(numField(), 'INTERIOR_DIR_Z');
-        this.appendDummyInput()
-          .appendField('  Driver Pos X').appendField(numField(), 'DRIVER_POS_X')
-          .appendField('  Y').appendField(numField(), 'DRIVER_POS_Y')
-          .appendField('  Z').appendField(numField(), 'DRIVER_POS_Z');
-        this.appendDummyInput()
-          .appendField('  Cargo').appendField(dropdownField([
-            ['Passenger', 'Passenger'],
-            ['Freight', 'Freight'],
-            ['None', 'None']
-          ]), 'CARGO');
         this.appendStatementInput('PROPERTIES').setCheck('car_property').appendField('Modular Properties');
         this.appendStatementInput('CAMERA_RESTRICTION').setCheck('camera_restriction').appendField('Camera Restriction');
         this.appendStatementInput('POWER').setCheck('power').appendField('Power');
@@ -1577,27 +1541,6 @@
             xml += generateXml(propBlock, ni);
             propBlock = propBlock.getNextBlock();
           }
-          // Dimensions and mass (inline fallback)
-          xml += numEl('Length', block.getFieldValue('LENGTH'), ni);
-          xml += numEl('Width', block.getFieldValue('WIDTH'), ni);
-          xml += numEl('Height', block.getFieldValue('HEIGHT'), ni);
-          xml += numEl('CenterOfGravityHeight', block.getFieldValue('CENTER_OF_GRAVITY_HEIGHT'), ni);
-          xml += numEl('ExposedFrontalArea', block.getFieldValue('EXPOSED_FRONTAL_AREA'), ni);
-          xml += numEl('UnexposedFrontalArea', block.getFieldValue('UNEXPOSED_FRONTAL_AREA'), ni);
-          xml += numEl('Mass', block.getFieldValue('MASS'), ni);
-          xml += boolEl('MotorCar', block.getFieldValue('MOTOR_CAR'), ni);
-          xml += numEl('FrontAxle', block.getFieldValue('FRONT_AXLE'), ni);
-          xml += numEl('RearAxle', block.getFieldValue('REAR_AXLE'), ni);
-          xml += textEl('Object', block.getFieldValue('OBJECT'), ni);
-          xml += boolEl('Reversed', block.getFieldValue('REVERSED'), ni);
-          xml += textEl('InteriorView', block.getFieldValue('INTERIOR_VIEW'), ni);
-          xml += vec3El('InteriorDirection', block.getFieldValue('INTERIOR_DIR_X'),
-            block.getFieldValue('INTERIOR_DIR_Y'), block.getFieldValue('INTERIOR_DIR_Z'), ni);
-          xml += boolEl('VisibleFromInterior', block.getFieldValue('VISIBLE_FROM_INTERIOR'), ni);
-          xml += boolEl('LoadingSway', block.getFieldValue('LOADING_SWAY'), ni);
-          xml += vec3El('DriverPosition', block.getFieldValue('DRIVER_POS_X'),
-            block.getFieldValue('DRIVER_POS_Y'), block.getFieldValue('DRIVER_POS_Z'), ni);
-          xml += enumEl('Cargo', block.getFieldValue('CARGO'), ni);
           // Sub-sections
           var powerBlock = block.getInputTargetBlock('POWER');
           if (powerBlock) xml += generateXml(powerBlock, ni);
@@ -1998,24 +1941,106 @@
     }
 
     function importCarElement(block, el) {
-      setNum(block, 'LENGTH', el, 'Length');
-      setNum(block, 'WIDTH', el, 'Width');
-      setNum(block, 'HEIGHT', el, 'Height');
-      setNum(block, 'CENTER_OF_GRAVITY_HEIGHT', el, 'CenterOfGravityHeight');
-      setNum(block, 'EXPOSED_FRONTAL_AREA', el, 'ExposedFrontalArea');
-      setNum(block, 'UNEXPOSED_FRONTAL_AREA', el, 'UnexposedFrontalArea');
-      setNum(block, 'MASS', el, 'Mass');
-      setBool(block, 'MOTOR_CAR', el, 'MotorCar');
-      setNum(block, 'FRONT_AXLE', el, 'FrontAxle');
-      setNum(block, 'REAR_AXLE', el, 'RearAxle');
-      setText(block, 'OBJECT', el, 'Object');
-      setBool(block, 'REVERSED', el, 'Reversed');
-      setText(block, 'INTERIOR_VIEW', el, 'InteriorView');
-      setVec3(block, 'INTERIOR_DIR_X', 'INTERIOR_DIR_Y', 'INTERIOR_DIR_Z', el, 'InteriorDirection');
-      setBool(block, 'VISIBLE_FROM_INTERIOR', el, 'VisibleFromInterior');
-      setBool(block, 'LOADING_SWAY', el, 'LoadingSway');
-      setVec3(block, 'DRIVER_POS_X', 'DRIVER_POS_Y', 'DRIVER_POS_Z', el, 'DriverPosition');
-      setEnum(block, 'CARGO', el, 'Cargo');
+      function addPropBlock(type, setupFn) {
+        var pBlock = workspace.newBlock(type);
+        setupFn(pBlock);
+        appendToStack(block, 'PROPERTIES', pBlock);
+      }
+
+      var lenEl = getChild(el, 'Length');
+      if (lenEl) addPropBlock('car_length', function(b) { b.setFieldValue(lenEl.textContent.trim(), 'VALUE'); });
+
+      var widthEl = getChild(el, 'Width');
+      if (widthEl) addPropBlock('car_width', function(b) { b.setFieldValue(widthEl.textContent.trim(), 'VALUE'); });
+
+      var heightEl = getChild(el, 'Height');
+      if (heightEl) addPropBlock('car_height', function(b) { b.setFieldValue(heightEl.textContent.trim(), 'VALUE'); });
+
+      var cogEl = getChild(el, 'CenterOfGravityHeight');
+      if (cogEl) addPropBlock('car_center_of_gravity', function(b) { b.setFieldValue(cogEl.textContent.trim(), 'VALUE'); });
+
+      var expEl = getChild(el, 'ExposedFrontalArea');
+      var unexpEl = getChild(el, 'UnexposedFrontalArea');
+      if (expEl || unexpEl) {
+        addPropBlock('car_frontal_area', function(b) {
+          b.setFieldValue(expEl ? expEl.textContent.trim() : '', 'EXPOSED');
+          b.setFieldValue(unexpEl ? unexpEl.textContent.trim() : '', 'UNEXPOSED');
+        });
+      }
+
+      var massEl = getChild(el, 'Mass');
+      if (massEl) addPropBlock('car_mass', function(b) { b.setFieldValue(massEl.textContent.trim(), 'VALUE'); });
+
+      var motorEl = getChild(el, 'MotorCar');
+      if (motorEl) {
+        addPropBlock('car_motor_car', function(b) {
+          var v = motorEl.textContent.trim().toLowerCase();
+          b.setFieldValue(v === 'true' || v === '1' ? 'TRUE' : 'FALSE', 'VALUE');
+        });
+      }
+
+      var frontAxleEl = getChild(el, 'FrontAxle');
+      var rearAxleEl = getChild(el, 'RearAxle');
+      if (frontAxleEl || rearAxleEl) {
+        addPropBlock('car_axles', function(b) {
+          b.setFieldValue(frontAxleEl ? frontAxleEl.textContent.trim() : '', 'FRONT');
+          b.setFieldValue(rearAxleEl ? rearAxleEl.textContent.trim() : '', 'REAR');
+        });
+      }
+
+      var objEl = getChild(el, 'Object');
+      if (objEl) addPropBlock('car_object', function(b) { b.setFieldValue(objEl.textContent.trim(), 'VALUE'); });
+
+      var revEl = getChild(el, 'Reversed');
+      if (revEl) {
+        addPropBlock('car_reversed', function(b) {
+          var v = revEl.textContent.trim().toLowerCase();
+          b.setFieldValue(v === 'true' || v === '1' ? 'TRUE' : 'FALSE', 'VALUE');
+        });
+      }
+
+      var intViewEl = getChild(el, 'InteriorView');
+      var intDirEl = getChild(el, 'InteriorDirection');
+      if (intViewEl || intDirEl) {
+        addPropBlock('car_interior_view', function(b) {
+          b.setFieldValue(intViewEl ? intViewEl.textContent.trim() : '', 'OBJECT');
+          if (intDirEl) {
+            var parts = intDirEl.textContent.split(',').map(function(s) { return s.trim(); });
+            b.setFieldValue(parts[0] || '', 'DIR_X');
+            b.setFieldValue(parts[1] || '', 'DIR_Y');
+            b.setFieldValue(parts[2] || '', 'DIR_Z');
+          }
+        });
+      }
+
+      var visEl = getChild(el, 'VisibleFromInterior');
+      if (visEl) {
+        addPropBlock('car_visible_interior', function(b) {
+          var v = visEl.textContent.trim().toLowerCase();
+          b.setFieldValue(v === 'true' || v === '1' ? 'TRUE' : 'FALSE', 'VALUE');
+        });
+      }
+
+      var swayEl = getChild(el, 'LoadingSway');
+      if (swayEl) {
+        addPropBlock('car_loading_sway', function(b) {
+          var v = swayEl.textContent.trim().toLowerCase();
+          b.setFieldValue(v === 'true' || v === '1' ? 'TRUE' : 'FALSE', 'VALUE');
+        });
+      }
+
+      var drvPosEl = getChild(el, 'DriverPosition');
+      if (drvPosEl) {
+        addPropBlock('car_driver_position', function(b) {
+          var parts = drvPosEl.textContent.split(',').map(function(s) { return s.trim(); });
+          b.setFieldValue(parts[0] || '', 'POS_X');
+          b.setFieldValue(parts[1] || '', 'POS_Y');
+          b.setFieldValue(parts[2] || '', 'POS_Z');
+        });
+      }
+
+      var cargoEl = getChild(el, 'Cargo');
+      if (cargoEl) addPropBlock('car_cargo', function(b) { b.setFieldValue(cargoEl.textContent.trim(), 'VALUE'); });
 
       // Camera restriction
       var crEl = getChild(el, 'CameraRestriction');
