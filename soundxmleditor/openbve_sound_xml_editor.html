@@ -704,6 +704,7 @@
     };
 
     const xmlGenerator = new Blockly.Generator('XML');
+    xmlGenerator.forBlock = xmlGenerator;
     xmlGenerator.scrub_ = function(block, code, opt_thisOnly) {
       const nextBlock = block.nextConnection && block.nextConnection.targetBlock();
       let nextCode = '';
