@@ -51,9 +51,9 @@ const STATION_CONFIG = {
   // Footer facilities
   facilities: [
     { label: 'GitHub', href: 'https://github.com/MoltenVertex', icon: 'github' },
-    { label: 'Email', href: 'mailto:296416754+MoltenVertex@users.noreply.github.com', icon: 'mail' },
-    { label: 'Schedule', href: '#', icon: 'clock' },
-    { label: 'Map', href: '#', icon: 'map' },
+    // { label: 'Email', href: 'mailto:296416754+MoltenVertex@users.noreply.github.com', icon: 'mail' },
+    // { label: 'Schedule', href: '#', icon: 'clock' },
+    // { label: 'Map', href: '#', icon: 'map' },
   ],
 
   footerText: '\u00A9 2026 \u00B7 All lines operational unless noted',
