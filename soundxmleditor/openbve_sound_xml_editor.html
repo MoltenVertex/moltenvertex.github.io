@@ -647,6 +647,11 @@
       <block type="indexed_sound"></block>
       <block type="misc_sound_node"></block>
     </category>
+    <category name="Sound Properties" colour="190">
+      <block type="sound_filename"></block>
+      <block type="sound_radius"></block>
+      <block type="sound_position"></block>
+    </category>
     <category name="Plugin &amp; Rails" colour="290">
       <block type="ats_container"></block>
       <block type="run_container"></block>
@@ -703,7 +708,6 @@
       return code + nextCode;
     };
 
-    // Keep syntax colors in XML output
     function escapeXml(unsafe) {
       if (!unsafe) return '';
       return unsafe.replace(/[<>&'"]/g, function (c) {
@@ -717,19 +721,55 @@
       });
     }
 
-    function formatSoundNode(nodeName, fileName, radius, usePosition, posX, posY, posZ, indent) {
-      let xml = indent + '<' + nodeName + '>\n';
-      xml += indent + '  <FileName>' + escapeXml(fileName) + '</FileName>\n';
-      if (radius !== null && radius !== undefined && radius !== '') {
-        xml += indent + '  <Radius>' + radius + '</Radius>\n';
+    // ── Simple Property Blocks ──
+    Blockly.Blocks['sound_filename'] = {
+      init: function() {
+        this.appendDummyInput()
+            .appendField("FileName:")
+            .appendField(new Blockly.FieldInput("sound.wav"), "FILENAME");
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(190);
       }
-      if (usePosition) {
-        xml += indent + '  <Position>' + posX + ',' + posY + ',' + posZ + '</Position>\n';
-      }
-      xml += indent + '</' + nodeName + '>\n';
-      return xml;
-    }
+    };
+    xmlGenerator['sound_filename'] = function(block) {
+      return '<FileName>' + escapeXml(block.getFieldValue('FILENAME')) + '</FileName>\n';
+    };
 
+    Blockly.Blocks['sound_radius'] = {
+      init: function() {
+        this.appendDummyInput()
+            .appendField("Radius:")
+            .appendField(new Blockly.FieldNumber(10.0, 0.1), "RADIUS")
+            .appendField("m");
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(190);
+      }
+    };
+    xmlGenerator['sound_radius'] = function(block) {
+      return '<Radius>' + block.getFieldValue('RADIUS') + '</Radius>\n';
+    };
+
+    Blockly.Blocks['sound_position'] = {
+      init: function() {
+        this.appendDummyInput()
+            .appendField("Position X:")
+            .appendField(new Blockly.FieldNumber(0), "POS_X")
+            .appendField("Y:")
+            .appendField(new Blockly.FieldNumber(0), "POS_Y")
+            .appendField("Z:")
+            .appendField(new Blockly.FieldNumber(0), "POS_Z");
+        this.setPreviousStatement(true, null);
+        this.setNextStatement(true, null);
+        this.setColour(190);
+      }
+    };
+    xmlGenerator['sound_position'] = function(block) {
+      return '<Position>' + block.getFieldValue('POS_X') + ',' + block.getFieldValue('POS_Y') + ',' + block.getFieldValue('POS_Z') + '</Position>\n';
+    };
+
+    // ── Root and Structural Blocks ──
     Blockly.Blocks['sound_root'] = {
       init: function() {
         this.appendDummyInput().appendField("openBVE <Sound> Root");
@@ -748,15 +788,11 @@
     Blockly.Blocks['indexed_sound'] = {
       init: function() {
         this.appendDummyInput()
-            .appendField("Sound Entry Index:").appendField(new Blockly.FieldNumber(0, 0), "INDEX");
-        this.appendDummyInput()
-            .appendField("File:").appendField(new Blockly.FieldInput("sound.wav"), "FILENAME")
-            .appendField("Radius:").appendField(new Blockly.FieldNumber(10.0, 0.1), "RADIUS");
-        this.appendDummyInput()
-            .appendField("Position:").appendField(new Blockly.FieldCheckbox("FALSE"), "USE_POSITION")
-            .appendField("X:").appendField(new Blockly.FieldNumber(0), "POS_X")
-            .appendField("Y:").appendField(new Blockly.FieldNumber(0), "POS_Y")
-            .appendField("Z:").appendField(new Blockly.FieldNumber(0), "POS_Z");
+            .appendField("Sound Entry Index:")
+            .appendField(new Blockly.FieldNumber(0, 0), "INDEX");
+        this.appendStatementInput("PROPERTIES")
+            .setCheck(null)
+            .appendField("Properties");
         this.setPreviousStatement(true, null);
         this.setNextStatement(true, null);
         this.setColour(160);
@@ -764,18 +800,12 @@
     };
     xmlGenerator['indexed_sound'] = function(block) {
       const index = block.getFieldValue('INDEX');
-      const fileName = block.getFieldValue('FILENAME');
-      const radius = block.getFieldValue('RADIUS');
-      const usePosition = block.getFieldValue('USE_POSITION') === 'TRUE';
-      const posX = block.getFieldValue('POS_X');
-      const posY = block.getFieldValue('POS_Y');
-      const posZ = block.getFieldValue('POS_Z');
+      const properties = xmlGenerator.statementToCode(block, 'PROPERTIES');
+      const indentedProps = properties.split('\n').map(line => line ? '        ' + line.trim() : '').join('\n').trim();
 
       let xml = '      <Sound>\n';
       xml += '        <Index>' + index + '</Index>\n';
-      xml += '        <FileName>' + escapeXml(fileName) + '</FileName>\n';
-      if (radius !== '') xml += '        <Radius>' + radius + '</Radius>\n';
-      if (usePosition) xml += '        <Position>' + posX + ',' + posY + ',' + posZ + '</Position>\n';
+      if (indentedProps) xml += '        ' + indentedProps + '\n';
       xml += '      </Sound>\n';
       return xml;
     };
@@ -833,43 +863,47 @@
       init: function() {
         this.appendDummyInput().appendField("Horn Node:")
             .appendField(new Blockly.FieldDropdown([["Loop", "Loop"], ["Start", "Start"], ["End", "End"]]), "SUB_TYPE");
-        this.appendDummyInput()
-            .appendField("File:").appendField(new Blockly.FieldInput("horn.wav"), "FILENAME")
-            .appendField("Radius:").appendField(new Blockly.FieldNumber(30.0, 0.1), "RADIUS");
-        this.appendDummyInput()
-            .appendField("Position:").appendField(new Blockly.FieldCheckbox("FALSE"), "USE_POSITION")
-            .appendField("X:").appendField(new Blockly.FieldNumber(0), "POS_X")
-            .appendField("Y:").appendField(new Blockly.FieldNumber(0), "POS_Y")
-            .appendField("Z:").appendField(new Blockly.FieldNumber(0), "POS_Z");
+        this.appendStatementInput("PROPERTIES")
+            .setCheck(null)
+            .appendField("Properties");
         this.setPreviousStatement(true, "horn_sub_sound");
         this.setNextStatement(true, "horn_sub_sound");
         this.setColour(50);
       }
     };
     xmlGenerator['horn_sub_sound'] = function(block) {
-      return formatSoundNode(block.getFieldValue('SUB_TYPE'), block.getFieldValue('FILENAME'), block.getFieldValue('RADIUS'), block.getFieldValue('USE_POSITION') === 'TRUE', block.getFieldValue('POS_X'), block.getFieldValue('POS_Y'), block.getFieldValue('POS_Z'), '        ');
+      const subType = block.getFieldValue('SUB_TYPE');
+      const properties = xmlGenerator.statementToCode(block, 'PROPERTIES');
+      const indentedProps = properties.split('\n').map(line => line ? '        ' + line.trim() : '').join('\n').trim();
+
+      let xml = '        <' + subType + '>\n';
+      if (indentedProps) xml += '        ' + indentedProps + '\n';
+      xml += '        </' + subType + '>\n';
+      return xml;
     };
 
-    function defineSubSoundBlock(blockName, displayName, options, defaultRadius, colour) {
+    function defineSubSoundBlock(blockName, displayName, options, colour) {
       Blockly.Blocks[blockName] = {
         init: function() {
           this.appendDummyInput().appendField(displayName + ":")
               .appendField(new Blockly.FieldDropdown(options), "SUB_TYPE");
-          this.appendDummyInput()
-              .appendField("File:").appendField(new Blockly.FieldInput("sound.wav"), "FILENAME")
-              .appendField("Radius:").appendField(new Blockly.FieldNumber(defaultRadius, 0.1), "RADIUS");
-          this.appendDummyInput()
-              .appendField("Position:").appendField(new Blockly.FieldCheckbox("FALSE"), "USE_POSITION")
-              .appendField("X:").appendField(new Blockly.FieldNumber(0), "POS_X")
-              .appendField("Y:").appendField(new Blockly.FieldNumber(0), "POS_Y")
-              .appendField("Z:").appendField(new Blockly.FieldNumber(0), "POS_Z");
+          this.appendStatementInput("PROPERTIES")
+              .setCheck(null)
+              .appendField("Properties");
           this.setPreviousStatement(true, blockName);
           this.setNextStatement(true, blockName);
           this.setColour(colour);
         }
       };
       xmlGenerator[blockName] = function(block) {
-        return formatSoundNode(block.getFieldValue('SUB_TYPE'), block.getFieldValue('FILENAME'), block.getFieldValue('RADIUS'), block.getFieldValue('USE_POSITION') === 'TRUE', block.getFieldValue('POS_X'), block.getFieldValue('POS_Y'), block.getFieldValue('POS_Z'), '      ');
+        const subType = block.getFieldValue('SUB_TYPE');
+        const properties = xmlGenerator.statementToCode(block, 'PROPERTIES');
+        const indentedProps = properties.split('\n').map(line => line ? '      ' + line.trim() : '').join('\n').trim();
+
+        let xml = '      <' + subType + '>\n';
+        if (indentedProps) xml += '      ' + indentedProps + '\n';
+        xml += '      </' + subType + '>\n';
+        return xml;
       };
     }
 
@@ -888,62 +922,64 @@
       };
     }
 
-    defineSubSoundBlock('compressor_sub_sound', 'Compressor', [["Start", "Start"], ["Loop", "Loop"], ["End", "End"]], 10.0, 50);
+    defineSubSoundBlock('compressor_sub_sound', 'Compressor', [["Start", "Start"], ["Loop", "Loop"], ["End", "End"]], 50);
     defineContainerBlock('compressor_container', 'Compressor', 'compressor_sub_sound', 120, 'Compressor');
 
-    defineSubSoundBlock('handle_sub_sound', 'Handle', [["Minimum", "Minimum"], ["Apply", "Apply"], ["Maximum", "Maximum"]], 2.0, 50);
+    defineSubSoundBlock('handle_sub_sound', 'Handle', [["Minimum", "Minimum"], ["Apply", "Apply"], ["Maximum", "Maximum"]], 50);
     defineContainerBlock('power_handle_container', 'Power Handle', 'handle_sub_sound', 120, 'PowerHandle');
     defineContainerBlock('brake_handle_container', 'Brake Handle', 'handle_sub_sound', 120, 'BrakeHandle');
 
-    defineSubSoundBlock('reverser_sub_sound', 'Reverser', [["Switch On", "On"], ["Switch Off", "Off"]], 2.0, 50);
+    defineSubSoundBlock('reverser_sub_sound', 'Reverser', [["Switch On", "On"], ["Switch Off", "Off"]], 50);
     defineContainerBlock('reverser_container', 'Reverser', 'reverser_sub_sound', 120, 'Reverser');
 
-    defineSubSoundBlock('brake_sub_sound', 'Brake', [["ReleaseFull", "ReleaseFull"], ["ReleaseHigh", "ReleaseHigh"], ["Release", "Release"], ["Emergency", "Emergency"], ["Application", "Application"]], 5.0, 50);
+    defineSubSoundBlock('brake_sub_sound', 'Brake', [["ReleaseFull", "ReleaseFull"], ["ReleaseHigh", "ReleaseHigh"], ["Release", "Release"], ["Emergency", "Emergency"], ["Application", "Application"]], 50);
     defineContainerBlock('brake_container', 'Brake Systems', 'brake_sub_sound', 120, 'Brake');
 
-    defineSubSoundBlock('doors_sub_sound', 'Door', [["Open Left", "OpenLeft"], ["Close Left", "CloseLeft"], ["Open Right", "OpenRight"], ["Close Right", "CloseRight"]], 5.0, 50);
+    defineSubSoundBlock('doors_sub_sound', 'Door', [["Open Left", "OpenLeft"], ["Close Left", "CloseLeft"], ["Open Right", "OpenRight"], ["Close Right", "CloseRight"]], 50);
     defineContainerBlock('doors_container', 'Doors', 'doors_sub_sound', 120, 'Doors');
 
-    defineSubSoundBlock('suspension_sub_sound', 'Suspension', [["Sway Left", "Left"], ["Sway Right", "Right"]], 5.0, 50);
+    defineSubSoundBlock('suspension_sub_sound', 'Suspension', [["Sway Left", "Left"], ["Sway Right", "Right"]], 50);
     defineContainerBlock('suspension_container', 'Suspension', 'suspension_sub_sound', 120, 'Suspension');
 
-    defineSubSoundBlock('breaker_sub_sound', 'Breaker', [["Connected (On)", "On"], ["Disconnected (Off)", "Off"]], 2.0, 50);
+    defineSubSoundBlock('breaker_sub_sound', 'Breaker', [["Connected (On)", "On"], ["Disconnected (Off)", "Off"]], 50);
     defineContainerBlock('breaker_container', 'Breaker', 'breaker_sub_sound', 120, 'Breaker');
 
-    defineSubSoundBlock('windscreen_sub_sound', 'Windscreen', [["RainDrop", "RainDrop"], ["WetWipe", "WetWipe"], ["DryWipe", "DryWipe"], ["Switch", "Switch"]], 2.0, 50);
+    defineSubSoundBlock('windscreen_sub_sound', 'Windscreen', [["RainDrop", "RainDrop"], ["WetWipe", "WetWipe"], ["DryWipe", "DryWipe"], ["Switch", "Switch"]], 50);
     defineContainerBlock('windscreen_container', 'Windscreen', 'windscreen_sub_sound', 120, 'Windscreen');
 
-    defineSubSoundBlock('sanders_sub_sound', 'Sanders', [["Activate", "Activate"], ["EmptyActivate", "EmptyActivate"], ["DeActivate", "DeActivate"], ["Loop", "Loop"], ["Empty", "Empty"]], 2.0, 50);
+    defineSubSoundBlock('sanders_sub_sound', 'Sanders', [["Activate", "Activate"], ["EmptyActivate", "EmptyActivate"], ["DeActivate", "DeActivate"], ["Loop", "Loop"], ["Empty", "Empty"]], 50);
     defineContainerBlock('sanders_container', 'Sanders', 'sanders_sub_sound', 120, 'Sanders');
 
-    defineSubSoundBlock('coupler_sub_sound', 'Coupler', [["Uncouple", "Uncouple"], ["Couple", "Couple"], ["CoupleCab", "CoupleCab"], ["UncoupleCab", "UncoupleCab"]], 5.0, 50);
+    defineSubSoundBlock('coupler_sub_sound', 'Coupler', [["Uncouple", "Uncouple"], ["Couple", "Couple"], ["CoupleCab", "CoupleCab"], ["UncoupleCab", "UncoupleCab"]], 50);
     defineContainerBlock('coupler_container', 'Coupler', 'coupler_sub_sound', 120, 'Coupler');
 
-    defineSubSoundBlock('headlights_sub_sound', 'Headlights', [["Switch", "Switch"]], 2.0, 50);
+    defineSubSoundBlock('headlights_sub_sound', 'Headlights', [["Switch", "Switch"]], 50);
     defineContainerBlock('headlights_container', 'Headlights', 'headlights_sub_sound', 120, 'Headlights');
 
-    defineSubSoundBlock('pantograph_sub_sound', 'Pantograph', [["Raise", "Raise"], ["Lower", "Lower"]], 5.0, 50);
+    defineSubSoundBlock('pantograph_sub_sound', 'Pantograph', [["Raise", "Raise"], ["Lower", "Lower"]], 50);
     defineContainerBlock('pantograph_container', 'Pantograph', 'pantograph_sub_sound', 120, 'Pantograph');
 
     Blockly.Blocks['misc_sound_node'] = {
       init: function() {
         this.appendDummyInput().appendField("Background Loop:")
             .appendField(new Blockly.FieldDropdown([["Constant (<Loop>)", "Loop"], ["Brake Rub (<Rub>)", "Rub"], ["Station Warn (<Halt>)", "Halt"]]), "SUB_TYPE");
-        this.appendDummyInput()
-            .appendField("File:").appendField(new Blockly.FieldInput("loop.wav"), "FILENAME")
-            .appendField("Radius:").appendField(new Blockly.FieldNumber(10.0, 0.1), "RADIUS");
-        this.appendDummyInput()
-            .appendField("Position:").appendField(new Blockly.FieldCheckbox("FALSE"), "USE_POSITION")
-            .appendField("X:").appendField(new Blockly.FieldNumber(0), "POS_X")
-            .appendField("Y:").appendField(new Blockly.FieldNumber(0), "POS_Y")
-            .appendField("Z:").appendField(new Blockly.FieldNumber(0), "POS_Z");
+        this.appendStatementInput("PROPERTIES")
+            .setCheck(null)
+            .appendField("Properties");
         this.setPreviousStatement(true, null);
         this.setNextStatement(true, null);
         this.setColour(210);
       }
     };
     xmlGenerator['misc_sound_node'] = function(block) {
-      return formatSoundNode(block.getFieldValue('SUB_TYPE'), block.getFieldValue('FILENAME'), block.getFieldValue('RADIUS'), block.getFieldValue('USE_POSITION') === 'TRUE', block.getFieldValue('POS_X'), block.getFieldValue('POS_Y'), block.getFieldValue('POS_Z'), '    ');
+      const subType = block.getFieldValue('SUB_TYPE');
+      const properties = xmlGenerator.statementToCode(block, 'PROPERTIES');
+      const indentedProps = properties.split('\n').map(line => line ? '    ' + line.trim() : '').join('\n').trim();
+
+      let xml = '    <' + subType + '>\n';
+      if (indentedProps) xml += '    ' + indentedProps + '\n';
+      xml += '    </' + subType + '>\n';
+      return xml;
     };
 
     let workspace;
@@ -1186,29 +1222,51 @@
       rootBlock.moveBy(50, 50);
       let currentParentConnection = rootBlock.getInput('SUB_NODES').connection;
 
-      function createSubSoundBlock(subType, childNode, blockName) {
-        const fileName = childNode.querySelector('FileName')?.textContent || 'sound.wav';
-        const radius = childNode.querySelector('Radius')?.textContent || '';
-        const positionText = childNode.querySelector('Position')?.textContent || '';
+      function parseProperties(node, parentBlock) {
+        let parentConnection = parentBlock.getInput('PROPERTIES').connection;
         
-        const block = workspace.newBlock(blockName);
-        block.setFieldValue(subType, 'SUB_TYPE');
-        block.setFieldValue(fileName, 'FILENAME');
-        if (radius !== '') block.setFieldValue(Number(radius), 'RADIUS');
+        const fileName = node.querySelector('FileName')?.textContent;
+        if (fileName !== undefined && fileName !== '') {
+          const fnBlock = workspace.newBlock('sound_filename');
+          fnBlock.setFieldValue(fileName, 'FILENAME');
+          fnBlock.initSvg();
+          fnBlock.render();
+          parentConnection.connect(fnBlock.previousConnection);
+          parentConnection = fnBlock.nextConnection;
+        }
 
+        const radius = node.querySelector('Radius')?.textContent;
+        if (radius !== undefined && radius !== '') {
+          const rBlock = workspace.newBlock('sound_radius');
+          rBlock.setFieldValue(Number(radius), 'RADIUS');
+          rBlock.initSvg();
+          rBlock.render();
+          parentConnection.connect(rBlock.previousConnection);
+          parentConnection = rBlock.nextConnection;
+        }
+
+        const positionText = node.querySelector('Position')?.textContent;
         if (positionText) {
           const coords = positionText.split(',');
           if (coords.length === 3) {
-            block.setFieldValue('TRUE', 'USE_POSITION');
-            block.setFieldValue(Number(coords[0]), 'POS_X');
-            block.setFieldValue(Number(coords[1]), 'POS_Y');
-            block.setFieldValue(Number(coords[2]), 'POS_Z');
+            const pBlock = workspace.newBlock('sound_position');
+            pBlock.setFieldValue(Number(coords[0]), 'POS_X');
+            pBlock.setFieldValue(Number(coords[1]), 'POS_Y');
+            pBlock.setFieldValue(Number(coords[2]), 'POS_Z');
+            pBlock.initSvg();
+            pBlock.render();
+            parentConnection.connect(pBlock.previousConnection);
+            parentConnection = pBlock.nextConnection;
           }
-        } else {
-          block.setFieldValue('FALSE', 'USE_POSITION');
         }
+      }
+
+      function createSubSoundBlock(subType, childNode, blockName) {
+        const block = workspace.newBlock(blockName);
+        block.setFieldValue(subType, 'SUB_TYPE');
         block.initSvg();
         block.render();
+        parseProperties(childNode, block);
         return block;
       }
 
@@ -1236,28 +1294,12 @@
           const soundNodes = node.querySelectorAll('Sound');
           soundNodes.forEach(sNode => {
             const index = sNode.querySelector('Index')?.textContent || '0';
-            const fileName = sNode.querySelector('FileName')?.textContent || '';
-            const radius = sNode.querySelector('Radius')?.textContent || '';
-            const positionText = sNode.querySelector('Position')?.textContent || '';
 
             const sBlock = workspace.newBlock('indexed_sound');
             sBlock.setFieldValue(Number(index), 'INDEX');
-            sBlock.setFieldValue(fileName, 'FILENAME');
-            if (radius !== '') sBlock.setFieldValue(Number(radius), 'RADIUS');
-            
-            if (positionText) {
-              const coords = positionText.split(',');
-              if (coords.length === 3) {
-                sBlock.setFieldValue('TRUE', 'USE_POSITION');
-                sBlock.setFieldValue(Number(coords[0]), 'POS_X');
-                sBlock.setFieldValue(Number(coords[1]), 'POS_Y');
-                sBlock.setFieldValue(Number(coords[2]), 'POS_Z');
-              }
-            } else {
-              sBlock.setFieldValue('FALSE', 'USE_POSITION');
-            }
             sBlock.initSvg();
             sBlock.render();
+            parseProperties(sNode, sBlock);
 
             childConnection.connect(sBlock.previousConnection);
             childConnection = sBlock.nextConnection;

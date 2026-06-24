@@ -81,16 +81,6 @@ const PROJECTS = [
     platform: '2',
     section: 'operational',
   },
-  {
-    name: 'Project Four',
-    href: '/project4',
-    description: 'A weekend hack turned into something people actually use.',
-    tech: 'Python',
-    line: 'teal',
-    lineName: 'TEAL LINE',
-    platform: '4',
-    section: 'operational',
-  },
 
   // ── In Service ──
   {
