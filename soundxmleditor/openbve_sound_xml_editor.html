@@ -642,44 +642,44 @@
   </div>
 
   <xml xmlns="https://developers.google.com/blockly/xml" id="toolbox" style="display: none">
-    <category name="General &amp; Loose" colour="230">
+    <category name="General &amp; Loose" colour="#00A1E9">
       <block type="sound_root"></block>
       <block type="indexed_sound"></block>
       <block type="misc_sound_node"></block>
     </category>
-    <category name="Sound Properties" colour="190">
+    <category name="Sound Properties" colour="#00A7A7">
       <block type="sound_filename"></block>
       <block type="sound_radius"></block>
       <block type="sound_position"></block>
     </category>
-    <category name="Plugin &amp; Rails" colour="290">
+    <category name="Plugin &amp; Rails" colour="#9C7DB8">
       <block type="ats_container"></block>
       <block type="run_container"></block>
       <block type="flange_container"></block>
       <block type="switch_container"></block>
       <block type="motor_container"></block>
     </category>
-    <category name="Horn &amp; Compressor" colour="20">
+    <category name="Horn &amp; Compressor" colour="#D71920">
       <block type="horn_container"></block>
       <block type="horn_element"></block>
       <block type="horn_sub_sound"></block>
       <block type="compressor_container"></block>
       <block type="compressor_sub_sound"></block>
     </category>
-    <category name="Controls" colour="120">
+    <category name="Controls" colour="#F39700">
       <block type="power_handle_container"></block>
       <block type="brake_handle_container"></block>
       <block type="handle_sub_sound"></block>
       <block type="reverser_container"></block>
       <block type="reverser_sub_sound"></block>
     </category>
-    <category name="Brake &amp; Doors" colour="50">
+    <category name="Brake &amp; Doors" colour="#009944">
       <block type="brake_container"></block>
       <block type="brake_sub_sound"></block>
       <block type="doors_container"></block>
       <block type="doors_sub_sound"></block>
     </category>
-    <category name="Mechanical Systems" colour="160">
+    <category name="Mechanical Systems" colour="#00A7A7">
       <block type="suspension_container"></block>
       <block type="suspension_sub_sound"></block>
       <block type="breaker_container"></block>
@@ -689,7 +689,7 @@
       <block type="pantograph_container"></block>
       <block type="pantograph_sub_sound"></block>
     </category>
-    <category name="Cab &amp; Weather" colour="80">
+    <category name="Cab &amp; Weather" colour="#009944">
       <block type="windscreen_container"></block>
       <block type="windscreen_sub_sound"></block>
       <block type="sanders_container"></block>
@@ -729,7 +729,7 @@
             .appendField(new Blockly.FieldInput("sound.wav"), "FILENAME");
         this.setPreviousStatement(true, null);
         this.setNextStatement(true, null);
-        this.setColour(190);
+        this.setColour('#00A7A7');
       }
     };
     xmlGenerator['sound_filename'] = function(block) {
@@ -744,7 +744,7 @@
             .appendField("m");
         this.setPreviousStatement(true, null);
         this.setNextStatement(true, null);
-        this.setColour(190);
+        this.setColour('#00A7A7');
       }
     };
     xmlGenerator['sound_radius'] = function(block) {
@@ -762,7 +762,7 @@
             .appendField(new Blockly.FieldNumber(0), "POS_Z");
         this.setPreviousStatement(true, null);
         this.setNextStatement(true, null);
-        this.setColour(190);
+        this.setColour('#00A7A7');
       }
     };
     xmlGenerator['sound_position'] = function(block) {
@@ -774,7 +774,7 @@
       init: function() {
         this.appendDummyInput().appendField("openBVE <Sound> Root");
         this.appendStatementInput("SUB_NODES").setCheck(null);
-        this.setColour(230);
+        this.setColour('#00A1E9');
       }
     };
     xmlGenerator['sound_root'] = function(block) {
@@ -795,7 +795,7 @@
             .appendField("Properties");
         this.setPreviousStatement(true, null);
         this.setNextStatement(true, null);
-        this.setColour(160);
+        this.setColour('#00A1E9');
       }
     };
     xmlGenerator['indexed_sound'] = function(block) {
@@ -825,11 +825,11 @@
         return '    <' + tag + '>\n' + sounds + '    </' + tag + '>\n';
       };
     }
-    defineListContainerBlock('ats_container', 'ATS Plugin Sounds', 'ATS', 290);
-    defineListContainerBlock('run_container', 'Track Run Sounds', 'Run', 290);
-    defineListContainerBlock('flange_container', 'Flange Squeals', 'Flange', 290);
-    defineListContainerBlock('switch_container', 'Point Switches', 'Switch', 290);
-    defineListContainerBlock('motor_container', 'Motor Sound Table', 'Motor', 290);
+    defineListContainerBlock('ats_container', 'ATS Plugin Sounds', 'ATS', '#9C7DB8');
+    defineListContainerBlock('run_container', 'Track Run Sounds', 'Run', '#9C7DB8');
+    defineListContainerBlock('flange_container', 'Flange Squeals', 'Flange', '#9C7DB8');
+    defineListContainerBlock('switch_container', 'Point Switches', 'Switch', '#9C7DB8');
+    defineListContainerBlock('motor_container', 'Motor Sound Table', 'Motor', '#9C7DB8');
 
     Blockly.Blocks['horn_container'] = {
       init: function() {
@@ -837,7 +837,7 @@
         this.appendStatementInput("HORNS").setCheck("horn_element");
         this.setPreviousStatement(true, null);
         this.setNextStatement(true, null);
-        this.setColour(20);
+        this.setColour('#D71920');
       }
     };
     xmlGenerator['horn_container'] = function(block) {
@@ -851,7 +851,7 @@
         this.appendStatementInput("SUB_SOUNDS").setCheck("horn_sub_sound");
         this.setPreviousStatement(true, "horn_element");
         this.setNextStatement(true, "horn_element");
-        this.setColour(35);
+        this.setColour('#D71920');
       }
     };
     xmlGenerator['horn_element'] = function(block) {
@@ -868,7 +868,7 @@
             .appendField("Properties");
         this.setPreviousStatement(true, "horn_sub_sound");
         this.setNextStatement(true, "horn_sub_sound");
-        this.setColour(50);
+        this.setColour('#D71920');
       }
     };
     xmlGenerator['horn_sub_sound'] = function(block) {
@@ -922,42 +922,42 @@
       };
     }
 
-    defineSubSoundBlock('compressor_sub_sound', 'Compressor', [["Start", "Start"], ["Loop", "Loop"], ["End", "End"]], 50);
-    defineContainerBlock('compressor_container', 'Compressor', 'compressor_sub_sound', 120, 'Compressor');
+    defineSubSoundBlock('compressor_sub_sound', 'Compressor', [["Start", "Start"], ["Loop", "Loop"], ["End", "End"]], '#D71920');
+    defineContainerBlock('compressor_container', 'Compressor', 'compressor_sub_sound', '#D71920', 'Compressor');
 
-    defineSubSoundBlock('handle_sub_sound', 'Handle', [["Minimum", "Minimum"], ["Apply", "Apply"], ["Maximum", "Maximum"]], 50);
-    defineContainerBlock('power_handle_container', 'Power Handle', 'handle_sub_sound', 120, 'PowerHandle');
-    defineContainerBlock('brake_handle_container', 'Brake Handle', 'handle_sub_sound', 120, 'BrakeHandle');
+    defineSubSoundBlock('handle_sub_sound', 'Handle', [["Minimum", "Minimum"], ["Apply", "Apply"], ["Maximum", "Maximum"]], '#F39700');
+    defineContainerBlock('power_handle_container', 'Power Handle', 'handle_sub_sound', '#F39700', 'PowerHandle');
+    defineContainerBlock('brake_handle_container', 'Brake Handle', 'handle_sub_sound', '#F39700', 'BrakeHandle');
 
-    defineSubSoundBlock('reverser_sub_sound', 'Reverser', [["Switch On", "On"], ["Switch Off", "Off"]], 50);
-    defineContainerBlock('reverser_container', 'Reverser', 'reverser_sub_sound', 120, 'Reverser');
+    defineSubSoundBlock('reverser_sub_sound', 'Reverser', [["Switch On", "On"], ["Switch Off", "Off"]], '#F39700');
+    defineContainerBlock('reverser_container', 'Reverser', 'reverser_sub_sound', '#F39700', 'Reverser');
 
-    defineSubSoundBlock('brake_sub_sound', 'Brake', [["ReleaseFull", "ReleaseFull"], ["ReleaseHigh", "ReleaseHigh"], ["Release", "Release"], ["Emergency", "Emergency"], ["Application", "Application"]], 50);
-    defineContainerBlock('brake_container', 'Brake Systems', 'brake_sub_sound', 120, 'Brake');
+    defineSubSoundBlock('brake_sub_sound', 'Brake', [["ReleaseFull", "ReleaseFull"], ["ReleaseHigh", "ReleaseHigh"], ["Release", "Release"], ["Emergency", "Emergency"], ["Application", "Application"]], '#009944');
+    defineContainerBlock('brake_container', 'Brake Systems', 'brake_sub_sound', '#009944', 'Brake');
 
-    defineSubSoundBlock('doors_sub_sound', 'Door', [["Open Left", "OpenLeft"], ["Close Left", "CloseLeft"], ["Open Right", "OpenRight"], ["Close Right", "CloseRight"]], 50);
-    defineContainerBlock('doors_container', 'Doors', 'doors_sub_sound', 120, 'Doors');
+    defineSubSoundBlock('doors_sub_sound', 'Door', [["Open Left", "OpenLeft"], ["Close Left", "CloseLeft"], ["Open Right", "OpenRight"], ["Close Right", "CloseRight"]], '#009944');
+    defineContainerBlock('doors_container', 'Doors', 'doors_sub_sound', '#009944', 'Doors');
 
-    defineSubSoundBlock('suspension_sub_sound', 'Suspension', [["Sway Left", "Left"], ["Sway Right", "Right"]], 50);
-    defineContainerBlock('suspension_container', 'Suspension', 'suspension_sub_sound', 120, 'Suspension');
+    defineSubSoundBlock('suspension_sub_sound', 'Suspension', [["Sway Left", "Left"], ["Sway Right", "Right"]], '#00A7A7');
+    defineContainerBlock('suspension_container', 'Suspension', 'suspension_sub_sound', '#00A7A7', 'Suspension');
 
-    defineSubSoundBlock('breaker_sub_sound', 'Breaker', [["Connected (On)", "On"], ["Disconnected (Off)", "Off"]], 50);
-    defineContainerBlock('breaker_container', 'Breaker', 'breaker_sub_sound', 120, 'Breaker');
+    defineSubSoundBlock('breaker_sub_sound', 'Breaker', [["Connected (On)", "On"], ["Disconnected (Off)", "Off"]], '#00A7A7');
+    defineContainerBlock('breaker_container', 'Breaker', 'breaker_sub_sound', '#00A7A7', 'Breaker');
 
-    defineSubSoundBlock('windscreen_sub_sound', 'Windscreen', [["RainDrop", "RainDrop"], ["WetWipe", "WetWipe"], ["DryWipe", "DryWipe"], ["Switch", "Switch"]], 50);
-    defineContainerBlock('windscreen_container', 'Windscreen', 'windscreen_sub_sound', 120, 'Windscreen');
+    defineSubSoundBlock('windscreen_sub_sound', 'Windscreen', [["RainDrop", "RainDrop"], ["WetWipe", "WetWipe"], ["DryWipe", "DryWipe"], ["Switch", "Switch"]], '#009944');
+    defineContainerBlock('windscreen_container', 'Windscreen', 'windscreen_sub_sound', '#009944', 'Windscreen');
 
-    defineSubSoundBlock('sanders_sub_sound', 'Sanders', [["Activate", "Activate"], ["EmptyActivate", "EmptyActivate"], ["DeActivate", "DeActivate"], ["Loop", "Loop"], ["Empty", "Empty"]], 50);
-    defineContainerBlock('sanders_container', 'Sanders', 'sanders_sub_sound', 120, 'Sanders');
+    defineSubSoundBlock('sanders_sub_sound', 'Sanders', [["Activate", "Activate"], ["EmptyActivate", "EmptyActivate"], ["DeActivate", "DeActivate"], ["Loop", "Loop"], ["Empty", "Empty"]], '#009944');
+    defineContainerBlock('sanders_container', 'Sanders', 'sanders_sub_sound', '#009944', 'Sanders');
 
-    defineSubSoundBlock('coupler_sub_sound', 'Coupler', [["Uncouple", "Uncouple"], ["Couple", "Couple"], ["CoupleCab", "CoupleCab"], ["UncoupleCab", "UncoupleCab"]], 50);
-    defineContainerBlock('coupler_container', 'Coupler', 'coupler_sub_sound', 120, 'Coupler');
+    defineSubSoundBlock('coupler_sub_sound', 'Coupler', [["Uncouple", "Uncouple"], ["Couple", "Couple"], ["CoupleCab", "CoupleCab"], ["UncoupleCab", "UncoupleCab"]], '#00A7A7');
+    defineContainerBlock('coupler_container', 'Coupler', 'coupler_sub_sound', '#00A7A7', 'Coupler');
 
-    defineSubSoundBlock('headlights_sub_sound', 'Headlights', [["Switch", "Switch"]], 50);
-    defineContainerBlock('headlights_container', 'Headlights', 'headlights_sub_sound', 120, 'Headlights');
+    defineSubSoundBlock('headlights_sub_sound', 'Headlights', [["Switch", "Switch"]], '#009944');
+    defineContainerBlock('headlights_container', 'Headlights', 'headlights_sub_sound', '#009944', 'Headlights');
 
-    defineSubSoundBlock('pantograph_sub_sound', 'Pantograph', [["Raise", "Raise"], ["Lower", "Lower"]], 50);
-    defineContainerBlock('pantograph_container', 'Pantograph', 'pantograph_sub_sound', 120, 'Pantograph');
+    defineSubSoundBlock('pantograph_sub_sound', 'Pantograph', [["Raise", "Raise"], ["Lower", "Lower"]], '#00A7A7');
+    defineContainerBlock('pantograph_container', 'Pantograph', 'pantograph_sub_sound', '#00A7A7', 'Pantograph');
 
     Blockly.Blocks['misc_sound_node'] = {
       init: function() {
@@ -968,7 +968,7 @@
             .appendField("Properties");
         this.setPreviousStatement(true, null);
         this.setNextStatement(true, null);
-        this.setColour(210);
+        this.setColour('#00A1E9');
       }
     };
     xmlGenerator['misc_sound_node'] = function(block) {
@@ -1047,8 +1047,11 @@
       rootBlock.render();
       rootBlock.moveBy(50, 50);
 
-      // Trigger initial rendering
-      setTimeout(function () { Blockly.svgResize(workspace); }, 100);
+      // Trigger multiple initial resizing updates to prevent flex layout height/width being computed as 0
+      setTimeout(function () { Blockly.svgResize(workspace); }, 50);
+      setTimeout(function () { Blockly.svgResize(workspace); }, 150);
+      setTimeout(function () { Blockly.svgResize(workspace); }, 300);
+      setTimeout(function () { Blockly.svgResize(workspace); }, 600);
       updateOutput();
     };
 
@@ -1109,6 +1112,18 @@
       document.getElementById('errorTitle').textContent = title;
       document.getElementById('errorMessage').textContent = msg;
       document.getElementById('errorModal').classList.add('show');
+    }
+
+    // Prevents deselect closing on active category clicks
+    if (Blockly.Toolbox && Blockly.Toolbox.prototype) {
+      var originalSetSelected = Blockly.Toolbox.prototype.setSelected;
+      Blockly.Toolbox.prototype.setSelected = function(item) {
+        if (this.selectedItem_ === item && item) {
+          // If already selected, do not close or clear the selection
+          return;
+        }
+        originalSetSelected.call(this, item);
+      };
     }
 
     function clearWorkspace() {
