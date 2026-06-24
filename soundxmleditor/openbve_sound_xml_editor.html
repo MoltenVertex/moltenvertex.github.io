@@ -697,6 +697,11 @@
   </xml>
 
   <script>
+    window.onerror = function(message, source, lineno, colno, error) {
+      alert("JavaScript Error: " + message + " at line " + lineno + ":" + colno);
+      return false;
+    };
+
     const xmlGenerator = new Blockly.Generator('XML');
     xmlGenerator.scrub_ = function(block, code, opt_thisOnly) {
       const nextBlock = block.nextConnection && block.nextConnection.targetBlock();
