@@ -10,7 +10,7 @@ const ICONS = {
   map: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4z"/><path d="M8 2v16"/><path d="M16 6v16"/></svg>',
 
   // Misc
-  train: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="14" rx="3"/><line x1="4" y1="10" x2="20" y2="10"/><line x1="8" y1="17" x2="8" y2="20"/><line x1="16" y1="17" x2="16" y2="20"/><line x1="6" y1="20" x2="18" y2="20"/></svg>',
+  train: '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="#ffffffff"><path d="M160-340v-380q0-53 27.5-84.5t72.5-48 102.5-22T480-880q66 0 124.5 5.5t102 22 68.5 48 25 84.5v380q0 59-40.5 99.5T660-200l60 60v20h-80l-80-80H400l-80 80h-80v-20l60-60q-59 0-99.5-40.5T160-340m80-220h200v-120H240zm280 0h200v-120H520zM383-337q17-17 17-43t-17-43-43-17-43 17-17 43 17 43 43 17 43-17m280 0q17-17 17-43t-17-43-43-17-43 17-17 43 17 43 43 17 43-17"/></svg>',
   arrowRight: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>',
   chevron: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>',
 };
@@ -52,8 +52,12 @@ function renderSections(sections, projects) {
     <div class="station-list">`;
 
     items.forEach(p => {
+      let href = p.href;
+      if (window.location.protocol === 'file:' && href.endsWith('/')) {
+        href += 'index.html';
+      }
       html += `
-      <a class="station-card" href="${p.href}" style="animation-delay:${delay}s">
+      <a class="station-card" href="${href}" style="animation-delay:${delay}s">
         <div class="platform">${p.platform}</div>
         <div class="line-bar ${p.line}"></div>
         <div class="station-info">
@@ -91,9 +95,11 @@ function renderFooter(text) {
 // ── Bootstrap ──
 document.addEventListener('DOMContentLoaded', () => {
   const app = document.getElementById('app');
-  app.innerHTML =
-    renderHeader(STATION_CONFIG) +
-    renderSections(STATION_CONFIG.sections, PROJECTS) +
-    renderFacilities(STATION_CONFIG.facilities) +
-    renderFooter(STATION_CONFIG.footerText);
+  if (app && typeof STATION_CONFIG !== 'undefined' && typeof PROJECTS !== 'undefined') {
+    app.innerHTML =
+      renderHeader(STATION_CONFIG) +
+      renderSections(STATION_CONFIG.sections, PROJECTS) +
+      renderFacilities(STATION_CONFIG.facilities) +
+      renderFooter(STATION_CONFIG.footerText);
+  }
 });

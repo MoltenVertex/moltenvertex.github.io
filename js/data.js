@@ -21,9 +21,9 @@ const STATION_CONFIG = {
   // Station header
   name: 'モルテン・バーテックス',           // Main station name
   romaji: 'MoltenVertex',      // Subtitle below
-  stationCode: 'M',               // Station number prefix
+  stationCode: 'MV',               // Station number prefix
   stationNum: '01',               // Station number
-  directionText: 'Select a station to explore',
+  directionText: 'Select a line to explore',
   topBarLabel: 'Projects Index',
 
   // Section definitions
@@ -50,10 +50,7 @@ const STATION_CONFIG = {
 
   // Footer facilities
   facilities: [
-    { label: 'GitHub', href: 'https://github.com/MoltenVertex', icon: 'github' },
-    // { label: 'Email', href: 'mailto:296416754+MoltenVertex@users.noreply.github.com', icon: 'mail' },
-    // { label: 'Schedule', href: '#', icon: 'clock' },
-    // { label: 'Map', href: '#', icon: 'map' },
+    { label: 'GitHub', href: 'https://moltenvertex.github.io/', icon: 'github' },
   ],
 
   footerText: '\u00A9 2026 \u00B7 All lines operational unless noted',
@@ -63,7 +60,7 @@ const PROJECTS = [
   // ── Operational ──
   {
     name: 'OpenBVE train.xml Editor',
-    href: './trainxmleditor/openbve_train_editor.html',
+    href: './trainxmleditor/',
     description: 'A visual Blockly-based configuration editor for OpenBVE train.xml files.',
     tech: 'HTML/Blockly',
     line: 'blue',
@@ -73,12 +70,22 @@ const PROJECTS = [
   },
   {
     name: 'OpenBVE sound.xml Editor',
-    href: './soundxmleditor/openbve_sound_xml_editor.html',
+    href: './soundxmleditor/',
     description: 'A visual Blockly-based configuration editor for OpenBVE sound.xml files.',
     tech: 'HTML/Blockly',
     line: 'purple',
     lineName: 'PURPLE LINE',
     platform: '2',
+    section: 'operational',
+  },
+  {
+    name: 'OpenBVE dynamiclight.xml Editor',
+    href: './dynamiclightxmleditor/',
+    description: 'A visual Blockly-based configuration editor for OpenBVE dynamiclight.xml files.',
+    tech: 'HTML/Blockly',
+    line: 'teal',
+    lineName: 'TEAL LINE',
+    platform: '3',
     section: 'operational',
   },
 

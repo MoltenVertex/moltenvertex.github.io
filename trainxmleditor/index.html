@@ -11,622 +11,28 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500&display=swap"
     rel="stylesheet">
-  <style>
-    :root {
-      --bg: #f0f0f0;
-      --sign-white: #ffffff;
-      --fg: #1a1a1a;
-      --fg-secondary: #444;
-      --muted: #999;
-      --border: #d4d4d4;
-      --border-dark: #bbb;
-      --red: #D71920;
-      --blue: #00A1E9;
-      --green: #009944;
-      --orange: #F39700;
-      --purple: #9C7DB8;
-      --teal: #00A7A7;
-    }
-
-    body, h1, h2, h3, p, main, .top-bar, .name-board, .direction-bar, #outputPanel, #statusBar, .modal, .modal-content {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    html,
-    body {
-      height: 100%;
-    }
-
-    html {
-      scroll-behavior: smooth;
-    }
-
-    body {
-      font-family: 'Inter', 'Noto Sans JP', sans-serif;
-      background: var(--bg);
-      color: var(--fg);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      -webkit-font-smoothing: antialiased;
-    }
-
-
-    .top-bar {
-      background: var(--red);
-      color: #fff;
-      padding: 5px 18px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      flex-shrink: 0;
-      animation: fadeDown 0.5s ease both;
-    }
-
-    .top-bar .train-icon {
-      width: 14px;
-      height: 14px;
-      fill: #fff;
-    }
-
-    .top-bar .meta {
-      margin-left: auto;
-      font-weight: 500;
-      letter-spacing: 1px;
-      opacity: 0.85;
-    }
-
-    /* Station name board */
-    .name-board {
-      background: var(--sign-white);
-      border-bottom: 3px solid var(--fg);
-      padding: 14px 18px 12px;
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      flex-shrink: 0;
-      animation: fadeDown 0.5s ease 0.05s both;
-    }
-
-    .station-medallion {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      background: var(--red);
-      color: #fff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      line-height: 1;
-    }
-
-    .station-medallion .letter {
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: 1px;
-      font-family: 'Noto Sans JP', sans-serif;
-    }
-
-    .station-medallion .number {
-      font-size: 20px;
-      font-weight: 800;
-      font-family: 'Noto Sans JP', sans-serif;
-      margin-top: 1px;
-    }
-
-    .name-board .title-group {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .name-board h1 {
-      font-family: 'Noto Sans JP', 'Inter', sans-serif;
-      font-size: clamp(22px, 3.5vw, 30px);
-      font-weight: 900;
-      letter-spacing: 3px;
-      line-height: 1.1;
-      color: var(--fg);
-    }
-
-    .name-board .subtitle {
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-top: 3px;
-    }
-
-    .name-board .toolbar {
-      display: flex;
-      gap: 5px;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-    }
-
-    .toolbar button {
-      background: var(--sign-white);
-      color: var(--fg);
-      border: 2px solid var(--border);
-      padding: 6px 13px;
-      border-radius: 0;
-      cursor: pointer;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      font-family: 'Inter', sans-serif;
-      transition: border-color 0.15s, background 0.15s, color 0.15s;
-      white-space: nowrap;
-    }
-
-    .toolbar button:hover {
-      border-color: var(--border-dark);
-      background: #fafafa;
-    }
-
-    .toolbar button.primary {
-      background: var(--red);
-      color: #fff;
-      border-color: var(--red);
-    }
-
-    .toolbar button.primary:hover {
-      background: #bf151b;
-      border-color: #bf151b;
-    }
-
-    .toolbar button.danger {
-      color: var(--red);
-      border-color: var(--border);
-    }
-
-    .toolbar button.danger:hover {
-      border-color: var(--red);
-      background: #fff5f5;
-    }
-
-    /* Direction bar */
-    .direction-bar {
-      background: var(--sign-white);
-      border-bottom: 1px solid var(--border);
-      padding: 7px 18px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 12px;
-      color: var(--fg-secondary);
-      flex-shrink: 0;
-      animation: fadeDown 0.5s ease 0.1s both;
-    }
-
-    .direction-bar .arrow {
-      font-weight: 700;
-      color: var(--red);
-      font-size: 14px;
-    }
-
-    .direction-bar .label {
-      font-weight: 600;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      font-size: 11px;
-    }
-
-    .direction-bar .dest {
-      color: var(--fg-secondary);
-    }
-
-    .direction-bar .line-stripe {
-      width: 4px;
-      height: 16px;
-      background: var(--blue);
-      margin-right: 4px;
-    }
-
-    /* === Main split  */
-    main {
-      flex: 1;
-      display: flex;
-      overflow: hidden;
-    }
-
-    #blocklyContainer {
-      flex: 1;
-      position: relative;
-      min-width: 0;
-      background: var(--bg);
-    }
-
-    #blocklyDiv {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-    }
-
-    #blocklyDiv .blocklyToolboxDiv {
-      background: var(--sign-white);
-      border-right: 2px solid var(--border);
-    }
-
-    #blocklyDiv .blocklyTreeRow {
-      border-bottom: 1px solid #eee;
-    }
-
-    #blocklyDiv .blocklyTreeRow:hover {
-      background: #fafafa;
-    }
-
-    #blocklyDiv .blocklyTreeLabel {
-      font-family: 'Inter', 'Noto Sans JP', sans-serif;
-      font-weight: 600;
-      font-size: 12px;
-      letter-spacing: 0.5px;
-    }
-
-    /*  Resizer  */
-    .resizer {
-      width: 8px;
-      background: var(--border);
-      cursor: col-resize;
-      flex-shrink: 0;
-      border-left: 3px solid var(--sign-white);
-      border-right: 3px solid var(--sign-white);
-      transition: background 0.15s;
-    }
-
-    .resizer:hover {
-      background: var(--red);
-    }
-
-    /*  Output panel — departure board style  */
-    #outputPanel {
-      width: 40%;
-      min-width: 300px;
-      background: var(--sign-white);
-      display: flex;
-      flex-direction: column;
-      border-left: 2px solid var(--fg);
-    }
-
-    #outputPanel .panel-header {
-      padding: 9px 14px;
-      background: var(--fg);
-      color: #fff;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-shrink: 0;
-    }
-
-    #outputPanel .panel-header .line-badge {
-      background: var(--red);
-      color: #fff;
-      font-size: 9px;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-      padding: 2px 6px;
-      border-radius: 2px;
-      text-transform: uppercase;
-      font-family: 'Inter', sans-serif;
-    }
-
-    #outputPanel .panel-header .panel-title {
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      font-family: 'Noto Sans JP', 'Inter', sans-serif;
-    }
-
-    #outputPanel .panel-header .actions {
-      margin-left: auto;
-      display: flex;
-      gap: 4px;
-    }
-
-    #outputPanel .panel-header .actions button {
-      background: transparent;
-      color: #fff;
-      border: 1px solid #555;
-      padding: 3px 9px;
-      border-radius: 0;
-      cursor: pointer;
-      font-size: 10px;
-      font-weight: 600;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-      font-family: 'Inter', sans-serif;
-      transition: border-color 0.15s, color 0.15s;
-    }
-
-    #outputPanel .panel-header .actions button:hover {
-      border-color: var(--red);
-      color: var(--red);
-    }
-
-    #xmlOutput {
-      flex: 1;
-      overflow: auto;
-      padding: 12px 16px;
-      font-family: 'JetBrains Mono', 'Consolas', monospace;
-      font-size: 11.5px;
-      line-height: 1.65;
-      white-space: pre-wrap;
-      word-break: break-word;
-      color: var(--fg);
-      background: var(--sign-white);
-      border-bottom: 1px solid var(--border);
-    }
-
-    #xmlOutput .xml-tag {
-      color: var(--red);
-      font-weight: 500;
-    }
-
-    #xmlOutput .xml-attr {
-      color: var(--blue);
-    }
-
-    #xmlOutput .xml-comment {
-      color: var(--muted);
-      font-style: italic;
-    }
-
-    #xmlOutput .xml-decl {
-      color: var(--muted);
-    }
-
-    #statusBar {
-      background: var(--sign-white);
-      color: var(--fg-secondary);
-      padding: 5px 16px;
-      font-size: 10px;
-      font-weight: 600;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      display: flex;
-      gap: 16px;
-      align-items: center;
-      flex-shrink: 0;
-      border-top: 1px solid var(--border);
-    }
-
-    #statusBar::before {
-      content: '';
-      display: inline-block;
-      width: 4px;
-      height: 12px;
-      background: var(--green);
-      flex-shrink: 0;
-    }
-
-    #statusBar .error::before {
-      background: var(--red);
-    }
-
-    #statusBar #statusText.error {
-      color: var(--red);
-    }
-
-    #statusBar #statusText.ok {
-      color: var(--green);
-    }
-
-    #statusBar #blockCount {
-      margin-left: auto;
-      color: var(--muted);
-      font-weight: 500;
-    }
-
-    /*  Modal  */
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(26, 26, 26, 0.5);
-      z-index: 100;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .modal.show {
-      display: flex;
-      animation: fadeIn 0.2s ease;
-    }
-
-    .modal-content {
-      background: var(--sign-white);
-      border: 3px solid var(--fg);
-      padding: 20px 24px;
-      border-radius: 0;
-      max-width: 460px;
-      width: 90%;
-      color: var(--fg);
-    }
-
-    .modal-content h3 {
-      font-family: 'Noto Sans JP', 'Inter', sans-serif;
-      font-size: 16px;
-      font-weight: 700;
-      letter-spacing: 1px;
-      margin-bottom: 10px;
-      padding-bottom: 8px;
-      border-bottom: 2px solid var(--red);
-    }
-
-    .modal-content p {
-      font-size: 13px;
-      line-height: 1.6;
-      margin-bottom: 16px;
-      color: var(--fg-secondary);
-    }
-
-    .modal-content button {
-      background: var(--fg);
-      color: #fff;
-      border: none;
-      padding: 8px 20px;
-      border-radius: 0;
-      cursor: pointer;
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      font-family: 'Inter', sans-serif;
-      transition: background 0.15s;
-    }
-
-    .modal-content button:hover {
-      background: var(--red);
-    }
-
-    /*  Animations  */
-    @keyframes fadeDown {
-      from {
-        opacity: 0;
-        transform: translateY(-8px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes fadeUp {
-      from {
-        opacity: 0;
-        transform: translateY(8px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-      }
-
-      to {
-        opacity: 1;
-      }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-
-      *,
-      *::before,
-      *::after {
-        animation-duration: 0.01ms !important;
-        transition-duration: 0.01ms !important;
-      }
-    }
-
-    /*  Responsive  */
-    @media (max-width: 860px) {
-      .name-board {
-        flex-wrap: wrap;
-        gap: 10px;
-      }
-
-      .name-board .toolbar {
-        width: 100%;
-        justify-content: flex-start;
-      }
-
-      .toolbar button {
-        padding: 5px 10px;
-        font-size: 10px;
-      }
-    }
-
-    @media (max-width: 768px) {
-      main {
-        flex-direction: column;
-      }
-
-      #outputPanel {
-        width: 100%;
-        min-width: 0;
-        height: 42%;
-        border-left: none;
-        border-top: 2px solid var(--fg);
-      }
-
-      .resizer {
-        display: none;
-      }
-
-      .station-medallion {
-        width: 40px;
-        height: 40px;
-      }
-
-      .station-medallion .number {
-        font-size: 16px;
-      }
-    }
-
-    /*  Blockly overrides  */
-    .blocklyFlyoutBackground {
-      fill: var(--sign-white) !important;
-    }
-
-    .blocklyFlyoutButton {
-      fill: var(--sign-white) !important;
-    }
-
-    .blocklyFlyoutLabelText {
-      font-family: 'Inter', sans-serif !important;
-      font-weight: 700 !important;
-    }
-
-    .blocklyTooltipDiv {
-      border: 2px solid var(--fg) !important;
-      border-radius: 0 !important;
-      box-shadow: none !important;
-      font-family: 'Inter', sans-serif !important;
-      font-size: 11px !important;
-    }
-  </style>
+  <link rel="stylesheet" href="../css/style.css">
+  <script src="../js/main.js"></script>
 </head>
 
-<body>
+<body class="train-theme">
 
   <div class="top-bar">
-    <svg class="train-icon" viewBox="0 0 24 24">
-      <path
-        d="M12 2C8 2 6 4 6 8v8c0 2 1 3 3 3l-1 3h2l1-2h2l1 2h2l-1-3c2 0 3-1 3-3V8c0-4-2-6-6-6zm-3 5h6v3H9V7zm0 5h6v2H9v-2z" />
-    </svg>
+    <a href="../index.html" class="back-station-chip">← Station</a>
+    <span class="train-icon-placeholder"></span>
     <span>OpenBVE train.xml Editor</span>
-    <span class="meta">Blockly Visual Programming</span>
+    <span class="meta">MoltenVertex</span>
+    <span class="back-station-chip" style="color: #fff;">BETA</span>
   </div>
 
-  <div class="name-board">
+  <div class=" name-board">
     <div class="station-medallion">
       <span class="letter">T</span>
       <span class="number">01</span>
     </div>
     <div class="title-group">
       <h1>train.xml</h1>
-      <div class="subtitle">Visual Configuration Editor</div>
+      <div class="subtitle">Visual Xml Editor</div>
     </div>
     <div class="toolbar">
       <button id="sampleBtn" title="Load a sample train configuration">Sample</button>
@@ -1958,32 +1364,32 @@
       }
 
       var lenEl = getChild(el, 'Length');
-      if (lenEl) addPropBlock('car_length', function(b) { b.setFieldValue(lenEl.textContent.trim(), 'VALUE'); });
+      if (lenEl) addPropBlock('car_length', function (b) { b.setFieldValue(lenEl.textContent.trim(), 'VALUE'); });
 
       var widthEl = getChild(el, 'Width');
-      if (widthEl) addPropBlock('car_width', function(b) { b.setFieldValue(widthEl.textContent.trim(), 'VALUE'); });
+      if (widthEl) addPropBlock('car_width', function (b) { b.setFieldValue(widthEl.textContent.trim(), 'VALUE'); });
 
       var heightEl = getChild(el, 'Height');
-      if (heightEl) addPropBlock('car_height', function(b) { b.setFieldValue(heightEl.textContent.trim(), 'VALUE'); });
+      if (heightEl) addPropBlock('car_height', function (b) { b.setFieldValue(heightEl.textContent.trim(), 'VALUE'); });
 
       var cogEl = getChild(el, 'CenterOfGravityHeight');
-      if (cogEl) addPropBlock('car_center_of_gravity', function(b) { b.setFieldValue(cogEl.textContent.trim(), 'VALUE'); });
+      if (cogEl) addPropBlock('car_center_of_gravity', function (b) { b.setFieldValue(cogEl.textContent.trim(), 'VALUE'); });
 
       var expEl = getChild(el, 'ExposedFrontalArea');
       var unexpEl = getChild(el, 'UnexposedFrontalArea');
       if (expEl || unexpEl) {
-        addPropBlock('car_frontal_area', function(b) {
+        addPropBlock('car_frontal_area', function (b) {
           b.setFieldValue(expEl ? expEl.textContent.trim() : '', 'EXPOSED');
           b.setFieldValue(unexpEl ? unexpEl.textContent.trim() : '', 'UNEXPOSED');
         });
       }
 
       var massEl = getChild(el, 'Mass');
-      if (massEl) addPropBlock('car_mass', function(b) { b.setFieldValue(massEl.textContent.trim(), 'VALUE'); });
+      if (massEl) addPropBlock('car_mass', function (b) { b.setFieldValue(massEl.textContent.trim(), 'VALUE'); });
 
       var motorEl = getChild(el, 'MotorCar');
       if (motorEl) {
-        addPropBlock('car_motor_car', function(b) {
+        addPropBlock('car_motor_car', function (b) {
           var v = motorEl.textContent.trim().toLowerCase();
           b.setFieldValue(v === 'true' || v === '1' ? 'TRUE' : 'FALSE', 'VALUE');
         });
@@ -1992,18 +1398,18 @@
       var frontAxleEl = getChild(el, 'FrontAxle');
       var rearAxleEl = getChild(el, 'RearAxle');
       if (frontAxleEl || rearAxleEl) {
-        addPropBlock('car_axles', function(b) {
+        addPropBlock('car_axles', function (b) {
           b.setFieldValue(frontAxleEl ? frontAxleEl.textContent.trim() : '', 'FRONT');
           b.setFieldValue(rearAxleEl ? rearAxleEl.textContent.trim() : '', 'REAR');
         });
       }
 
       var objEl = getChild(el, 'Object');
-      if (objEl) addPropBlock('car_object', function(b) { b.setFieldValue(objEl.textContent.trim(), 'VALUE'); });
+      if (objEl) addPropBlock('car_object', function (b) { b.setFieldValue(objEl.textContent.trim(), 'VALUE'); });
 
       var revEl = getChild(el, 'Reversed');
       if (revEl) {
-        addPropBlock('car_reversed', function(b) {
+        addPropBlock('car_reversed', function (b) {
           var v = revEl.textContent.trim().toLowerCase();
           b.setFieldValue(v === 'true' || v === '1' ? 'TRUE' : 'FALSE', 'VALUE');
         });
@@ -2012,10 +1418,10 @@
       var intViewEl = getChild(el, 'InteriorView');
       var intDirEl = getChild(el, 'InteriorDirection');
       if (intViewEl || intDirEl) {
-        addPropBlock('car_interior_view', function(b) {
+        addPropBlock('car_interior_view', function (b) {
           b.setFieldValue(intViewEl ? intViewEl.textContent.trim() : '', 'OBJECT');
           if (intDirEl) {
-            var parts = intDirEl.textContent.split(',').map(function(s) { return s.trim(); });
+            var parts = intDirEl.textContent.split(',').map(function (s) { return s.trim(); });
             b.setFieldValue(parts[0] || '', 'DIR_X');
             b.setFieldValue(parts[1] || '', 'DIR_Y');
             b.setFieldValue(parts[2] || '', 'DIR_Z');
@@ -2025,7 +1431,7 @@
 
       var visEl = getChild(el, 'VisibleFromInterior');
       if (visEl) {
-        addPropBlock('car_visible_interior', function(b) {
+        addPropBlock('car_visible_interior', function (b) {
           var v = visEl.textContent.trim().toLowerCase();
           b.setFieldValue(v === 'true' || v === '1' ? 'TRUE' : 'FALSE', 'VALUE');
         });
@@ -2033,7 +1439,7 @@
 
       var swayEl = getChild(el, 'LoadingSway');
       if (swayEl) {
-        addPropBlock('car_loading_sway', function(b) {
+        addPropBlock('car_loading_sway', function (b) {
           var v = swayEl.textContent.trim().toLowerCase();
           b.setFieldValue(v === 'true' || v === '1' ? 'TRUE' : 'FALSE', 'VALUE');
         });
@@ -2041,8 +1447,8 @@
 
       var drvPosEl = getChild(el, 'DriverPosition');
       if (drvPosEl) {
-        addPropBlock('car_driver_position', function(b) {
-          var parts = drvPosEl.textContent.split(',').map(function(s) { return s.trim(); });
+        addPropBlock('car_driver_position', function (b) {
+          var parts = drvPosEl.textContent.split(',').map(function (s) { return s.trim(); });
           b.setFieldValue(parts[0] || '', 'POS_X');
           b.setFieldValue(parts[1] || '', 'POS_Y');
           b.setFieldValue(parts[2] || '', 'POS_Z');
@@ -2050,7 +1456,7 @@
       }
 
       var cargoEl = getChild(el, 'Cargo');
-      if (cargoEl) addPropBlock('car_cargo', function(b) { b.setFieldValue(cargoEl.textContent.trim(), 'VALUE'); });
+      if (cargoEl) addPropBlock('car_cargo', function (b) { b.setFieldValue(cargoEl.textContent.trim(), 'VALUE'); });
 
       // Camera restriction
       var crEl = getChild(el, 'CameraRestriction');
@@ -2665,6 +2071,9 @@
         }
       });
     })();
+
+    // Insert train SVG icon
+    document.querySelector('.train-icon-placeholder').outerHTML = ICONS.train;
 
     // Initial output
     updateOutput();

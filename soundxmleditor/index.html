@@ -11,579 +11,17 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500&display=swap"
     rel="stylesheet">
-  <style>
-    :root {
-      --bg: #f0f0f0;
-      --sign-white: #ffffff;
-      --fg: #1a1a1a;
-      --fg-secondary: #444;
-      --muted: #999;
-      --border: #d4d4d4;
-      --border-dark: #bbb;
-      --red: #D71920;
-      --blue: #00A1E9;
-      --green: #009944;
-      --orange: #F39700;
-      --purple: #9C7DB8;
-      --teal: #00A7A7;
-    }
-
-    body, h1, h2, h3, p, main, .top-bar, .name-board, .direction-bar, #outputPanel, #statusBar, .modal, .modal-content {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    html,
-    body {
-      height: 100%;
-    }
-
-    html {
-      scroll-behavior: smooth;
-    }
-
-    body {
-      font-family: 'Inter', 'Noto Sans JP', sans-serif;
-      background: var(--bg);
-      color: var(--fg);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      -webkit-font-smoothing: antialiased;
-    }
-
-    .top-bar {
-      background: var(--red);
-      color: #fff;
-      padding: 5px 18px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      flex-shrink: 0;
-      animation: fadeDown 0.5s ease both;
-    }
-
-    .top-bar .train-icon {
-      width: 14px;
-      height: 14px;
-      fill: #fff;
-    }
-
-    .top-bar .meta {
-      margin-left: auto;
-      font-weight: 500;
-      letter-spacing: 1px;
-      opacity: 0.85;
-    }
-
-    /* Station name board */
-    .name-board {
-      background: var(--sign-white);
-      border-bottom: 3px solid var(--fg);
-      padding: 14px 18px 12px;
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      flex-shrink: 0;
-      animation: fadeDown 0.5s ease 0.05s both;
-    }
-
-    .station-medallion {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      background: var(--purple);
-      color: #fff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      line-height: 1;
-    }
-
-    .station-medallion .letter {
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: 1px;
-      font-family: 'Noto Sans JP', sans-serif;
-    }
-
-    .station-medallion .number {
-      font-size: 20px;
-      font-weight: 800;
-      font-family: 'Noto Sans JP', sans-serif;
-      margin-top: 1px;
-    }
-
-    .name-board .title-group {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .name-board h1 {
-      font-family: 'Noto Sans JP', 'Inter', sans-serif;
-      font-size: clamp(22px, 3.5vw, 30px);
-      font-weight: 900;
-      letter-spacing: 3px;
-      line-height: 1.1;
-      color: var(--fg);
-    }
-
-    .name-board .subtitle {
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-top: 3px;
-    }
-
-    .name-board .toolbar {
-      display: flex;
-      gap: 5px;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-    }
-
-    .toolbar button {
-      background: var(--sign-white);
-      color: var(--fg);
-      border: 2px solid var(--border);
-      padding: 6px 13px;
-      border-radius: 0;
-      cursor: pointer;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      font-family: 'Inter', sans-serif;
-      transition: border-color 0.15s, background 0.15s, color 0.15s;
-      white-space: nowrap;
-    }
-
-    .toolbar button:hover {
-      border-color: var(--border-dark);
-      background: #fafafa;
-    }
-
-    .toolbar button.primary {
-      background: var(--purple);
-      color: #fff;
-      border-color: var(--purple);
-    }
-
-    .toolbar button.primary:hover {
-      background: #7d5e9c;
-      border-color: #7d5e9c;
-    }
-
-    .toolbar button.danger {
-      color: var(--red);
-      border-color: var(--border);
-    }
-
-    .toolbar button.danger:hover {
-      border-color: var(--red);
-      background: #fff5f5;
-    }
-
-    /* Direction bar */
-    .direction-bar {
-      background: var(--sign-white);
-      border-bottom: 1px solid var(--border);
-      padding: 7px 18px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 12px;
-      color: var(--fg-secondary);
-      flex-shrink: 0;
-      animation: fadeDown 0.5s ease 0.1s both;
-    }
-
-    .direction-bar .arrow {
-      font-weight: 700;
-      color: var(--purple);
-      font-size: 14px;
-    }
-
-    .direction-bar .label {
-      font-weight: 600;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      font-size: 11px;
-    }
-
-    .direction-bar .dest {
-      color: var(--fg-secondary);
-    }
-
-    .direction-bar .line-stripe {
-      width: 4px;
-      height: 16px;
-      background: var(--purple);
-      margin-right: 4px;
-    }
-
-    /* === Main split === */
-    main {
-      flex: 1;
-      display: flex;
-      overflow: hidden;
-    }
-
-    #blocklyContainer {
-      flex: 1;
-      position: relative;
-      min-width: 0;
-      background: var(--bg);
-    }
-
-    #blocklyDiv {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-    }
-
-    #blocklyDiv .blocklyToolboxDiv {
-      background: var(--sign-white);
-      border-right: 2px solid var(--border);
-    }
-
-    #blocklyDiv .blocklyTreeRow {
-      border-bottom: 1px solid #eee;
-    }
-
-    #blocklyDiv .blocklyTreeRow:hover {
-      background: #fafafa;
-    }
-
-    #blocklyDiv .blocklyTreeLabel {
-      font-family: 'Inter', 'Noto Sans JP', sans-serif;
-      font-weight: 600;
-      font-size: 12px;
-      letter-spacing: 0.5px;
-    }
-
-    /* Resizer */
-    .resizer {
-      width: 8px;
-      background: var(--border);
-      cursor: col-resize;
-      flex-shrink: 0;
-      border-left: 3px solid var(--sign-white);
-      border-right: 3px solid var(--sign-white);
-      transition: background 0.15s;
-    }
-
-    .resizer:hover {
-      background: var(--purple);
-    }
-
-    /* Output panel — departure board style */
-    #outputPanel {
-      width: 40%;
-      min-width: 300px;
-      background: var(--sign-white);
-      display: flex;
-      flex-direction: column;
-      border-left: 2px solid var(--fg);
-    }
-
-    #outputPanel .panel-header {
-      padding: 9px 14px;
-      background: var(--fg);
-      color: #fff;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-shrink: 0;
-    }
-
-    #outputPanel .panel-header .line-badge {
-      background: var(--purple);
-      color: #fff;
-      font-size: 9px;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-      padding: 2px 6px;
-      border-radius: 2px;
-      text-transform: uppercase;
-      font-family: 'Inter', sans-serif;
-    }
-
-    #outputPanel .panel-header .panel-title {
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      font-family: 'Noto Sans JP', 'Inter', sans-serif;
-    }
-
-    #outputPanel .panel-header .actions {
-      margin-left: auto;
-      display: flex;
-      gap: 4px;
-    }
-
-    #outputPanel .panel-header .actions button {
-      background: transparent;
-      color: #fff;
-      border: 1px solid #555;
-      padding: 3px 9px;
-      border-radius: 0;
-      cursor: pointer;
-      font-size: 10px;
-      font-weight: 600;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-      font-family: 'Inter', sans-serif;
-      transition: border-color 0.15s, color 0.15s;
-    }
-
-    #outputPanel .panel-header .actions button:hover {
-      border-color: var(--purple);
-      color: var(--purple);
-    }
-
-    #xmlOutput {
-      flex: 1;
-      overflow: auto;
-      padding: 12px 16px;
-      font-family: 'JetBrains Mono', 'Consolas', monospace;
-      font-size: 11.5px;
-      line-height: 1.65;
-      white-space: pre-wrap;
-      word-break: break-word;
-      color: var(--fg);
-      background: var(--sign-white);
-      border-bottom: 1px solid var(--border);
-    }
-
-    #xmlOutput .xml-tag {
-      color: var(--purple);
-      font-weight: 500;
-    }
-
-    #xmlOutput .xml-attr {
-      color: var(--blue);
-    }
-
-    #xmlOutput .xml-comment {
-      color: var(--muted);
-      font-style: italic;
-    }
-
-    #xmlOutput .xml-decl {
-      color: var(--muted);
-    }
-
-    #statusBar {
-      background: var(--sign-white);
-      color: var(--fg-secondary);
-      padding: 5px 16px;
-      font-size: 10px;
-      font-weight: 600;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      display: flex;
-      gap: 16px;
-      align-items: center;
-      border-top: 1px solid var(--border);
-      flex-shrink: 0;
-    }
-
-    #statusBar #statusText.error {
-      color: var(--red);
-    }
-
-    #statusBar #statusText.ok {
-      color: var(--green);
-    }
-
-    #statusBar #blockCount {
-      margin-left: auto;
-      color: var(--muted);
-      font-weight: 500;
-    }
-
-    /* Modal */
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(26, 26, 26, 0.5);
-      z-index: 100;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .modal.show {
-      display: flex;
-      animation: fadeIn 0.2s ease;
-    }
-
-    .modal-content {
-      background: var(--sign-white);
-      border: 3px solid var(--fg);
-      padding: 20px 24px;
-      border-radius: 0;
-      max-width: 460px;
-      width: 90%;
-      color: var(--fg);
-    }
-
-    .modal-content h3 {
-      font-family: 'Noto Sans JP', 'Inter', sans-serif;
-      font-size: 16px;
-      font-weight: 700;
-      letter-spacing: 1px;
-      margin-bottom: 10px;
-      padding-bottom: 8px;
-      border-bottom: 2px solid var(--purple);
-    }
-
-    .modal-content p {
-      font-size: 13px;
-      line-height: 1.6;
-      margin-bottom: 16px;
-      color: var(--fg-secondary);
-    }
-
-    .modal-content button {
-      background: var(--fg);
-      color: #fff;
-      border: none;
-      padding: 8px 20px;
-      border-radius: 0;
-      cursor: pointer;
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      font-family: 'Inter', sans-serif;
-      transition: background 0.15s;
-    }
-
-    .modal-content button:hover {
-      background: var(--purple);
-    }
-
-    /* Animations */
-    @keyframes fadeDown {
-      from {
-        opacity: 0;
-        transform: translateY(-8px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes fadeUp {
-      from {
-        opacity: 0;
-        transform: translateY(8px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-      }
-      to {
-        opacity: 1;
-      }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      *,
-      *::before,
-      *::after {
-        animation-duration: 0.01ms !important;
-        transition-duration: 0.01ms !important;
-      }
-    }
-
-    /* Responsive */
-    @media (max-width: 860px) {
-      .name-board {
-        flex-wrap: wrap;
-        gap: 10px;
-      }
-      .name-board .toolbar {
-        width: 100%;
-        justify-content: flex-start;
-      }
-      .toolbar button {
-        padding: 5px 10px;
-        font-size: 10px;
-      }
-    }
-
-    @media (max-width: 768px) {
-      main {
-        flex-direction: column;
-      }
-      #outputPanel {
-        width: 100%;
-        min-width: 0;
-        height: 42%;
-        border-left: none;
-        border-top: 2px solid var(--fg);
-      }
-      .resizer {
-        display: none;
-      }
-      .station-medallion {
-        width: 40px;
-        height: 40px;
-      }
-      .station-medallion .number {
-        font-size: 16px;
-      }
-    }
-
-    /* Blockly overrides */
-    .blocklyFlyoutBackground {
-      fill: var(--sign-white) !important;
-    }
-
-    .blocklyFlyoutButton {
-      fill: var(--sign-white) !important;
-    }
-
-    .blocklyFlyoutLabelText {
-      font-family: 'Inter', sans-serif !important;
-      font-weight: 700 !important;
-    }
-  </style>
+  <link rel="stylesheet" href="../css/style.css">
+  <script src="../js/main.js"></script>
 </head>
 
-<body>
+<body class="sound-theme">
 
   <div class="top-bar">
-    <svg class="train-icon" viewBox="0 0 24 24" style="width:14px; height:14px; fill:#fff;">
-      <path d="M12 2C8 2 4 3.5 4 7v10c0 1.5 2 3 5 3v1h1v-1h4v1h1v-1c3 0 5-1.5 5-3V7c0-3.5-4-5-8-5zm-4 15c-.8 0-1.5-.7-1.5-1.5S7.2 14 8 14s1.5.7 1.5 1.5S8.8 17 8 17zm8 0c-.8 0-1.5-.7-1.5-1.5s.7-1.5 1.5-1.5 1.5.7 1.5 1.5-.7 1.5-1.5 1.5zm2-6H6V7h12v4z"/>
-    </svg>
-    <span>OpenBVE Projects Index</span>
-    <span class="meta">SYSTEM NORMAL</span>
+    <a href="../index.html" class="back-station-chip">← Station</a>
+    <span class="train-icon-placeholder"></span>
+    <span>OpenBVE Sound.xml Editor</span>
+    <span class="meta back-station-chip" style="color: #fff;">BETA</span>
   </div>
 
   <div class="name-board">
@@ -593,7 +31,7 @@
     </div>
     <div class="title-group">
       <h1>sound.xml Editor</h1>
-      <div class="subtitle">Sound Configuration Interface</div>
+      <div class="subtitle">Visual Sound Config Editor</div>
     </div>
     <div class="toolbar">
       <input type="file" id="fileInput" accept=".xml" style="display:none">
@@ -606,7 +44,7 @@
 
   <div class="direction-bar">
     <div class="line-stripe"></div>
-    <span class="arrow">&gt;&gt;</span>
+    <span class="arrow">→</span>
     <span class="label">Direction:</span>
     <span class="dest">Consist Sounds &amp; Cab Audio Config</span>
   </div>
@@ -698,14 +136,14 @@
   </xml>
 
   <script>
-    window.onerror = function(message, source, lineno, colno, error) {
+    window.onerror = function (message, source, lineno, colno, error) {
       alert("JavaScript Error: " + message + " at line " + lineno + ":" + colno);
       return false;
     };
 
     const xmlGenerator = new Blockly.Generator('XML');
     xmlGenerator.forBlock = xmlGenerator;
-    xmlGenerator.scrub_ = function(block, code, opt_thisOnly) {
+    xmlGenerator.scrub_ = function (block, code, opt_thisOnly) {
       const nextBlock = block.nextConnection && block.nextConnection.targetBlock();
       let nextCode = '';
       if (nextBlock) {
@@ -729,82 +167,82 @@
 
     // ── Simple Property Blocks ──
     Blockly.Blocks['sound_filename'] = {
-      init: function() {
+      init: function () {
         this.appendDummyInput()
-            .appendField("FileName:")
-            .appendField(new Blockly.FieldTextInput("sound.wav"), "FILENAME");
+          .appendField("FileName:")
+          .appendField(new Blockly.FieldTextInput("sound.wav"), "FILENAME");
         this.setPreviousStatement(true, null);
         this.setNextStatement(true, null);
         this.setColour('#00A7A7');
       }
     };
-    xmlGenerator['sound_filename'] = function(block) {
+    xmlGenerator['sound_filename'] = function (block) {
       return '<FileName>' + escapeXml(block.getFieldValue('FILENAME')) + '</FileName>\n';
     };
 
     Blockly.Blocks['sound_radius'] = {
-      init: function() {
+      init: function () {
         this.appendDummyInput()
-            .appendField("Radius:")
-            .appendField(new Blockly.FieldNumber(10.0, 0.1), "RADIUS")
-            .appendField("m");
+          .appendField("Radius:")
+          .appendField(new Blockly.FieldNumber(10.0, 0.1), "RADIUS")
+          .appendField("m");
         this.setPreviousStatement(true, null);
         this.setNextStatement(true, null);
         this.setColour('#00A7A7');
       }
     };
-    xmlGenerator['sound_radius'] = function(block) {
+    xmlGenerator['sound_radius'] = function (block) {
       return '<Radius>' + block.getFieldValue('RADIUS') + '</Radius>\n';
     };
 
     Blockly.Blocks['sound_position'] = {
-      init: function() {
+      init: function () {
         this.appendDummyInput()
-            .appendField("Position X:")
-            .appendField(new Blockly.FieldNumber(0), "POS_X")
-            .appendField("Y:")
-            .appendField(new Blockly.FieldNumber(0), "POS_Y")
-            .appendField("Z:")
-            .appendField(new Blockly.FieldNumber(0), "POS_Z");
+          .appendField("Position X:")
+          .appendField(new Blockly.FieldNumber(0), "POS_X")
+          .appendField("Y:")
+          .appendField(new Blockly.FieldNumber(0), "POS_Y")
+          .appendField("Z:")
+          .appendField(new Blockly.FieldNumber(0), "POS_Z");
         this.setPreviousStatement(true, null);
         this.setNextStatement(true, null);
         this.setColour('#00A7A7');
       }
     };
-    xmlGenerator['sound_position'] = function(block) {
+    xmlGenerator['sound_position'] = function (block) {
       return '<Position>' + block.getFieldValue('POS_X') + ',' + block.getFieldValue('POS_Y') + ',' + block.getFieldValue('POS_Z') + '</Position>\n';
     };
 
     // ── Root and Structural Blocks ──
     Blockly.Blocks['sound_root'] = {
-      init: function() {
+      init: function () {
         this.appendDummyInput().appendField("openBVE <Sound> Root");
         this.appendStatementInput("SUB_NODES").setCheck(null);
         this.setColour('#00A1E9');
       }
     };
-    xmlGenerator['sound_root'] = function(block) {
+    xmlGenerator['sound_root'] = function (block) {
       const subNodes = xmlGenerator.statementToCode(block, 'SUB_NODES');
       return '<?xml version="1.0" encoding="utf-8"?>\n' +
-             '<openBVE xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">\n' +
-             '  <Sound>\n' + subNodes + '  </Sound>\n' +
-             '</openBVE>\n';
+        '<openBVE xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">\n' +
+        '  <Sound>\n' + subNodes + '  </Sound>\n' +
+        '</openBVE>\n';
     };
 
     Blockly.Blocks['indexed_sound'] = {
-      init: function() {
+      init: function () {
         this.appendDummyInput()
-            .appendField("Sound Entry Index:")
-            .appendField(new Blockly.FieldNumber(0, 0), "INDEX");
+          .appendField("Sound Entry Index:")
+          .appendField(new Blockly.FieldNumber(0, 0), "INDEX");
         this.appendStatementInput("PROPERTIES")
-            .setCheck(null)
-            .appendField("Properties");
+          .setCheck(null)
+          .appendField("Properties");
         this.setPreviousStatement(true, null);
         this.setNextStatement(true, null);
         this.setColour('#00A1E9');
       }
     };
-    xmlGenerator['indexed_sound'] = function(block) {
+    xmlGenerator['indexed_sound'] = function (block) {
       const index = block.getFieldValue('INDEX');
       const properties = xmlGenerator.statementToCode(block, 'PROPERTIES');
       const indentedProps = properties.split('\n').map(line => line ? '        ' + line.trim() : '').join('\n').trim();
@@ -818,7 +256,7 @@
 
     function defineListContainerBlock(blockName, displayName, tag, colour) {
       Blockly.Blocks[blockName] = {
-        init: function() {
+        init: function () {
           this.appendDummyInput().appendField(displayName + " (<" + tag + ">)");
           this.appendStatementInput("SOUNDS").setCheck("indexed_sound");
           this.setPreviousStatement(true, null);
@@ -826,7 +264,7 @@
           this.setColour(colour);
         }
       };
-      xmlGenerator[blockName] = function(block) {
+      xmlGenerator[blockName] = function (block) {
         const sounds = xmlGenerator.statementToCode(block, 'SOUNDS');
         return '    <' + tag + '>\n' + sounds + '    </' + tag + '>\n';
       };
@@ -838,7 +276,7 @@
     defineListContainerBlock('motor_container', 'Motor Sound Table', 'Motor', '#9C7DB8');
 
     Blockly.Blocks['horn_container'] = {
-      init: function() {
+      init: function () {
         this.appendDummyInput().appendField("Train Horns (<Horn>)");
         this.appendStatementInput("HORNS").setCheck("horn_element");
         this.setPreviousStatement(true, null);
@@ -846,38 +284,38 @@
         this.setColour('#D71920');
       }
     };
-    xmlGenerator['horn_container'] = function(block) {
+    xmlGenerator['horn_container'] = function (block) {
       return '    <Horn>\n' + xmlGenerator.statementToCode(block, 'HORNS') + '    </Horn>\n';
     };
 
     Blockly.Blocks['horn_element'] = {
-      init: function() {
+      init: function () {
         this.appendDummyInput().appendField("Horn:")
-            .appendField(new Blockly.FieldDropdown([["Primary", "Primary"], ["Secondary", "Secondary"], ["Music", "Music"]]), "TYPE");
+          .appendField(new Blockly.FieldDropdown([["Primary", "Primary"], ["Secondary", "Secondary"], ["Music", "Music"]]), "TYPE");
         this.appendStatementInput("SUB_SOUNDS").setCheck("horn_sub_sound");
         this.setPreviousStatement(true, "horn_element");
         this.setNextStatement(true, "horn_element");
         this.setColour('#D71920');
       }
     };
-    xmlGenerator['horn_element'] = function(block) {
+    xmlGenerator['horn_element'] = function (block) {
       const type = block.getFieldValue('TYPE');
       return '      <' + type + '>\n' + xmlGenerator.statementToCode(block, 'SUB_SOUNDS') + '      </' + type + '>\n';
     };
 
     Blockly.Blocks['horn_sub_sound'] = {
-      init: function() {
+      init: function () {
         this.appendDummyInput().appendField("Horn Node:")
-            .appendField(new Blockly.FieldDropdown([["Loop", "Loop"], ["Start", "Start"], ["End", "End"]]), "SUB_TYPE");
+          .appendField(new Blockly.FieldDropdown([["Loop", "Loop"], ["Start", "Start"], ["End", "End"]]), "SUB_TYPE");
         this.appendStatementInput("PROPERTIES")
-            .setCheck(null)
-            .appendField("Properties");
+          .setCheck(null)
+          .appendField("Properties");
         this.setPreviousStatement(true, "horn_sub_sound");
         this.setNextStatement(true, "horn_sub_sound");
         this.setColour('#D71920');
       }
     };
-    xmlGenerator['horn_sub_sound'] = function(block) {
+    xmlGenerator['horn_sub_sound'] = function (block) {
       const subType = block.getFieldValue('SUB_TYPE');
       const properties = xmlGenerator.statementToCode(block, 'PROPERTIES');
       const indentedProps = properties.split('\n').map(line => line ? '        ' + line.trim() : '').join('\n').trim();
@@ -890,18 +328,18 @@
 
     function defineSubSoundBlock(blockName, displayName, options, colour) {
       Blockly.Blocks[blockName] = {
-        init: function() {
+        init: function () {
           this.appendDummyInput().appendField(displayName + ":")
-              .appendField(new Blockly.FieldDropdown(options), "SUB_TYPE");
+            .appendField(new Blockly.FieldDropdown(options), "SUB_TYPE");
           this.appendStatementInput("PROPERTIES")
-              .setCheck(null)
-              .appendField("Properties");
+            .setCheck(null)
+            .appendField("Properties");
           this.setPreviousStatement(true, blockName);
           this.setNextStatement(true, blockName);
           this.setColour(colour);
         }
       };
-      xmlGenerator[blockName] = function(block) {
+      xmlGenerator[blockName] = function (block) {
         const subType = block.getFieldValue('SUB_TYPE');
         const properties = xmlGenerator.statementToCode(block, 'PROPERTIES');
         const indentedProps = properties.split('\n').map(line => line ? '      ' + line.trim() : '').join('\n').trim();
@@ -915,7 +353,7 @@
 
     function defineContainerBlock(blockName, displayName, subCheck, colour, tag) {
       Blockly.Blocks[blockName] = {
-        init: function() {
+        init: function () {
           this.appendDummyInput().appendField(displayName + " (<" + tag + ">)");
           this.appendStatementInput("SUB_SOUNDS").setCheck(subCheck);
           this.setPreviousStatement(true, null);
@@ -923,7 +361,7 @@
           this.setColour(colour);
         }
       };
-      xmlGenerator[blockName] = function(block) {
+      xmlGenerator[blockName] = function (block) {
         return '    <' + tag + '>\n' + xmlGenerator.statementToCode(block, 'SUB_SOUNDS') + '    </' + tag + '>\n';
       };
     }
@@ -966,18 +404,18 @@
     defineContainerBlock('pantograph_container', 'Pantograph', 'pantograph_sub_sound', '#00A7A7', 'Pantograph');
 
     Blockly.Blocks['misc_sound_node'] = {
-      init: function() {
+      init: function () {
         this.appendDummyInput().appendField("Background Loop:")
-            .appendField(new Blockly.FieldDropdown([["Constant (<Loop>)", "Loop"], ["Brake Rub (<Rub>)", "Rub"], ["Station Warn (<Halt>)", "Halt"]]), "SUB_TYPE");
+          .appendField(new Blockly.FieldDropdown([["Constant (<Loop>)", "Loop"], ["Brake Rub (<Rub>)", "Rub"], ["Station Warn (<Halt>)", "Halt"]]), "SUB_TYPE");
         this.appendStatementInput("PROPERTIES")
-            .setCheck(null)
-            .appendField("Properties");
+          .setCheck(null)
+          .appendField("Properties");
         this.setPreviousStatement(true, null);
         this.setNextStatement(true, null);
         this.setColour('#00A1E9');
       }
     };
-    xmlGenerator['misc_sound_node'] = function(block) {
+    xmlGenerator['misc_sound_node'] = function (block) {
       const subType = block.getFieldValue('SUB_TYPE');
       const properties = xmlGenerator.statementToCode(block, 'PROPERTIES');
       const indentedProps = properties.split('\n').map(line => line ? '    ' + line.trim() : '').join('\n').trim();
@@ -1055,13 +493,13 @@
         statusMsg = 'No Sound root block';
         statusClass = 'error';
       }
-      
+
       document.getElementById('xmlOutput').dataset.raw = output;
       document.getElementById('xmlOutput').innerHTML = highlightXml(output);
       var statusEl = document.getElementById('statusText');
       statusEl.textContent = statusMsg;
       statusEl.className = statusClass;
-      
+
       var count = workspace.getAllBlocks(false).length;
       document.getElementById('blockCount').textContent = count + ' blocks';
     }
@@ -1083,7 +521,7 @@
       Blockly.Events.enable();
       updateOutput();
     }
-    
+
     function exportXml() {
       var xml = document.getElementById('xmlOutput').dataset.raw || '';
       if (!xml || xml.startsWith('<!--')) {
@@ -1122,11 +560,11 @@
       ta.style.opacity = '0';
       document.body.appendChild(ta);
       ta.select();
-      try { 
-        document.execCommand('copy'); 
-        flashStatus('Copied to clipboard!'); 
-      } catch (e) { 
-        showError('Copy Failed', 'Could not copy to clipboard.'); 
+      try {
+        document.execCommand('copy');
+        flashStatus('Copied to clipboard!');
+      } catch (e) {
+        showError('Copy Failed', 'Could not copy to clipboard.');
       }
       document.body.removeChild(ta);
     }
@@ -1144,7 +582,7 @@
       const file = event.target.files[0];
       if (!file) return;
       const reader = new FileReader();
-      reader.onload = function(e) {
+      reader.onload = function (e) {
         try {
           importXmlToWorkspace(e.target.result);
           flashStatus('Imported ' + file.name);
@@ -1160,7 +598,7 @@
     function importXmlToWorkspace(xmlText) {
       const parser = new DOMParser();
       const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
-      
+
       let soundNode = xmlDoc.querySelector('Sound');
       if (!soundNode) {
         if (xmlDoc.documentElement.nodeName === 'Sound') soundNode = xmlDoc.documentElement;
@@ -1177,7 +615,7 @@
 
       function parseProperties(node, parentBlock) {
         let parentConnection = parentBlock.getInput('PROPERTIES').connection;
-        
+
         const fileName = node.querySelector('FileName')?.textContent;
         if (fileName !== undefined && fileName !== '') {
           const fnBlock = workspace.newBlock('sound_filename');
@@ -1374,7 +812,7 @@
     document.getElementById('exportBtn').addEventListener('click', exportXml);
     document.getElementById('clearBtn').addEventListener('click', clearWorkspace);
     document.getElementById('copyBtn').addEventListener('click', copyXml);
-    document.getElementById('sampleBtn').addEventListener('click', function() {
+    document.getElementById('sampleBtn').addEventListener('click', function () {
       try {
         importXmlToWorkspace(SAMPLE_XML);
         flashStatus('Sample loaded');
@@ -1383,7 +821,10 @@
       }
     });
 
-    window.onload = function() {
+    window.onload = function () {
+      // Insert train SVG icon
+      document.querySelector('.train-icon-placeholder').outerHTML = ICONS.train;
+
       workspace = Blockly.inject('blocklyDiv', {
         toolbox: document.getElementById('toolbox'),
         trashcan: true,
@@ -1410,14 +851,14 @@
         }
       });
 
-      workspace.addChangeListener(function() {
+      workspace.addChangeListener(function () {
         scheduleUpdate();
       });
 
-      window.addEventListener('resize', function() {
+      window.addEventListener('resize', function () {
         Blockly.svgResize(workspace);
       });
-      
+
       const rootBlock = workspace.newBlock('sound_root');
       rootBlock.initSvg();
       rootBlock.render();

@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>dynamiclight.xml Editor — OpenBVE</title>
+  <!-- Three.js for 3D visualization -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <!-- OrbitControls for camera control -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <script src="../js/main.js"></script>
+</head>
+
+<body class="light-theme">
+
+  <div class="top-bar">
+    <a href="../index.html" class="back-station-chip">← Station</a>
+    <span class="train-icon-placeholder"></span>
+    <span>OpenBVE Dynamic Light XML Editor</span>
+    <span class="meta back-station-chip" style="color: #fff;">BETA</span>
+  </div>
+
+  <div class="name-board">
+    <div class="station-medallion">
+      <span class="letter">L</span>
+      <span class="number">01</span>
+    </div>
+    <div class="title-group">
+      <h1>dynamiclight.xml</h1>
+      <div class="subtitle">Dynamic Route Lighting System</div>
+    </div>
+    <div class="toolbar">
+      <button id="importBtn">Import</button>
+      <button id="copyBtn">Copy</button>
+      <button id="exportBtn" class="primary">Download</button>
+      <input type="file" id="fileInput" accept=".xml" style="display:none">
+    </div>
+  </div>
+
+  <div class="direction-bar">
+    <span class="line-stripe"></span>
+    <span class="arrow">→</span>
+    <span class="label">Direction</span>
+    <span class="dest">Route Environment Ambient & Directional Sun Vector Mapping</span>
+  </div>
+
+  <main>
+    <div id="sidebarPanel">
+      <div class="section-title">
+        <span>Timeline Points</span>
+        <button id="addTimeBtn">+ Add</button>
+      </div>
+      <div class="timeline-list" id="timelineList">
+        <!-- items populate dynamically -->
+      </div>
+
+      <div class="editor-form" id="editorForm" style="display:none;">
+        <div class="form-group">
+          <label>Time (Hours.Minutes)</label>
+          <div class="form-row">
+            <input type="number" id="editTimeHrs" min="0" max="23" placeholder="HH">
+            <span style="align-self:center;">:</span>
+            <input type="number" id="editTimeMins" min="0" max="59" placeholder="MM">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Ambient Light</label>
+          <div class="form-row">
+            <input type="color" id="editAmbColor">
+            <input type="text" id="editAmbText" readonly>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Directional Light</label>
+          <div class="form-row">
+            <input type="color" id="editDirColor">
+            <input type="text" id="editDirText" readonly>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Light Direction Format</label>
+          <div class="form-row">
+            <select id="editDirType">
+              <option value="Cartesian">Cartesian (X, Y, Z)</option>
+              <option value="Spherical">Spherical (Theta, Phi)</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="cartesianInputs" class="form-group">
+          <label>Cartesian Sun Vector (X, Y, Z)</label>
+          <div class="form-row">
+            <input type="number" id="editX" step="0.01" placeholder="X">
+            <input type="number" id="editY" step="0.01" placeholder="Y">
+            <input type="number" id="editZ" step="0.01" placeholder="Z">
+          </div>
+        </div>
+
+        <div id="sphericalInputs" class="form-group" style="display:none;">
+          <label>Spherical Coordinates (Theta, Phi)</label>
+          <div class="form-row">
+            <input type="number" id="editTheta" step="1" placeholder="Θ (0-360)">
+            <input type="number" id="editPhi" step="1" placeholder="Φ (-90 to 90)">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Cab Lighting (0 - 255)</label>
+          <div class="form-row">
+            <input type="number" id="editCab" min="0" max="255">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="resizer" id="resizer"></div>
+
+    <div id="rightContainer">
+      <div id="visualizerContainer">
+        <canvas id="canvas3d"></canvas>
+        <div class="visualizer-overlay" id="visualizerOverlay">
+          Time: --:--<br>
+          Ambient: RGB(0,0,0)<br>
+          Sun Vec: [0, 0, 0]
+        </div>
+
+        <div class="timeline-scrubber">
+          <span>Time:</span>
+          <input type="range" id="timeScrubber" min="0" max="1439" value="720">
+          <span id="scrubberTimeVal">12:00</span>
+          <button id="playBtn" style="padding: 2px 10px;">Play</button>
+        </div>
+      </div>
+      <div class="resizer-v" id="resizerV"></div>
+      <div id="outputPanel">
+        <div class="panel-header">
+          <span class="line-badge">XML</span>
+          <span class="panel-title">Generated XML Output</span>
+        </div>
+        <pre id="xmlOutput"></pre>
+        <div id="statusBar">
+          <span id="statusText">Dynamic Lighting XML Valid</span>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // State management
+    let timeline = [
+      {
+        time: 0.0, // represented as float HH.MM
+        ambient: [20, 20, 30],
+        directional: [10, 10, 20],
+        dirType: 'Cartesian',
+        x: 0.22, y: -0.86, z: -0.45,
+        theta: 0, phi: -45,
+        cab: 80
+      },
+      {
+        time: 6.0,
+        ambient: [100, 100, 110],
+        directional: [120, 100, 80],
+        dirType: 'Cartesian',
+        x: 0.86, y: 0.22, z: -0.45,
+        theta: 45, phi: 15,
+        cab: 180
+      },
+      {
+        time: 12.0,
+        ambient: [160, 160, 160],
+        directional: [200, 200, 190],
+        dirType: 'Cartesian',
+        x: 0.22, y: 0.86, z: -0.45,
+        theta: 90, phi: 60,
+        cab: 255
+      },
+      {
+        time: 18.0,
+        ambient: [90, 80, 80],
+        directional: [140, 90, 50],
+        dirType: 'Cartesian',
+        x: -0.86, y: 0.22, z: -0.45,
+        theta: 270, phi: 15,
+        cab: 150
+      }
+    ];
+
+    let activeIndex = 2;
+    let isPlaying = false;
+    let playInterval = null;
+
+    // Helpers
+    function pad(n) { return String(n).padStart(2, '0'); }
+    function floatToTimeStr(val) {
+      let hrs = Math.floor(val);
+      let mins = Math.round((val - hrs) * 100);
+      return `${pad(hrs)}:${pad(mins)}`;
+    }
+    function rgbToHex(r, g, b) {
+      return "#" + [r, g, b].map(x => {
+        const hex = x.toString(16);
+        return hex.length === 1 ? "0" + hex : hex;
+      }).join("");
+    }
+    function hexToRgb(hex) {
+      const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+      return result ? [
+        parseInt(result[1], 16),
+        parseInt(result[2], 16),
+        parseInt(result[3], 16)
+      ] : [0, 0, 0];
+    }
+
+    // 3D Scene Setup
+    const container = document.getElementById('visualizerContainer');
+    const canvas = document.getElementById('canvas3d');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x050510);
+
+    const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
+    camera.position.set(8, 6, 8);
+
+    const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+    renderer.setSize(container.clientWidth, container.clientHeight);
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+
+    // Lights in 3D Scene
+    const sceneAmbientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    scene.add(sceneAmbientLight);
+
+    const sceneDirLight = new THREE.DirectionalLight(0xffffff, 1.0);
+    scene.add(sceneDirLight);
+
+    // Helpers to visualize sun
+    const dirLightHelper = new THREE.DirectionalLightHelper(sceneDirLight, 1, 0xffff00);
+    scene.add(dirLightHelper);
+
+    // Track Grid & Train Dummy Model
+    const gridHelper = new THREE.GridHelper(20, 20, 0x444444, 0x222222);
+    gridHelper.position.y = -0.5;
+    scene.add(gridHelper);
+
+    // Simple train shape
+    const trainGroup = new THREE.Group();
+    const bodyGeom = new THREE.BoxGeometry(1.2, 1.4, 4);
+    const bodyMat = new THREE.MeshStandardMaterial({ color: 0xcccccc, roughness: 0.4 });
+    const trainBody = new THREE.Mesh(bodyGeom, bodyMat);
+    trainGroup.add(trainBody);
+
+    const windowGeom = new THREE.BoxGeometry(1.22, 0.4, 0.8);
+    const windowMat = new THREE.MeshBasicMaterial({ color: 0x88ccff });
+    for (let z = -1.2; z <= 1.2; z += 1.2) {
+      const winLeft = new THREE.Mesh(windowGeom, windowMat);
+      winLeft.position.set(0, 0.3, z);
+      trainGroup.add(winLeft);
+    }
+    scene.add(trainGroup);
+
+    // Arrow pointing to light origin
+    const arrowDir = new THREE.Vector3();
+    const arrowOrigin = new THREE.Vector3(0, 3, 0);
+    const arrowHelper = new THREE.ArrowHelper(arrowDir, arrowOrigin, 2.5, 0xffff00, 0.4, 0.2);
+    scene.add(arrowHelper);
+
+    // Sky Dome Mesh
+    const skyGeom = new THREE.SphereGeometry(25, 32, 15);
+    const skyMat = new THREE.MeshBasicMaterial({ color: 0x050510, side: THREE.BackSide });
+    const skyDome = new THREE.Mesh(skyGeom, skyMat);
+    scene.add(skyDome);
+
+    // Visualisation loop
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    // Resize handler
+    window.addEventListener('resize', () => {
+      camera.aspect = container.clientWidth / container.clientHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(container.clientWidth, container.clientHeight);
+    });
+
+    // Scrubber interpolation logic
+    // Cosine interpolation as per docs
+    function cosineInterpolate(y1, y2, mu) {
+      let mu2 = (1 - Math.cos(mu * Math.PI)) / 2;
+      return y1 * (1 - mu2) + y2 * mu2;
+    }
+
+    function getInterpolatedState(timeVal) {
+      // Sort timeline
+      let sorted = [...timeline].sort((a, b) => a.time - b.time);
+      if (sorted.length === 0) return null;
+      if (sorted.length === 1) return sorted[0];
+
+      // Find segment
+      let idx1 = -1;
+      let idx2 = -1;
+      for (let i = 0; i < sorted.length; i++) {
+        if (sorted[i].time <= timeVal) {
+          idx1 = i;
+        }
+      }
+
+      if (idx1 === -1) {
+        // Time is before first element, wrap around
+        idx1 = sorted.length - 1;
+        idx2 = 0;
+      } else {
+        idx2 = (idx1 + 1) % sorted.length;
+      }
+
+      let t1 = sorted[idx1].time;
+      let t2 = sorted[idx2].time;
+      let mu = 0;
+
+      if (idx2 === 0) {
+        // wrapping around midnight
+        let dist = (24.0 - t1) + t2;
+        let progress = timeVal >= t1 ? (timeVal - t1) : ((24.0 - t1) + timeVal);
+        mu = progress / dist;
+      } else {
+        mu = (timeVal - t1) / (t2 - t1);
+      }
+
+      let p1 = sorted[idx1];
+      let p2 = sorted[idx2];
+
+      // Interpolate colors
+      let amb = [
+        cosineInterpolate(p1.ambient[0], p2.ambient[0], mu),
+        cosineInterpolate(p1.ambient[1], p2.ambient[1], mu),
+        cosineInterpolate(p1.ambient[2], p2.ambient[2], mu)
+      ];
+
+      let dir = [
+        cosineInterpolate(p1.directional[0], p2.directional[0], mu),
+        cosineInterpolate(p1.directional[1], p2.directional[1], mu),
+        cosineInterpolate(p1.directional[2], p2.directional[2], mu)
+      ];
+
+      // Handle Direction Vector interpolation
+      let vec1 = getCartesianVector(p1);
+      let vec2 = getCartesianVector(p2);
+
+      let vec = [
+        cosineInterpolate(vec1[0], vec2[0], mu),
+        cosineInterpolate(vec1[1], vec2[1], mu),
+        cosineInterpolate(vec1[2], vec2[2], mu)
+      ];
+
+      // Normalize
+      let len = Math.sqrt(vec[0] * vec[0] + vec[1] * vec[1] + vec[2] * vec[2]);
+      if (len > 0) {
+        vec = [vec[0] / len, vec[1] / len, vec[2] / len];
+      }
+
+      return {
+        ambient: amb,
+        directional: dir,
+        vector: vec,
+        cab: cosineInterpolate(p1.cab, p2.cab, mu)
+      };
+    }
+
+    function getCartesianVector(pt) {
+      if (pt.dirType === 'Cartesian') {
+        return [pt.x || 0, pt.y || 0, pt.z || 0];
+      } else {
+        // Spherical to Cartesian conversion
+        // Theta = azimuth, Phi = elevation
+        let thetaRad = (pt.theta || 0) * Math.PI / 180;
+        let phiRad = (pt.phi || 0) * Math.PI / 180;
+        return [
+          Math.cos(phiRad) * Math.sin(thetaRad),
+          Math.sin(phiRad),
+          -Math.cos(phiRad) * Math.cos(thetaRad)
+        ];
+      }
+    }
+
+    // UI Updates
+    function updateVisualizer(timeVal) {
+      let state = getInterpolatedState(timeVal);
+      if (!state) return;
+
+      // Update Three.js lights
+      let ambColor = new THREE.Color(state.ambient[0] / 255, state.ambient[1] / 255, state.ambient[2] / 255);
+      let dirColor = new THREE.Color(state.directional[0] / 255, state.directional[1] / 255, state.directional[2] / 255);
+
+      sceneAmbientLight.color.copy(ambColor);
+      sceneDirLight.color.copy(dirColor);
+
+      // Sun Vector direction
+      let v = state.vector;
+      sceneDirLight.position.set(v[0] * 10, v[1] * 10, v[2] * 10);
+
+      // Arrow indicator pointing opposite direction of light vector (showing source)
+      let dirVec = new THREE.Vector3(-v[0], -v[1], -v[2]).normalize();
+      arrowHelper.setDirection(dirVec);
+      arrowHelper.position.set(v[0] * 3, v[1] * 3, v[2] * 3);
+
+      // Skybox background updates based on time/light
+      let skyColor = new THREE.Color(
+        Math.max(0.01, state.ambient[0] / 512),
+        Math.max(0.01, state.ambient[1] / 512),
+        Math.max(0.02, state.ambient[2] / 400)
+      );
+      scene.background.copy(skyColor);
+      skyMat.color.copy(skyColor);
+
+      // Overlay text
+      let hrs = Math.floor(timeVal);
+      let mins = Math.round((timeVal - hrs) * 60);
+      document.getElementById('visualizerOverlay').innerHTML = `
+        Time: ${pad(hrs)}:${pad(mins)}<br>
+        Ambient: RGB(${Math.round(state.ambient[0])}, ${Math.round(state.ambient[1])}, ${Math.round(state.ambient[2])})<br>
+        Sun Vector: [${v[0].toFixed(3)}, ${v[1].toFixed(3)}, ${v[2].toFixed(3)}]
+      `;
+    }
+
+    function renderTimeline() {
+      const list = document.getElementById('timelineList');
+      list.innerHTML = '';
+
+      // Sort timeline
+      timeline.sort((a, b) => a.time - b.time);
+
+      timeline.forEach((pt, index) => {
+        const item = document.createElement('div');
+        item.className = `timeline-item ${index === activeIndex ? 'active' : ''}`;
+
+        let ambHex = rgbToHex(pt.ambient[0], pt.ambient[1], pt.ambient[2]);
+        let dirHex = rgbToHex(pt.directional[0], pt.directional[1], pt.directional[2]);
+
+        item.innerHTML = `
+          <div>
+            <span class="time-lbl">${floatToTimeStr(pt.time)}</span>
+          </div>
+          <div class="light-swatches">
+            <div class="swatch" style="background:${ambHex}" title="Ambient"></div>
+            <div class="swatch" style="background:${dirHex}" title="Directional"></div>
+            <button class="delete-btn" onclick="deletePoint(event, ${index})">×</button>
+          </div>
+        `;
+
+        item.addEventListener('click', () => {
+          activeIndex = index;
+          selectPoint(index);
+        });
+
+        list.appendChild(item);
+      });
+
+      generateXML();
+    }
+
+    function selectPoint(index) {
+      activeIndex = index;
+      let pt = timeline[index];
+      if (!pt) {
+        document.getElementById('editorForm').style.display = 'none';
+        return;
+      }
+
+      document.getElementById('editorForm').style.display = 'block';
+
+      // Load values to fields
+      let hrs = Math.floor(pt.time);
+      let mins = Math.round((pt.time - hrs) * 100);
+      document.getElementById('editTimeHrs').value = hrs;
+      document.getElementById('editTimeMins').value = mins;
+
+      let ambHex = rgbToHex(pt.ambient[0], pt.ambient[1], pt.ambient[2]);
+      document.getElementById('editAmbColor').value = ambHex;
+      document.getElementById('editAmbText').value = pt.ambient.join(', ');
+
+      let dirHex = rgbToHex(pt.directional[0], pt.directional[1], pt.directional[2]);
+      document.getElementById('editDirColor').value = dirHex;
+      document.getElementById('editDirText').value = pt.directional.join(', ');
+
+      document.getElementById('editDirType').value = pt.dirType;
+      document.getElementById('editX').value = pt.x;
+      document.getElementById('editY').value = pt.y;
+      document.getElementById('editZ').value = pt.z;
+      document.getElementById('editTheta').value = pt.theta;
+      document.getElementById('editPhi').value = pt.phi;
+      document.getElementById('editCab').value = pt.cab;
+
+      toggleDirInputs(pt.dirType);
+
+      // Sync visualizer
+      updateVisualizer(pt.time);
+      document.getElementById('timeScrubber').value = Math.round(pt.time * 60);
+      document.getElementById('scrubberTimeVal').textContent = floatToTimeStr(pt.time);
+    }
+
+    function toggleDirInputs(type) {
+      if (type === 'Cartesian') {
+        document.getElementById('cartesianInputs').style.display = 'block';
+        document.getElementById('sphericalInputs').style.display = 'none';
+      } else {
+        document.getElementById('cartesianInputs').style.display = 'none';
+        document.getElementById('sphericalInputs').style.display = 'block';
+      }
+    }
+
+    function deletePoint(e, index) {
+      e.stopPropagation();
+      if (timeline.length <= 1) {
+        alert("Must contain at least 1 light point.");
+        return;
+      }
+      timeline.splice(index, 1);
+      activeIndex = Math.max(0, index - 1);
+      renderTimeline();
+      selectPoint(activeIndex);
+    }
+
+    // Input event binding
+    document.getElementById('addTimeBtn').addEventListener('click', () => {
+      // Find empty slot or default hour
+      let nextTime = 12.0;
+      if (timeline.length > 0) {
+        nextTime = (timeline[timeline.length - 1].time + 2.0) % 24;
+      }
+      timeline.push({
+        time: parseFloat(nextTime.toFixed(2)),
+        ambient: [100, 100, 100],
+        directional: [100, 100, 100],
+        dirType: 'Cartesian',
+        x: 0, y: 1, z: 0,
+        theta: 0, phi: 90,
+        cab: 255
+      });
+      renderTimeline();
+      selectPoint(timeline.length - 1);
+    });
+
+    function saveActivePoint() {
+      let pt = timeline[activeIndex];
+      if (!pt) return;
+
+      let hrs = parseInt(document.getElementById('editTimeHrs').value) || 0;
+      let mins = parseInt(document.getElementById('editTimeMins').value) || 0;
+      pt.time = parseFloat((hrs + mins / 100).toFixed(2));
+
+      pt.ambient = hexToRgb(document.getElementById('editAmbColor').value);
+      document.getElementById('editAmbText').value = pt.ambient.join(', ');
+
+      pt.directional = hexToRgb(document.getElementById('editDirColor').value);
+      document.getElementById('editDirText').value = pt.directional.join(', ');
+
+      pt.dirType = document.getElementById('editDirType').value;
+      pt.x = parseFloat(document.getElementById('editX').value) || 0;
+      pt.y = parseFloat(document.getElementById('editY').value) || 0;
+      pt.z = parseFloat(document.getElementById('editZ').value) || 0;
+      pt.theta = parseFloat(document.getElementById('editTheta').value) || 0;
+      pt.phi = parseFloat(document.getElementById('editPhi').value) || 0;
+      pt.cab = parseInt(document.getElementById('editCab').value) || 0;
+
+      // Re-sort and render list
+      let currentTime = pt.time;
+      renderTimeline();
+
+      // Keep track of edited point post sorting
+      activeIndex = timeline.findIndex(x => x.time === currentTime);
+      selectPoint(activeIndex);
+    }
+
+    // Bind inputs to save active point automatically
+    ['editTimeHrs', 'editTimeMins', 'editX', 'editY', 'editZ', 'editTheta', 'editPhi', 'editCab'].forEach(id => {
+      document.getElementById(id).addEventListener('input', saveActivePoint);
+    });
+
+    ['editAmbColor', 'editDirColor', 'editDirType'].forEach(id => {
+      document.getElementById(id).addEventListener('change', (e) => {
+        if (id === 'editDirType') toggleDirInputs(e.target.value);
+        saveActivePoint();
+      });
+    });
+
+    // Scrubber control
+    const scrubber = document.getElementById('timeScrubber');
+    scrubber.addEventListener('input', (e) => {
+      let minsTotal = parseInt(e.target.value);
+      let floatTime = Math.floor(minsTotal / 60) + (minsTotal % 60) / 100;
+      document.getElementById('scrubberTimeVal').textContent = floatToTimeStr(floatTime);
+      updateVisualizer(floatTime);
+    });
+
+    // Playback loop
+    document.getElementById('playBtn').addEventListener('click', () => {
+      isPlaying = !isPlaying;
+      document.getElementById('playBtn').textContent = isPlaying ? "Pause" : "Play";
+
+      if (isPlaying) {
+        playInterval = setInterval(() => {
+          let curr = parseInt(scrubber.value);
+          let next = (curr + 10) % 1440;
+          scrubber.value = next;
+
+          let floatTime = Math.floor(next / 60) + (next % 60) / 100;
+          document.getElementById('scrubberTimeVal').textContent = floatToTimeStr(floatTime);
+          updateVisualizer(floatTime);
+        }, 100);
+      } else {
+        clearInterval(playInterval);
+      }
+    });
+
+    // XML generation
+    function generateXML() {
+      let xml = `<?xml version="1.0" encoding="utf-8"?>
+<openBVE xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">`;
+
+      timeline.forEach(pt => {
+        let dirNode = '';
+        if (pt.dirType === 'Cartesian') {
+          dirNode = `<LightDirection>${pt.x}, ${pt.y}, ${pt.z}</LightDirection>`;
+        } else {
+          dirNode = `<SphericalLightDirection>${pt.theta}, ${pt.phi}</SphericalLightDirection>`;
+        }
+
+        xml += `
+  <Brightness>
+    <Time>${floatToTimeStr(pt.time)}</Time>
+    <AmbientLight>${pt.ambient.join(',')}</AmbientLight>
+    <DirectionalLight>${pt.directional.join(',')}</DirectionalLight>
+    ${dirNode}
+    <CabLighting>${pt.cab}</CabLighting>
+  </Brightness>`;
+      });
+
+      xml += '\n</openBVE>';
+
+      // Syntax highlight output
+      document.getElementById('xmlOutput').innerHTML = highlightXML(xml);
+    }
+
+    function highlightXML(xml) {
+      return xml
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/(&lt;\?.+?\?&gt;)/g, '<span class="xml-comment">$1</span>')
+        .replace(/(&lt;[a-zA-Z0-9:]+)(&gt;|&lt;\/)/g, '<span class="xml-tag">$1</span>$2')
+        .replace(/(&lt;\/[a-zA-Z0-9:]+&gt;)/g, '<span class="xml-tag">$1</span>')
+        .replace(/(\s[a-zA-Z0-9:]+=)("[^"]*")/g, ' <span class="xml-attr">$1</span><span class="xml-val">$2</span>');
+    }
+
+    // Export & Import
+    document.getElementById('exportBtn').addEventListener('click', () => {
+      let xml = `<?xml version="1.0" encoding="utf-8"?>\n<openBVE xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">\n`;
+      timeline.forEach(pt => {
+        let dirNode = pt.dirType === 'Cartesian' ?
+          `<LightDirection>${pt.x}, ${pt.y}, ${pt.z}</LightDirection>` :
+          `<SphericalLightDirection>${pt.theta}, ${pt.phi}</SphericalLightDirection>`;
+
+        xml += `  <Brightness>
+    <Time>${floatToTimeStr(pt.time)}</Time>
+    <AmbientLight>${pt.ambient.join(',')}</AmbientLight>
+    <DirectionalLight>${pt.directional.join(',')}</DirectionalLight>
+    ${dirNode}
+    <CabLighting>${pt.cab}</CabLighting>
+  </Brightness>\n`;
+      });
+      xml += '</openBVE>';
+
+      const blob = new Blob([xml], { type: 'text/xml' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'dynamiclight.xml';
+      a.click();
+    });
+
+    document.getElementById('copyBtn').addEventListener('click', () => {
+      let temp = document.createElement('textarea');
+      temp.value = document.getElementById('xmlOutput').textContent;
+      document.body.appendChild(temp);
+      temp.select();
+      document.execCommand('copy');
+      document.body.removeChild(temp);
+      alert("XML copied to clipboard!");
+    });
+
+    document.getElementById('importBtn').addEventListener('click', () => {
+      document.getElementById('fileInput').click();
+    });
+
+    document.getElementById('fileInput').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function (evt) {
+        try {
+          const parser = new DOMParser();
+          const xmlDoc = parser.parseFromString(evt.target.result, "text/xml");
+          const brightnessNodes = xmlDoc.getElementsByTagName("Brightness");
+
+          if (brightnessNodes.length === 0) {
+            throw new Error("No <Brightness> nodes found.");
+          }
+
+          let newTimeline = [];
+          for (let i = 0; i < brightnessNodes.length; i++) {
+            const node = brightnessNodes[i];
+
+            let timeStr = node.getElementsByTagName("Time")[0]?.textContent || "12.00";
+            let timeParts = timeStr.split(':').map(Number);
+            let time = timeParts.length === 2 ? timeParts[0] + timeParts[1] / 100 : parseFloat(timeStr);
+
+            let amb = (node.getElementsByTagName("AmbientLight")[0]?.textContent || "160,160,160").split(/[,;]/).map(Number);
+            let dir = (node.getElementsByTagName("DirectionalLight")[0]?.textContent || "160,160,160").split(/[,;]/).map(Number);
+            let cab = parseInt(node.getElementsByTagName("CabLighting")[0]?.textContent || "255");
+
+            let dirType = 'Cartesian';
+            let x = 0, y = 1, z = 0, theta = 0, phi = 90;
+
+            let cartNode = node.getElementsByTagName("LightDirection")[0] || node.getElementsByTagName("CartesianLightDirection")[0];
+            let spherNode = node.getElementsByTagName("SphericalLightDirection")[0];
+
+            if (spherNode) {
+              dirType = 'Spherical';
+              let coords = spherNode.textContent.split(/[,;]/).map(Number);
+              theta = coords[0] || 0;
+              phi = coords[1] || 0;
+            } else if (cartNode) {
+              let coords = cartNode.textContent.split(/[,;]/).map(Number);
+              x = coords[0] || 0;
+              y = coords[1] || 0;
+              z = coords[2] || 0;
+            }
+
+            newTimeline.push({ time, ambient: amb, directional: dir, dirType, x, y, z, theta, phi, cab });
+          }
+
+          timeline = newTimeline;
+          activeIndex = 0;
+          renderTimeline();
+          selectPoint(0);
+          alert("Imported successfully!");
+        } catch (err) {
+          alert("Error parsing XML: " + err.message);
+        }
+      };
+      reader.readAsText(file);
+    });
+
+    // Resizer logic
+    (function setupResizer() {
+      const resizer = document.getElementById('resizer');
+      const sidebar = document.getElementById('sidebarPanel');
+      const container = document.querySelector('main');
+      let dragging = false;
+
+      resizer.addEventListener('mousedown', function (e) {
+        dragging = true;
+        document.body.style.cursor = 'col-resize';
+        document.body.style.userSelect = 'none';
+        e.preventDefault();
+      });
+
+      document.addEventListener('mousemove', function (e) {
+        if (!dragging) return;
+        const rect = container.getBoundingClientRect();
+        let sidebarWidth = e.clientX - rect.left;
+        if (sidebarWidth < 220) sidebarWidth = 220;
+        if (sidebarWidth > rect.width - 320) sidebarWidth = rect.width - 320;
+        sidebar.style.width = sidebarWidth + 'px';
+
+        // Notify Three.js renderer
+        const visualizer = document.getElementById('visualizerContainer');
+        camera.aspect = visualizer.clientWidth / visualizer.clientHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(visualizer.clientWidth, visualizer.clientHeight);
+      });
+
+      document.addEventListener('mouseup', function () {
+        if (dragging) {
+          dragging = false;
+          document.body.style.cursor = '';
+          document.body.style.userSelect = '';
+        }
+      });
+    })();
+
+    // Vertical Resizer logic
+    (function setupVerticalResizer() {
+      const resizerV = document.getElementById('resizerV');
+      const outputPanel = document.getElementById('outputPanel');
+      const container = document.getElementById('rightContainer');
+      const visualizer = document.getElementById('visualizerContainer');
+      let dragging = false;
+
+      resizerV.addEventListener('mousedown', function (e) {
+        dragging = true;
+        document.body.style.cursor = 'row-resize';
+        document.body.style.userSelect = 'none';
+        e.preventDefault();
+      });
+
+      document.addEventListener('mousemove', function (e) {
+        if (!dragging) return;
+        const rect = container.getBoundingClientRect();
+        let outputHeight = rect.bottom - e.clientY;
+        if (outputHeight < 100) outputHeight = 100;
+        if (outputHeight > rect.height - 150) outputHeight = rect.height - 150;
+        outputPanel.style.height = outputHeight + 'px';
+
+        // Notify Three.js renderer
+        camera.aspect = visualizer.clientWidth / visualizer.clientHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(visualizer.clientWidth, visualizer.clientHeight);
+      });
+
+      document.addEventListener('mouseup', function () {
+        if (dragging) {
+          dragging = false;
+          document.body.style.cursor = '';
+          document.body.style.userSelect = '';
+        }
+      });
+    })();
+
+    // Insert train SVG icon
+    document.querySelector('.train-icon-placeholder').outerHTML = ICONS.train;
+
+    // Boot
+    renderTimeline();
+    selectPoint(activeIndex);
+  </script>
+</body>
+
+</html>
