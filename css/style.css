@@ -531,10 +531,19 @@ a.station-card:hover .direction {
   --theme-arrow: var(--teal);
 }
 
+.route-theme {
+  --theme-primary: var(--green);
+  --theme-accent: var(--green);
+  --theme-medallion: var(--green);
+  --theme-hover: #008039;
+  --theme-arrow: var(--green);
+}
+
 /* Shared XML Editor Layout Styles */
 .train-theme,
 .sound-theme,
-.light-theme {
+.light-theme,
+.route-theme {
   display: flex;
   flex-direction: column;
   height: 100vh;

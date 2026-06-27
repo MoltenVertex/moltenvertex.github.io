@@ -1,0 +1,1883 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenBVE Route Editor</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root {
+            --bg: #0d0f14;
+            --sf: #14171f;
+            --sf2: #1a1e28;
+            --bd: #252a36;
+            --tx: #c8cdd8;
+            --mt: #585f72;
+            --ac: #3ec9b0;
+            --acd: #2ba08c;
+            --wr: #e8943a;
+            --dn: #d94f4f;
+            --grid: #181c26;
+            --grid2: #1f2430;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
+        }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: var(--bg);
+            color: var(--tx);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            font-size: 13px;
+            -webkit-font-smoothing: antialiased
+        }
+
+        /* ── Header ── */
+        header {
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            height: 40px;
+            background: var(--sf);
+            border-bottom: 1px solid var(--bd);
+            gap: 6px;
+            flex-shrink: 0
+        }
+
+        .logo {
+            font-weight: 700;
+            font-size: 13px;
+            color: var(--ac);
+            letter-spacing: -.3px;
+            white-space: nowrap;
+            margin-right: 6px
+        }
+
+        .tg {
+            display: flex;
+            gap: 1px
+        }
+
+        .ts {
+            width: 1px;
+            height: 20px;
+            background: var(--bd);
+            margin: 0 5px
+        }
+
+        header button {
+            background: 0 0;
+            border: 1px solid transparent;
+            color: var(--mt);
+            padding: 3px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: all .12s;
+            white-space: nowrap
+        }
+
+        header button:hover {
+            background: var(--sf2);
+            color: var(--tx);
+            border-color: var(--bd)
+        }
+
+        header button i {
+            font-size: 10px;
+            width: 13px;
+            text-align: center
+        }
+
+        /* ── Main layout ── */
+        main {
+            flex: 1;
+            display: flex;
+            overflow: hidden
+        }
+
+        /* ── Left panel ── */
+        .pl {
+            width: 224px;
+            background: var(--sf);
+            border-right: 1px solid var(--bd);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0
+        }
+
+        .pt {
+            display: flex;
+            border-bottom: 1px solid var(--bd);
+            flex-shrink: 0
+        }
+
+        .pt button {
+            flex: 1;
+            padding: 7px 2px;
+            background: 0 0;
+            border: none;
+            border-bottom: 2px solid transparent;
+            color: var(--mt);
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: .3px;
+            transition: all .12s;
+            text-transform: uppercase
+        }
+
+        .pt button.active {
+            color: var(--ac);
+            border-bottom-color: var(--ac)
+        }
+
+        .pt button:hover:not(.active) {
+            color: var(--tx);
+            background: var(--sf2)
+        }
+
+        .pc {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px
+        }
+
+        .pc::-webkit-scrollbar {
+            width: 3px
+        }
+
+        .pc::-webkit-scrollbar-thumb {
+            background: var(--bd);
+            border-radius: 2px
+        }
+
+        .tp {
+            display: none
+        }
+
+        .tp.active {
+            display: block
+        }
+
+        .fl {
+            margin-bottom: 8px
+        }
+
+        .fl label {
+            display: block;
+            font-size: 10px;
+            color: var(--mt);
+            margin-bottom: 3px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .3px
+        }
+
+        .fl input,
+        .fl select,
+        .fl textarea {
+            width: 100%;
+            background: var(--bg);
+            border: 1px solid var(--bd);
+            color: var(--tx);
+            padding: 4px 7px;
+            border-radius: 4px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            outline: 0;
+            transition: border-color .12s
+        }
+
+        .fl input:focus,
+        .fl select:focus {
+            border-color: var(--ac)
+        }
+
+        .fl input[type=range] {
+            padding: 0;
+            background: 0 0;
+            -webkit-appearance: none;
+            height: 16px
+        }
+
+        .fl input[type=range]::-webkit-slider-track {
+            background: var(--bd);
+            height: 2px;
+            border-radius: 1px
+        }
+
+        .fl input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 12px;
+            height: 12px;
+            background: var(--ac);
+            border-radius: 50%;
+            margin-top: -5px;
+            cursor: pointer;
+            transition: transform .1s
+        }
+
+        .fl input[type=range]::-webkit-slider-thumb:hover {
+            transform: scale(1.2)
+        }
+
+        .fr {
+            display: flex;
+            gap: 5px
+        }
+
+        .fr .fl {
+            flex: 1
+        }
+
+        .fl-ro input {
+            color: var(--mt);
+            cursor: default
+        }
+
+        .btn {
+            background: var(--sf2);
+            border: 1px solid var(--bd);
+            color: var(--tx);
+            padding: 4px 9px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 11px;
+            transition: all .12s;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px
+        }
+
+        .btn:hover {
+            background: var(--bd)
+        }
+
+        .btn-a {
+            background: var(--acd);
+            border-color: var(--ac);
+            color: #fff
+        }
+
+        .btn-a:hover {
+            background: var(--ac)
+        }
+
+        .btn-d {
+            color: var(--dn)
+        }
+
+        .btn-d:hover {
+            background: var(--dn);
+            color: #fff
+        }
+
+        .btn-s {
+            padding: 2px 7px;
+            font-size: 10px
+        }
+
+        .btn-blk {
+            width: 100%;
+            justify-content: center
+        }
+
+        .sep {
+            height: 1px;
+            background: var(--bd);
+            margin: 9px 0
+        }
+
+        .li {
+            background: var(--bg);
+            border: 1px solid var(--bd);
+            border-radius: 4px;
+            padding: 7px 8px;
+            margin-bottom: 7px
+        }
+
+        .li-h {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px
+        }
+
+        .li-h span {
+            font-size: 11px;
+            font-weight: 500;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 140px
+        }
+
+        .li-h button {
+            background: 0 0;
+            border: none;
+            color: var(--mt);
+            cursor: pointer;
+            font-size: 10px;
+            padding: 2px 4px;
+            border-radius: 2px
+        }
+
+        .li-h button:hover {
+            color: var(--dn);
+            background: rgba(217, 79, 79, .1)
+        }
+
+        .li .fl {
+            margin-bottom: 4px
+        }
+
+        .li .fl:last-child {
+            margin-bottom: 0
+        }
+
+        /* ── View area ── */
+        .vs {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden
+        }
+
+        .vt {
+            display: flex;
+            padding: 0 10px;
+            height: 28px;
+            align-items: center;
+            gap: 3px;
+            background: var(--sf);
+            border-bottom: 1px solid var(--bd);
+            flex-shrink: 0
+        }
+
+        .vt button {
+            background: 0 0;
+            border: 1px solid transparent;
+            color: var(--mt);
+            padding: 3px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: .3px;
+            transition: all .12s;
+            text-transform: uppercase
+        }
+
+        .vt button.active {
+            background: var(--sf2);
+            color: var(--tx);
+            border-color: var(--bd)
+        }
+
+        .cw {
+            flex: 1;
+            position: relative;
+            overflow: hidden
+        }
+
+        .cw canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%
+        }
+
+        .ch {
+            position: absolute;
+            top: 6px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 10px;
+            color: var(--mt);
+            background: rgba(13, 15, 20, .9);
+            padding: 3px 12px;
+            border-radius: 3px;
+            pointer-events: none;
+            white-space: nowrap;
+            border: 1px solid var(--bd)
+        }
+
+        /* ── Right panel ── */
+        .pr {
+            width: 210px;
+            background: var(--sf);
+            border-left: 1px solid var(--bd);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0
+        }
+
+        .pr h3 {
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            color: var(--mt);
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--bd);
+            flex-shrink: 0
+        }
+
+        .pr .pc {
+            padding: 10px 12px
+        }
+
+        .ns {
+            color: var(--mt);
+            font-size: 11px;
+            text-align: center;
+            padding: 30px 10px;
+            line-height: 1.7
+        }
+
+        .cp {
+            position: relative;
+            background: var(--sf);
+            border-top: 1px solid var(--bd);
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column
+        }
+
+        .resizer-y {
+            position: absolute;
+            top: -4px;
+            left: 0;
+            right: 0;
+            height: 8px;
+            cursor: ns-resize;
+            z-index: 100;
+        }
+
+        .ch2 {
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            height: 28px;
+            gap: 6px;
+            flex-shrink: 0
+        }
+
+        .ch2 span {
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            color: var(--mt)
+        }
+
+        .ch2 button {
+            margin-left: auto;
+            background: 0 0;
+            border: none;
+            color: var(--mt);
+            cursor: pointer;
+            font-size: 11px;
+            padding: 3px 7px;
+            border-radius: 3px;
+            font-family: inherit;
+            transition: all .1s
+        }
+
+        .ch2 button:hover {
+            background: var(--sf2);
+            color: var(--tx)
+        }
+
+        .cb {
+            height: 150px;
+            overflow: hidden;
+        }
+
+        .cb textarea {
+            width: 100%;
+            height: 100%;
+            background: var(--bg);
+            border: none;
+            color: var(--tx);
+            padding: 6px 12px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            resize: none;
+            outline: 0;
+            line-height: 1.7
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 14px;
+            left: 50%;
+            transform: translateX(-50%) translateY(70px);
+            background: var(--sf2);
+            border: 1px solid var(--bd);
+            color: var(--tx);
+            padding: 6px 16px;
+            border-radius: 5px;
+            font-size: 12px;
+            z-index: 1000;
+            transition: transform .25s ease;
+            pointer-events: none
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0)
+        }
+
+        #fi {
+            display: none
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            padding: 2px 0
+        }
+
+        .stat-row .v {
+            color: var(--ac);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px
+        }
+
+        .curve-info {
+            font-size: 10px;
+            padding: 3px 7px;
+            border-radius: 3px;
+            margin-bottom: 6px
+        }
+
+        .curve-ok {
+            background: rgba(62, 201, 176, .08);
+            color: var(--ac);
+            border: 1px solid rgba(62, 201, 176, .15)
+        }
+
+        .curve-err {
+            background: rgba(232, 148, 58, .08);
+            color: var(--wr);
+            border: 1px solid rgba(232, 148, 58, .15)
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div class="logo">OpenBVE Route Editor</div>
+        <div class="tg">
+            <button onclick="newRoute()"><i class="fa-solid fa-file"></i> New</button>
+            <button onclick="document.getElementById('fi').click()"><i class="fa-solid fa-file-import"></i>
+                Import</button>
+            <button onclick="exportCSV()"><i class="fa-solid fa-file-export"></i> Export</button>
+        </div>
+        <div class="ts"></div>
+        <div class="tg">
+            <button onclick="zoomIn()"><i class="fa-solid fa-magnifying-glass-plus"></i></button>
+            <button onclick="zoomOut()"><i class="fa-solid fa-magnifying-glass-minus"></i></button>
+            <button onclick="fitView()"><i class="fa-solid fa-expand"></i> Fit</button>
+            <button id="snapBtn" onclick="toggleSnap()"><i class="fa-solid fa-border-all"></i> Snap: Off</button>
+        </div>
+        <div class="ts"></div>
+        <div class="tg">
+            <button onclick="undo()" title="Undo (Ctrl+Z)"><i class="fa-solid fa-rotate-left"></i></button>
+            <button onclick="redo()" title="Redo (Ctrl+Y)"><i class="fa-solid fa-rotate-right"></i></button>
+        </div>
+        <input type="file" id="fi" accept=".csv,.txt" onchange="importCSV(event)">
+    </header>
+
+    <main>
+        <aside class="pl">
+            <div class="pt">
+                <button class="active" onclick="switchTab(this,'tab-route')">Route</button>
+                <button onclick="switchTab(this,'tab-stn')">Stations</button>
+                <button onclick="switchTab(this,'tab-sig')">Signals</button>
+                <button onclick="switchTab(this,'tab-obj')">Objects</button>
+            </div>
+            <div class="pc">
+                <div id="tab-route" class="tp active">
+                    <div class="fl"><label>Title</label><input id="r-title"
+                            oninput="S.route.title=this.value;updateCSV()"></div>
+                    <div class="fl"><label>Description</label><input id="r-desc"
+                            oninput="S.route.description=this.value;updateCSV()"></div>
+                    <div class="fl"><label>Image</label><input id="r-img"
+                            oninput="S.route.image=this.value;updateCSV()"></div>
+                    <div class="sep"></div>
+                    <div class="fl"><label>Default Speed (km/h)</label><input type="number" id="r-speed" value="0"
+                            oninput="S.route.speed=+this.value;updateCSV()"></div>
+                    <div class="fl"><label>Gauge (mm)</label><input type="number" id="r-gauge" value="1435"
+                            oninput="S.route.gauge=+this.value;updateCSV()"></div>
+                    <div class="sep"></div>
+                    <div class="stat-row"><span>Total length</span><span class="v" id="stat-len">0 m</span></div>
+                    <div class="stat-row"><span>Nodes</span><span class="v" id="stat-nodes">0</span></div>
+                    <div class="stat-row"><span>Stations</span><span class="v" id="stat-stn">0</span></div>
+                    <div class="stat-row"><span>Signals</span><span class="v" id="stat-sig">0</span></div>
+                    <div class="stat-row"><span>Objects</span><span class="v" id="stat-obj">0</span></div>
+                </div>
+                <div id="tab-stn" class="tp">
+                    <div id="stn-list"></div>
+                    <button class="btn btn-a btn-blk" style="margin-top:6px" onclick="addStation()"><i
+                            class="fa-solid fa-plus"></i> Add Station</button>
+                </div>
+                <div id="tab-sig" class="tp">
+                    <div id="sig-list"></div>
+                    <button class="btn btn-a btn-blk" style="margin-top:6px" onclick="addSignal()"><i
+                            class="fa-solid fa-plus"></i> Add Signal</button>
+                </div>
+                <div id="tab-obj" class="tp">
+                    <div id="obj-list"></div>
+                    <button class="btn btn-a btn-blk" style="margin-top:6px" onclick="addObject()"><i
+                            class="fa-solid fa-plus"></i> Add Object</button>
+                </div>
+            </div>
+        </aside>
+
+        <div class="vs">
+            <div class="vt">
+                <button class="active" onclick="switchView(this,'plan')">Plan</button>
+                <button onclick="switchView(this,'profile')">Profile</button>
+            </div>
+            <div class="cw">
+                <canvas id="c-plan"></canvas>
+                <canvas id="c-prof" style="display:none"></canvas>
+                <div class="ch" id="canvas-hint">Click: add node &nbsp;&middot;&nbsp; Drag: move &nbsp;&middot;&nbsp;
+                    Right-click: delete &nbsp;&middot;&nbsp; Scroll: zoom &nbsp;&middot;&nbsp; Middle-drag / Space+drag:
+                    pan</div>
+            </div>
+        </div>
+
+        <aside class="pr">
+            <h3>Properties</h3>
+            <div class="pc" id="props">
+                <div class="ns">Select a node on the canvas to edit its properties</div>
+            </div>
+        </aside>
+    </main>
+
+    <div class="cp">
+        <div class="resizer-y" id="csv-resizer"></div>
+        <div class="ch2">
+            <span>CSV Output</span>
+            <button onclick="copyCSV()"><i class="fa-solid fa-copy"></i> Copy</button>
+        </div>
+        <div class="cb" id="csv-body">
+            <textarea id="csv-out" readonly></textarea>
+        </div>
+    </div>
+    <div class="toast" id="toast"></div>
+
+    <script>
+        /* ================================================================
+           STATE
+           ================================================================ */
+        let NID = 1;
+        const S = {
+            nodes: [], stations: [], signals: [], objects: [],
+            route: { title: 'Untitled Route', description: '', image: '', speed: 0, gauge: 1435 },
+            selId: null, activeView: 'plan', snap: false
+        };
+        const cam = { x: 0, y: 400, z: 0.35 };
+        const pcam = { x: 0, y: 0, z: 0.5 };
+        let PD = null; // path data
+        let uStack = [], rStack = [];
+
+        const cP = document.getElementById('c-plan');
+        const cR = document.getElementById('c-prof');
+        const xP = cP.getContext('2d');
+        const xR = cR.getContext('2d');
+        let dpr = 1;
+
+        /* ── Helpers ── */
+        const dist = (a, b) => Math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2);
+        const nAng = a => Math.atan2(Math.sin(a), Math.cos(a));
+        const lerp = (a, b, t) => a + (b - a) * t;
+        const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+        const fN = (v, d = 1) => v.toFixed(d);
+        const gN = id => S.nodes.find(n => n.id === id);
+        const selN = () => S.selId != null ? gN(S.selId) : null;
+
+        function saveU() {
+            uStack.push(JSON.stringify({ nodes: S.nodes, stations: S.stations, signals: S.signals, objects: S.objects, route: S.route, rawHeaderLines: S.rawHeaderLines, unparsedTrack: S.unparsedTrack }));
+            if (uStack.length > 60) uStack.shift(); rStack = [];
+        }
+        function undo() { if (!uStack.length) return; rStack.push(JSON.stringify({ nodes: S.nodes, stations: S.stations, signals: S.signals, objects: S.objects, route: S.route, rawHeaderLines: S.rawHeaderLines, unparsedTrack: S.unparsedTrack })); const d = JSON.parse(uStack.pop()); Object.assign(S, d); recomp(); refreshAll(); }
+        function redo() { if (!rStack.length) return; uStack.push(JSON.stringify({ nodes: S.nodes, stations: S.stations, signals: S.signals, objects: S.objects, route: S.route, rawHeaderLines: S.rawHeaderLines, unparsedTrack: S.unparsedTrack })); const d = JSON.parse(rStack.pop()); Object.assign(S, d); recomp(); refreshAll(); }
+
+        function toast(m) { const t = document.getElementById('toast'); t.textContent = m; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 1800); }
+
+        /* ================================================================
+           PATH GEOMETRY
+           ================================================================ */
+        function computePath() {
+            const nd = S.nodes, n = nd.length;
+            if (n < 2) { PD = { segs: [], dists: [], tps: [], bears: [] }; return; }
+            const bears = [];
+            for (let i = 0; i < n - 1; i++) bears.push(Math.atan2(nd[i + 1].y - nd[i].y, nd[i + 1].x - nd[i].x));
+
+            const tps = new Array(n).fill(null);
+            for (let i = 1; i < n - 1; i++) {
+                const R = nd[i].cr;
+                if (R <= 0) continue;
+                const defl = nAng(bears[i] - bears[i - 1]);
+                if (Math.abs(defl) < 0.003) continue;
+                const T = R * Math.tan(Math.abs(defl) / 2);
+                const sL = dist(nd[i - 1], nd[i]), sA = dist(nd[i], nd[i + 1]);
+                if (T >= sL * 0.95 || T >= sA * 0.95) { tps[i] = { valid: false, R }; continue; }
+                const t1 = { x: nd[i].x - T * Math.cos(bears[i - 1]), y: nd[i].y - T * Math.sin(bears[i - 1]) };
+                const t2 = { x: nd[i].x + T * Math.cos(bears[i]), y: nd[i].y + T * Math.sin(bears[i]) };
+                const sg = defl > 0 ? 1 : -1;
+                const ctr = { x: t1.x + R * Math.cos(bears[i - 1] + sg * Math.PI / 2), y: t1.y + R * Math.sin(bears[i - 1] + sg * Math.PI / 2) };
+                tps[i] = { t1, t2, ctr, R, aLen: R * Math.abs(defl), defl, sg, valid: true };
+            }
+
+            const segs = [], dists = [0];
+            let cd = 0;
+            for (let i = 0; i < n - 1; i++) {
+                let ss, se;
+                if (i === 0) ss = { x: nd[0].x, y: nd[0].y };
+                else if (tps[i] && tps[i].valid) ss = tps[i].t2;
+                else ss = { x: nd[i].x, y: nd[i].y };
+                if (i === n - 2) se = { x: nd[n - 1].x, y: nd[n - 1].y };
+                else if (tps[i + 1] && tps[i + 1].valid) se = tps[i + 1].t1;
+                else se = { x: nd[i + 1].x, y: nd[i + 1].y };
+                const sL = dist(ss, se);
+                segs.push({ type: 's', s: ss, e: se, len: sL });
+                cd += sL;
+                if (i < n - 2 && tps[i + 1] && tps[i + 1].valid) {
+                    const tp = tps[i + 1];
+                    segs.push({ type: 'a', ctr: tp.ctr, R: tp.R, t1: tp.t1, t2: tp.t2, len: tp.aLen, defl: tp.defl, sg: tp.sg });
+                    cd += tp.aLen;
+                }
+                dists[i + 1] = cd;
+            }
+            PD = { segs, dists, tps, bears };
+        }
+
+        function posAtDist(d) {
+            if (!PD || !PD.segs.length) return { x: 0, y: 0, dir: Math.PI / 2 };
+            let rem = d;
+            for (const seg of PD.segs) {
+                if (rem <= seg.len + 0.01) {
+                    const t = clamp(rem / Math.max(seg.len, .01), 0, 1);
+                    if (seg.type === 's') return { x: lerp(seg.s.x, seg.e.x, t), y: lerp(seg.s.y, seg.e.y, t), dir: Math.atan2(seg.e.y - seg.s.y, seg.e.x - seg.s.x) };
+                    const wsa = Math.atan2(seg.t1.y - seg.ctr.y, seg.t1.x - seg.ctr.x);
+                    const ang = wsa + seg.sg * t * Math.abs(seg.defl);
+                    return { x: seg.ctr.x + seg.R * Math.cos(ang), y: seg.ctr.y + seg.R * Math.sin(ang), dir: ang + seg.sg * Math.PI / 2 };
+                }
+                rem -= seg.len;
+            }
+            const last = PD.segs[PD.segs.length - 1];
+            if (last.type === 's') return { x: last.e.x, y: last.e.y, dir: Math.atan2(last.e.y - last.s.y, last.e.x - last.s.x) };
+            const wa = Math.atan2(last.t2.y - last.ctr.y, last.t2.x - last.ctr.x);
+            return { x: last.t2.x, y: last.t2.y, dir: wa + last.sg * Math.PI / 2 };
+        }
+
+        function recomp() {
+            computePath();
+            if (PD && PD.dists.length === S.nodes.length) {
+                S.nodes.forEach((nd, i) => {
+                    if (nd.d === undefined || pi.mode === 'dragging' || prI.mode === 'dragging') {
+                        nd.d = Math.round(PD.dists[i]);
+                    }
+                });
+            }
+            updateCSV();
+            updateStats();
+        }
+
+        /* ================================================================
+           CANVAS SETUP
+           ================================================================ */
+        function setupCv(cv) {
+            dpr = window.devicePixelRatio || 1;
+            const r = cv.parentElement.getBoundingClientRect();
+            cv.width = r.width * dpr; cv.height = r.height * dpr;
+        }
+        function sizeCv(cv) {
+            const r = cv.parentElement.getBoundingClientRect();
+            cv.width = r.width * dpr; cv.height = r.height * dpr;
+        }
+
+        /* ── Coords ── */
+        function w2sx(wx) { const r = cP.getBoundingClientRect(); return (wx - cam.x) * cam.z + r.width / 2 }
+        function w2sy(wy) { const r = cP.getBoundingClientRect(); return -(wy - cam.y) * cam.z + r.height / 2 }
+        function s2wx(sx) { const r = cP.getBoundingClientRect(); return (sx - r.width / 2) / cam.z + cam.x }
+        function s2wy(sy) { const r = cP.getBoundingClientRect(); return -(sy - r.height / 2) / cam.z + cam.y }
+        function p2sx(d) { const r = cR.getBoundingClientRect(); return (d - pcam.x) * pcam.z + 55 }
+        function p2sy(e) { const r = cR.getBoundingClientRect(); return r.height - 28 - (e - pcam.y) * pcam.z }
+        function s2pe(sy) { const r = cR.getBoundingClientRect(); return (r.height - 28 - sy) / pcam.z + pcam.y }
+
+        /* ================================================================
+           PLAN VIEW RENDER
+           ================================================================ */
+        function drawPlan() {
+            const cv = cP, ctx = xP;
+            sizeCv(cv);
+            ctx.save(); ctx.scale(dpr, dpr);
+            const W = cv.parentElement.getBoundingClientRect().width, H = cv.parentElement.getBoundingClientRect().height;
+            ctx.fillStyle = '#0d0f14'; ctx.fillRect(0, 0, W, H);
+
+            // Adaptive grid
+            let gs = 100;
+            if (cam.z < 0.08) gs = 2000; else if (cam.z < 0.15) gs = 1000; else if (cam.z < 0.35) gs = 500;
+            else if (cam.z < 0.8) gs = 200; else if (cam.z < 2) gs = 100; else if (cam.z < 5) gs = 50; else gs = 20;
+
+            const lx = s2wx(0), rx = s2wx(W), ty = s2wy(0), by = s2wy(H);
+            const gx0 = Math.floor(Math.min(lx, rx) / gs) * gs, gy0 = Math.floor(Math.min(by, ty) / gs) * gs;
+            const maj = gs * 5;
+
+            ctx.lineWidth = 1;
+            for (let gx = gx0; gx <= Math.max(lx, rx) + gs; gx += gs) {
+                const sx = w2sx(gx); if (sx < -10 || sx > W + 10) continue;
+                ctx.strokeStyle = gx % (maj) < 1 ? '#1e2230' : '#151820';
+                ctx.beginPath(); ctx.moveTo(sx, 0); ctx.lineTo(sx, H); ctx.stroke();
+                if (gx % (maj) < 1 && cam.z > 0.04) {
+                    ctx.fillStyle = '#3a4050'; ctx.font = '9px IBM Plex Mono'; ctx.textAlign = 'center';
+                    ctx.fillText(gx + 'm', sx, H - 3);
+                }
+            }
+            for (let gy = gy0; gy <= Math.max(by, ty) + gs; gy += gs) {
+                const sy = w2sy(gy); if (sy < -10 || sy > H + 10) continue;
+                ctx.strokeStyle = gy % (maj) < 1 ? '#1e2230' : '#151820';
+                ctx.beginPath(); ctx.moveTo(0, sy); ctx.lineTo(W, sy); ctx.stroke();
+                if (gy % (maj) < 1 && cam.z > 0.04) {
+                    ctx.fillStyle = '#3a4050'; ctx.font = '9px IBM Plex Mono'; ctx.textAlign = 'left';
+                    ctx.fillText(gy + 'm', 3, sy - 3);
+                }
+            }
+
+            if (!PD || S.nodes.length < 2) { ctx.restore(); return }
+
+            // ── Draw path ──
+            ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+
+            // Glow
+            ctx.beginPath(); let first = true;
+            for (const seg of PD.segs) {
+                if (seg.type === 's') {
+                    const sx = w2sx(seg.s.x), sy = w2sy(seg.s.y), ex = w2sx(seg.e.x), ey = w2sy(seg.e.y);
+                    if (first) { ctx.moveTo(sx, sy); first = false } else ctx.lineTo(sx, sy);
+                    ctx.lineTo(ex, ey);
+                } else {
+                    const scx = w2sx(seg.ctr.x), scy = w2sy(seg.ctr.y), sr = Math.max(1, seg.R * cam.z);
+                    const wsa = Math.atan2(seg.t1.y - seg.ctr.y, seg.t1.x - seg.ctr.x);
+                    const wea = Math.atan2(seg.t2.y - seg.ctr.y, seg.t2.x - seg.ctr.x);
+                    ctx.arc(scx, scy, sr, -wsa, -wea, seg.sg > 0); // FIXED: sg>0 not sg<0
+                }
+            }
+            ctx.strokeStyle = 'rgba(62,201,176,0.10)'; ctx.lineWidth = 10; ctx.stroke();
+            ctx.strokeStyle = 'rgba(62,201,176,0.18)'; ctx.lineWidth = 5; ctx.stroke();
+
+            // Main line
+            ctx.beginPath(); first = true;
+            for (const seg of PD.segs) {
+                if (seg.type === 's') {
+                    const sx = w2sx(seg.s.x), sy = w2sy(seg.s.y), ex = w2sx(seg.e.x), ey = w2sy(seg.e.y);
+                    if (first) { ctx.moveTo(sx, sy); first = false } else ctx.lineTo(sx, sy);
+                    ctx.lineTo(ex, ey);
+                } else {
+                    const scx = w2sx(seg.ctr.x), scy = w2sy(seg.ctr.y), sr = Math.max(1, seg.R * cam.z);
+                    const wsa = Math.atan2(seg.t1.y - seg.ctr.y, seg.t1.x - seg.ctr.x);
+                    const wea = Math.atan2(seg.t2.y - seg.ctr.y, seg.t2.x - seg.ctr.x);
+                    ctx.arc(scx, scy, sr, -wsa, -wea, seg.sg > 0);
+                }
+            }
+            ctx.strokeStyle = '#3ec9b0'; ctx.lineWidth = 2.5; ctx.stroke();
+
+            // Direction arrows
+            const tLen = PD.dists[PD.dists.length - 1] || 1;
+            const aInt = Math.max(60, tLen / 18);
+            for (let d = aInt; d < tLen - 20; d += aInt) {
+                const p = posAtDist(d);
+                const sx = w2sx(p.x), sy = w2sy(p.y);
+                ctx.save(); ctx.translate(sx, sy); ctx.rotate(-p.dir);
+                ctx.fillStyle = 'rgba(62,201,176,0.45)';
+                ctx.beginPath(); ctx.moveTo(5, 0); ctx.lineTo(-4, -3.5); ctx.lineTo(-4, 3.5); ctx.closePath(); ctx.fill();
+                ctx.restore();
+            }
+
+            // Distance labels
+            ctx.font = '10px IBM Plex Mono'; ctx.textAlign = 'center';
+            for (let i = 0; i < S.nodes.length; i++) {
+                const nd = S.nodes[i], d = PD.dists[i] || 0;
+                const sx = w2sx(nd.x), sy = w2sy(nd.y);
+                ctx.fillStyle = 'rgba(62,201,176,0.50)';
+                ctx.fillText(fN(d, 0) + 'm', sx, sy - 13);
+            }
+
+            // Station markers on plan
+            for (const st of S.stations) {
+                const p = posAtDist(st.distance);
+                const sx = w2sx(p.x), sy = w2sy(p.y);
+                // Marker
+                ctx.fillStyle = 'rgba(232,148,58,0.12)';
+                ctx.beginPath(); ctx.arc(sx, sy, 10, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = '#e8943a';
+                ctx.beginPath(); ctx.arc(sx, sy, 5, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = '#0d0f14';
+                ctx.beginPath(); ctx.arc(sx, sy, 2.5, 0, Math.PI * 2); ctx.fill();
+                // Label
+                ctx.fillStyle = '#e8943a'; ctx.font = '500 10px Space Grotesk'; ctx.textAlign = 'center';
+                ctx.fillText(st.name, sx, sy - 16);
+            }
+
+            // Selected node info
+            const sn = selN();
+            if (sn) {
+                const idx = S.nodes.indexOf(sn);
+                const tp = PD.tps[idx];
+                if (tp && tp.valid) {
+                    // Tangent lines
+                    ctx.setLineDash([3, 3]);
+                    ctx.strokeStyle = 'rgba(62,201,176,0.25)'; ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(w2sx(tp.t1.x), w2sy(tp.t1.y));
+                    ctx.lineTo(w2sx(sn.x), w2sy(sn.y));
+                    ctx.lineTo(w2sx(tp.t2.x), w2sy(tp.t2.y));
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                    // Radius circle
+                    ctx.strokeStyle = 'rgba(62,201,176,0.08)'; ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.arc(w2sx(tp.ctr.x), w2sy(tp.ctr.y), Math.max(1, tp.R * cam.z), 0, Math.PI * 2);
+                    ctx.stroke();
+                    // R label
+                    const mx = (tp.t1.x + sn.x) / 2, my = (tp.t1.y + sn.y) / 2;
+                    ctx.fillStyle = 'rgba(62,201,176,0.60)'; ctx.font = '500 10px IBM Plex Mono'; ctx.textAlign = 'center';
+                    ctx.fillText('R=' + fN(tp.R, 0), w2sx(mx), w2sy(my) - 8);
+                    // Tangent points
+                    for (const pt of [tp.t1, tp.t2]) {
+                        ctx.fillStyle = 'rgba(62,201,176,0.40)';
+                        ctx.beginPath(); ctx.arc(w2sx(pt.x), w2sy(pt.y), 2.5, 0, Math.PI * 2); ctx.fill();
+                    }
+                }
+            }
+
+            // Nodes
+            for (const nd of S.nodes) {
+                const sx = w2sx(nd.x), sy = w2sy(nd.y);
+                const sel = nd.id === S.selId;
+                if (sel) {
+                    ctx.fillStyle = 'rgba(62,201,176,0.10)';
+                    ctx.beginPath(); ctx.arc(sx, sy, 14, 0, Math.PI * 2); ctx.fill();
+                    ctx.strokeStyle = 'rgba(62,201,176,0.30)'; ctx.lineWidth = 1;
+                    ctx.beginPath(); ctx.arc(sx, sy, 14, 0, Math.PI * 2); ctx.stroke();
+                }
+                // Outer ring
+                ctx.fillStyle = sel ? '#3ec9b0' : 'rgba(62,201,176,0.7)';
+                ctx.beginPath(); ctx.arc(sx, sy, sel ? 6 : 4.5, 0, Math.PI * 2); ctx.fill();
+                // Inner
+                ctx.fillStyle = '#0d0f14';
+                ctx.beginPath(); ctx.arc(sx, sy, sel ? 4 : 3, 0, Math.PI * 2); ctx.fill();
+                // Center dot
+                ctx.fillStyle = sel ? '#3ec9b0' : 'rgba(62,201,176,0.8)';
+                ctx.beginPath(); ctx.arc(sx, sy, 1.5, 0, Math.PI * 2); ctx.fill();
+            }
+
+            // Preview line
+            if (pi.mode === 'adding' && S.nodes.length > 0) {
+                const last = S.nodes[S.nodes.length - 1];
+                ctx.setLineDash([5, 4]);
+                ctx.strokeStyle = 'rgba(62,201,176,0.22)'; ctx.lineWidth = 1.5;
+                ctx.beginPath(); ctx.moveTo(w2sx(last.x), w2sy(last.y)); ctx.lineTo(pi.mx, pi.my); ctx.stroke();
+                ctx.setLineDash([]);
+            }
+
+            ctx.restore();
+        }
+
+        /* ================================================================
+           PROFILE VIEW RENDER
+           ================================================================ */
+        function drawProfile() {
+            const cv = cR, ctx = xR;
+            sizeCv(cv);
+            ctx.save(); ctx.scale(dpr, dpr);
+            const W = cv.parentElement.getBoundingClientRect().width, H = cv.parentElement.getBoundingClientRect().height;
+            ctx.fillStyle = '#0d0f14'; ctx.fillRect(0, 0, W, H);
+
+            if (!PD || S.nodes.length < 2) {
+                ctx.fillStyle = '#585f72'; ctx.font = '12px Space Grotesk'; ctx.textAlign = 'center';
+                ctx.fillText('Add at least 2 nodes in Plan view', W / 2, H / 2);
+                ctx.restore(); return;
+            }
+
+            const maxD = PD.dists[PD.dists.length - 1] || 100;
+            let minE = Infinity, maxE = -Infinity;
+            for (const n of S.nodes) { minE = Math.min(minE, n.elev); maxE = Math.max(maxE, n.elev); }
+            if (maxE - minE < 1) { minE -= 2; maxE += 2; }
+            const eR = maxE - minE;
+            pcam.z = Math.min((W - 90) / maxD, (H - 60) / (eR * 1.4));
+            pcam.z = clamp(pcam.z, 0.001, 10);
+            pcam.x = -maxD * 0.02; pcam.y = minE - eR * 0.15;
+
+            const dS = niceStep(maxD / 8), eS = niceStep(eR / 6);
+            ctx.font = '9px IBM Plex Mono'; ctx.lineWidth = 1;
+
+            for (let d = 0; d <= maxD + dS; d += dS) {
+                const sx = p2sx(d); if (sx < 45 || sx > W) continue;
+                ctx.strokeStyle = d % (dS * 5) < 1 ? '#1e2230' : '#151820';
+                ctx.beginPath(); ctx.moveTo(sx, 0); ctx.lineTo(sx, H - 22); ctx.stroke();
+                ctx.fillStyle = '#3a4050'; ctx.textAlign = 'center';
+                ctx.fillText(fN(d, 0), sx, H - 8);
+            }
+            for (let e = Math.floor(minE / eS) * eS - eS; e <= maxE + eS; e += eS) {
+                const sy = p2sy(e); if (sy < 5 || sy > H - 22) continue;
+                ctx.strokeStyle = '#151820';
+                ctx.beginPath(); ctx.moveTo(45, sy); ctx.lineTo(W, sy); ctx.stroke();
+                ctx.fillStyle = '#3a4050'; ctx.textAlign = 'right';
+                ctx.fillText(fN(e, 1) + 'm', 42, sy + 3);
+            }
+
+            // Ground fill
+            ctx.beginPath();
+            ctx.moveTo(p2sx(PD.dists[0]), p2sy(0));
+            for (let i = 0; i < S.nodes.length; i++) ctx.lineTo(p2sx(PD.dists[i]), p2sy(S.nodes[i].elev));
+            ctx.lineTo(p2sx(PD.dists[S.nodes.length - 1]), p2sy(0));
+            ctx.closePath();
+            ctx.fillStyle = 'rgba(62,201,176,0.04)'; ctx.fill();
+
+            // Line
+            ctx.beginPath();
+            for (let i = 0; i < S.nodes.length; i++) {
+                const sx = p2sx(PD.dists[i]), sy = p2sy(S.nodes[i].elev);
+                i === 0 ? ctx.moveTo(sx, sy) : ctx.lineTo(sx, sy);
+            }
+            ctx.strokeStyle = 'rgba(62,201,176,0.15)'; ctx.lineWidth = 6; ctx.stroke();
+            ctx.strokeStyle = '#3ec9b0'; ctx.lineWidth = 2; ctx.stroke();
+
+            // Gradient labels
+            ctx.font = '10px IBM Plex Mono'; ctx.textAlign = 'center';
+            for (let i = 0; i < S.nodes.length - 1; i++) {
+                const d1 = PD.dists[i], d2 = PD.dists[i + 1], e1 = S.nodes[i].elev, e2 = S.nodes[i + 1].elev;
+                const sL = d2 - d1; if (sL < 1) continue;
+                const g = (e2 - e1) / sL * 100;
+                ctx.fillStyle = Math.abs(g) > 2 ? '#e8943a' : 'rgba(62,201,176,0.55)';
+                ctx.fillText((g >= 0 ? '+' : '') + fN(g, 2) + '%', p2sx((d1 + d2) / 2), p2sy((e1 + e2) / 2) - 10);
+            }
+
+            // Station lines
+            for (const st of S.stations) {
+                const sx = p2sx(st.distance); if (sx < 45 || sx > W) continue;
+                ctx.strokeStyle = 'rgba(232,148,58,0.35)'; ctx.lineWidth = 1; ctx.setLineDash([3, 3]);
+                ctx.beginPath(); ctx.moveTo(sx, 0); ctx.lineTo(sx, H - 22); ctx.stroke(); ctx.setLineDash([]);
+                ctx.fillStyle = '#e8943a'; ctx.font = '500 9px Space Grotesk'; ctx.textAlign = 'center';
+                ctx.fillText(st.name, sx, 12);
+            }
+
+            // Nodes
+            for (let i = 0; i < S.nodes.length; i++) {
+                const nd = S.nodes[i], sx = p2sx(PD.dists[i]), sy = p2sy(nd.elev);
+                const sel = nd.id === S.selId;
+                if (sel) { ctx.fillStyle = 'rgba(62,201,176,0.10)'; ctx.beginPath(); ctx.arc(sx, sy, 11, 0, Math.PI * 2); ctx.fill(); }
+                ctx.fillStyle = sel ? '#3ec9b0' : 'rgba(62,201,176,0.7)';
+                ctx.beginPath(); ctx.arc(sx, sy, sel ? 5.5 : 3.5, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = '#0d0f14';
+                ctx.beginPath(); ctx.arc(sx, sy, sel ? 3.5 : 2.2, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = sel ? '#3ec9b0' : 'rgba(62,201,176,0.8)';
+                ctx.beginPath(); ctx.arc(sx, sy, 1.2, 0, Math.PI * 2); ctx.fill();
+            }
+
+            ctx.restore();
+        }
+
+        function niceStep(r) {
+            const p = Math.pow(10, Math.floor(Math.log10(Math.max(r, .001))));
+            const n = r / p;
+            return n <= 1.5 ? p : n <= 3.5 ? p * 2 : n <= 7.5 ? p * 5 : p * 10;
+        }
+
+        /* ================================================================
+           PLAN INTERACTION
+           ================================================================ */
+        const pi = { mode: 'idle', dragId: null, sx: 0, sy: 0, moved: false, mx: 0, my: 0, pan: false, pc: null, pm: null, sp: false };
+
+        cP.addEventListener('mousedown', e => {
+            if (S.activeView !== 'plan') return;
+            const r = cP.getBoundingClientRect(), sx = e.clientX - r.left, sy = e.clientY - r.top;
+            if (e.button === 1 || (e.button === 0 && pi.sp)) {
+                pi.pan = true; pi.pc = { x: cam.x, y: cam.y }; pi.pm = { x: e.clientX, y: e.clientY }; e.preventDefault(); return;
+            }
+            if (e.button !== 0) return;
+            const wx = s2wx(sx), wy = s2wy(sy);
+            let hitId = null, hitD = 14;
+            for (const nd of S.nodes) { const d = Math.hypot(w2sx(nd.x) - sx, w2sy(nd.y) - sy); if (d < hitD) { hitD = d; hitId = nd.id; } }
+            if (hitId != null) { saveU(); pi.mode = 'dragging'; pi.dragId = hitId; pi.sx = wx; pi.sy = wy; pi.moved = false; S.selId = hitId; updateProps(); }
+            else { pi.mode = 'adding'; pi.sx = wx; pi.sy = wy; pi.moved = false; }
+            pi.mx = sx; pi.my = sy;
+        });
+
+        cP.addEventListener('mousemove', e => {
+            if (S.activeView !== 'plan') return;
+            const r = cP.getBoundingClientRect(), sx = e.clientX - r.left, sy = e.clientY - r.top;
+            pi.mx = sx; pi.my = sy;
+            if (pi.pan) { cam.x = pi.pc.x - (e.clientX - pi.pm.x) / cam.z; cam.y = pi.pc.y + (e.clientY - pi.pm.y) / cam.z; render(); return; }
+            if (pi.mode === 'dragging') {
+                const nd = gN(pi.dragId);
+                if (nd) {
+                    let wx = s2wx(sx), wy = s2wy(sy);
+                    if (S.snap) {
+                        wx = Math.round(wx / 10) * 10;
+                        wy = Math.round(wy / 10) * 10;
+                    }
+                    if (Math.abs(wx - pi.sx) > 2 || Math.abs(wy - pi.sy) > 2) pi.moved = true;
+                    nd.x = wx; nd.y = wy; recomp(); updateProps();
+                }
+                render(); return;
+            }
+            if (pi.mode === 'adding') { if (Math.abs(s2wx(sx) - pi.sx) > 2 || Math.abs(s2wy(sy) - pi.sy) > 2) pi.moved = true; render(); return; }
+            let hit = false;
+            for (const nd of S.nodes) if (Math.hypot(w2sx(nd.x) - sx, w2sy(nd.y) - sy) < 12) { hit = true; break; }
+            cP.style.cursor = pi.sp ? 'grab' : hit ? 'pointer' : 'crosshair';
+        });
+
+        cP.addEventListener('mouseup', e => {
+            if (S.activeView !== 'plan') return;
+            if (pi.pan) { pi.pan = false; return; }
+            if (pi.mode === 'dragging') { if (!pi.moved) uStack.pop(); pi.mode = 'idle'; render(); return; }
+            if (pi.mode === 'adding' && !pi.moved) {
+                saveU();
+                const r = cP.getBoundingClientRect(), sx = e.clientX - r.left, sy = e.clientY - r.top;
+                let wx = s2wx(sx), wy = s2wy(sy);
+                if (S.snap) {
+                    wx = Math.round(wx / 10) * 10;
+                    wy = Math.round(wy / 10) * 10;
+                }
+                let bestS = -1, bestD = 15;
+                for (let i = 0; i < S.nodes.length - 1; i++) { const d = ptSegD(wx, wy, S.nodes[i], S.nodes[i + 1]); const sd = d * cam.z; if (sd < bestD) { bestD = sd; bestS = i; } }
+                let nn;
+                if (bestS >= 0 && S.nodes.length >= 2) {
+                    nn = { id: NID++, x: wx, y: wy, cr: 0, elev: lerp(S.nodes[bestS].elev, S.nodes[bestS + 1].elev, .5) };
+                    S.nodes.splice(bestS + 1, 0, nn);
+                } else {
+                    const le = S.nodes.length > 0 ? S.nodes[S.nodes.length - 1].elev : 0;
+                    nn = { id: NID++, x: wx, y: wy, cr: 0, elev: le };
+                    S.nodes.push(nn);
+                }
+                S.selId = nn.id; recomp(); updateProps(); render();
+            }
+            pi.mode = 'idle'; render();
+        });
+
+        cP.addEventListener('contextmenu', e => {
+            e.preventDefault(); if (S.activeView !== 'plan') return;
+            const r = cP.getBoundingClientRect(), sx = e.clientX - r.left, sy = e.clientY - r.top;
+            for (const nd of S.nodes) {
+                if (Math.hypot(w2sx(nd.x) - sx, w2sy(nd.y) - sy) < 12) {
+                    saveU(); S.nodes = S.nodes.filter(n => n.id !== nd.id); if (S.selId === nd.id) S.selId = null;
+                    recomp(); updateProps(); render(); return;
+                }
+            }
+        });
+
+        cP.addEventListener('wheel', e => {
+            if (S.activeView !== 'plan') return; e.preventDefault();
+            const r = cP.getBoundingClientRect(), sx = e.clientX - r.left, sy = e.clientY - r.top;
+            const wxB = s2wx(sx), wyB = s2wy(sy);
+            cam.z = clamp(cam.z * (e.deltaY > 0 ? .85 : 1.18), .005, 50);
+            cam.x = wxB - (sx - r.width / 2) / cam.z; cam.y = wyB + (sy - r.height / 2) / cam.z;
+            render();
+        }, { passive: false });
+
+        function ptSegD(px, py, a, b) {
+            const dx = b.x - a.x, dy = b.y - a.y, l2 = dx * dx + dy * dy;
+            if (l2 < .001) return dist({ x: px, y: py }, a);
+            let t = clamp(((px - a.x) * dx + (py - a.y) * dy) / l2, 0, 1);
+            return dist({ x: px, y: py }, { x: a.x + t * dx, y: a.y + t * dy });
+        }
+
+        /* ── Profile interaction ── */
+        const prI = { mode: 'idle', dragId: null };
+        cR.addEventListener('mousedown', e => {
+            if (S.activeView !== 'profile' || !PD || S.nodes.length < 2) return;
+            const r = cR.getBoundingClientRect(), sx = e.clientX - r.left, sy = e.clientY - r.top;
+            let hitId = null, hitD = 14;
+            for (let i = 0; i < S.nodes.length; i++) {
+                const nsx = p2sx(PD.dists[i]), nsy = p2sy(S.nodes[i].elev);
+                if (Math.hypot(nsx - sx, nsy - sy) < hitD) { hitD = Math.hypot(nsx - sx, nsy - sy); hitId = S.nodes[i].id; }
+            }
+            if (hitId != null) { saveU(); prI.mode = 'dragging'; prI.dragId = hitId; S.selId = hitId; updateProps(); render(); }
+        });
+        cR.addEventListener('mousemove', e => {
+            if (S.activeView !== 'profile' || prI.mode !== 'dragging') return;
+            const nd = gN(prI.dragId); if (!nd) return;
+            const sy = e.clientY - cR.getBoundingClientRect().top;
+            nd.elev = Math.round(s2pe(sy) * 10) / 10;
+            recomp(); updateProps(); render();
+        });
+        cR.addEventListener('mouseup', () => { if (prI.mode === 'dragging') { prI.mode = 'idle'; } });
+
+        /* ── Keyboard ── */
+        document.addEventListener('keydown', e => {
+            if (e.code === 'Space') { pi.sp = true; cP.style.cursor = 'grab'; e.preventDefault(); }
+            if ((e.code === 'Delete' || e.code === 'Backspace') && S.selId != null && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+                saveU(); S.nodes = S.nodes.filter(n => n.id !== S.selId); S.selId = null; recomp(); updateProps(); render();
+            }
+            if (e.ctrlKey && e.code === 'KeyZ') { e.preventDefault(); undo(); }
+            if (e.ctrlKey && e.code === 'KeyY') { e.preventDefault(); redo(); }
+        });
+        document.addEventListener('keyup', e => { if (e.code === 'Space') { pi.sp = false; cP.style.cursor = 'crosshair'; } });
+
+        /* ================================================================
+           PROPERTIES PANEL
+           ================================================================ */
+        function updateProps() {
+            const el = document.getElementById('props'), nd = selN();
+            if (!nd) { el.innerHTML = '<div class="ns">Select a node on the canvas to edit its properties</div>'; return; }
+            const idx = S.nodes.indexOf(nd), d = PD ? (PD.dists[idx] || 0) : 0;
+            let gradStr = '-';
+            if (PD && idx < S.nodes.length - 1) {
+                const d2 = PD.dists[idx + 1] || 0, sL = d2 - d;
+                if (sL > .1) { const g = (S.nodes[idx + 1].elev - nd.elev) / sL * 100; gradStr = (g >= 0 ? '+' : '') + fN(g, 2) + '%'; }
+            }
+            const tp = PD ? PD.tps[idx] : null;
+            const ok = tp && tp.valid, bad = tp && !tp.valid && tp.R > 0;
+
+            el.innerHTML = `
+    <div class="fl fl-ro"><label>Distance</label><input value="${fN(d, 1)} m" readonly></div>
+    <div class="fl fl-ro"><label>X</label><input value="${fN(nd.x, 1)}" readonly></div>
+    <div class="fl fl-ro"><label>Y</label><input value="${fN(nd.y, 1)}" readonly></div>
+    <div class="sep"></div>
+    <div class="fl"><label>Curve Radius (m)</label>
+      <input type="range" min="0" max="10000" step="10" value="${nd.cr}" oninput="setCR(${nd.id},+this.value);this.nextElementSibling.value=this.value">
+      <input type="number" min="0" max="100000" step="10" value="${nd.cr}" oninput="setCR(${nd.id},+this.value);this.previousElementSibling.value=this.value" style="margin-top:3px">
+    </div>
+    ${ok ? `<div class="curve-info curve-ok">Arc: ${fN(tp.aLen, 1)}m &middot; Defl: ${fN(Math.abs(tp.defl) * 180 / Math.PI, 1)}&deg;</div>` : ''}
+    ${bad ? `<div class="curve-info curve-err">R too small for angle</div>` : ''}
+    <div class="sep"></div>
+    <div class="fl"><label>Elevation (m)</label><input type="number" step="0.1" value="${nd.elev}" oninput="setElev(${nd.id},+this.value)"></div>
+    <div class="fl fl-ro"><label>Gradient</label><input value="${gradStr}" readonly></div>
+    <div class="sep"></div>
+    <div class="fr">
+      <button class="btn btn-s" onclick="moveNd(${nd.id},-1)" ${idx === 0 ? 'disabled style="opacity:.3"' : ''}><i class="fa-solid fa-arrow-left"></i> Prev</button>
+      <button class="btn btn-s" onclick="moveNd(${nd.id},1)" ${idx === S.nodes.length - 1 ? 'disabled style="opacity:.3"' : ''}><i class="fa-solid fa-arrow-right"></i> Next</button>
+    </div>
+    <button class="btn btn-d btn-blk" style="margin-top:8px" onclick="delNd(${nd.id})"><i class="fa-solid fa-trash"></i> Delete Node</button>
+  `;
+        }
+        function setCR(id, v) { const nd = gN(id); if (nd) { nd.cr = Math.max(0, v); recomp(); updateProps(); render(); } }
+        function setElev(id, v) { const nd = gN(id); if (nd) { nd.elev = v; recomp(); updateProps(); render(); } }
+        function delNd(id) { saveU(); S.nodes = S.nodes.filter(n => n.id !== id); if (S.selId === id) S.selId = null; recomp(); updateProps(); render(); }
+        function moveNd(id, dir) {
+            const idx = S.nodes.findIndex(n => n.id === id), ni = idx + dir;
+            if (ni < 0 || ni >= S.nodes.length) return;
+            saveU();[S.nodes[idx], S.nodes[ni]] = [S.nodes[ni], S.nodes[idx]];
+            recomp(); updateProps(); render();
+        }
+
+        /* ================================================================
+           STATIONS / SIGNALS / OBJECTS PANELS
+           ================================================================ */
+        function renderStations() {
+            document.getElementById('stn-list').innerHTML = S.stations.map((st, i) => `
+    <div class="li">
+      <div class="li-h"><span>${st.name || 'Station ' + (i + 1)}</span><button onclick="rmStn(${i})"><i class="fa-solid fa-xmark"></i></button></div>
+      <div class="fl"><label>Name</label><input value="${st.name}" oninput="S.stations[${i}].name=this.value;if(S.stations[${i}].rawArgs)S.stations[${i}].rawArgs[0]=this.value;updateCSV();render()"></div>
+      <div class="fl"><label>Distance (m)</label><input type="number" value="${st.distance}" oninput="S.stations[${i}].distance=+this.value;updateCSV();render()"></div>
+      <div class="fr">
+        <div class="fl"><label>Stop (s)</label><input type="number" value="${st.stopTime}" oninput="S.stations[${i}].stopTime=+this.value;if(S.stations[${i}].rawArgs)S.stations[${i}].rawArgs[8]=this.value;updateCSV()"></div>
+        <div class="fl"><label>Doors</label><select onchange="S.stations[${i}].doors=this.value;if(S.stations[${i}].rawArgs)S.stations[${i}].rawArgs[4]=this.value;updateCSV()">
+          <option value="0" ${st.doors === 0 || st.doors === '0' || st.doors === 'N' ? 'selected' : ''}>None</option>
+          <option value="-1" ${st.doors === -1 || st.doors === '-1' || st.doors === 'L' ? 'selected' : ''}>Left</option>
+          <option value="1" ${st.doors === 1 || st.doors === '1' || st.doors === 'R' ? 'selected' : ''}>Right</option>
+          <option value="B" ${st.doors === 'B' ? 'selected' : ''}>Both</option>
+        </select></div>
+      </div>
+      <div class="fl"><label>File</label><input value="${st.file || ''}" oninput="S.stations[${i}].file=this.value;updateCSV()"></div>
+    </div>`).join('');
+        }
+        function addStation() {
+            saveU(); const d = PD ? (PD.dists[PD.dists.length - 1] || 0) / 2 : 0;
+            S.stations.push({ name: 'Station ' + (S.stations.length + 1), distance: Math.round(d), stopTime: 20, doors: 'B', file: '' });
+            renderStations(); updateCSV(); updateStats(); render();
+        }
+        function rmStn(i) { saveU(); S.stations.splice(i, 1); renderStations(); updateCSV(); updateStats(); render(); }
+
+        function renderSignals() {
+            document.getElementById('sig-list').innerHTML = S.signals.map((sg, i) => `
+    <div class="li">
+      <div class="li-h"><span>Signal ${i + 1}</span><button onclick="rmSig(${i})"><i class="fa-solid fa-xmark"></i></button></div>
+      <div class="fl"><label>Distance (m)</label><input type="number" value="${sg.distance}" oninput="S.signals[${i}].distance=+this.value;updateCSV()"></div>
+      <div class="fl"><label>Type</label><input value="${sg.type}" oninput="S.signals[${i}].type=this.value;updateCSV()"></div>
+      <div class="fr">
+        <div class="fl"><label>X</label><input type="number" step="0.1" value="${sg.x}" oninput="S.signals[${i}].x=+this.value;updateCSV()"></div>
+        <div class="fl"><label>Y</label><input type="number" step="0.1" value="${sg.y}" oninput="S.signals[${i}].y=+this.value;updateCSV()"></div>
+        <div class="fl"><label>Z</label><input type="number" step="0.1" value="${sg.z || 0}" oninput="S.signals[${i}].z=+this.value;updateCSV()"></div>
+      </div>
+    </div>`).join('');
+        }
+        function addSignal() { saveU(); const d = PD ? (PD.dists[PD.dists.length - 1] || 0) / 2 : 0; S.signals.push({ distance: Math.round(d), type: '0', x: 0, y: 0, z: 0 }); renderSignals(); updateCSV(); render(); }
+        function rmSig(i) { saveU(); S.signals.splice(i, 1); renderSignals(); updateCSV(); }
+
+        function renderObjects() {
+            document.getElementById('obj-list').innerHTML = S.objects.map((ob, i) => `
+    <div class="li">
+      <div class="li-h"><span>${ob.file || 'Object ' + (i + 1)}</span><button onclick="rmObj(${i})"><i class="fa-solid fa-xmark"></i></button></div>
+      <div class="fl"><label>File</label><input value="${ob.file}" oninput="S.objects[${i}].file=this.value;updateCSV()"></div>
+      <div class="fl"><label>Distance (m)</label><input type="number" value="${ob.distance}" oninput="S.objects[${i}].distance=+this.value;updateCSV()"></div>
+      <div class="fr">
+        <div class="fl"><label>X</label><input type="number" step="0.1" value="${ob.x}" oninput="S.objects[${i}].x=+this.value;updateCSV()"></div>
+        <div class="fl"><label>Y</label><input type="number" step="0.1" value="${ob.y}" oninput="S.objects[${i}].y=+this.value;updateCSV()"></div>
+        <div class="fl"><label>Z</label><input type="number" step="0.1" value="${ob.z || 0}" oninput="S.objects[${i}].z=+this.value;updateCSV()"></div>
+      </div>
+      <div class="fr">
+        <div class="fl"><label>Yaw</label><input type="number" step="1" value="${ob.yaw || 0}" oninput="S.objects[${i}].yaw=+this.value;updateCSV()"></div>
+        <div class="fl"><label>Pitch</label><input type="number" step="1" value="${ob.pitch || 0}" oninput="S.objects[${i}].pitch=+this.value;updateCSV()"></div>
+        <div class="fl"><label>Roll</label><input type="number" step="1" value="${ob.roll || 0}" oninput="S.objects[${i}].roll=+this.value;updateCSV()"></div>
+      </div>
+    </div>`).join('');
+        }
+        function addObject() { saveU(); const d = PD ? (PD.dists[PD.dists.length - 1] || 0) / 2 : 0; S.objects.push({ file: '', distance: Math.round(d), x: 0, y: 0, z: 0, yaw: 0, pitch: 0, roll: 0 }); renderObjects(); updateCSV(); render(); }
+        function rmObj(i) { saveU(); S.objects.splice(i, 1); renderObjects(); updateCSV(); }
+
+        /* ================================================================
+           CSV GENERATION
+           ================================================================ */
+        function generateCSV() {
+            const L = [];
+
+            // Collect unique objects
+            const objMap = {};
+            let objIdx = 0;
+            S.objects.forEach(ob => {
+                if (ob.file && objMap[ob.file] === undefined) {
+                    objMap[ob.file] = objIdx++;
+                }
+            });
+
+            const headerLines = S.rawHeaderLines || [];
+            let structureHeaderIdx = -1;
+            for (let i = 0; i < headerLines.length; i++) {
+                if (headerLines[i].trim().toLowerCase() === 'with structure') {
+                    structureHeaderIdx = i;
+                    break;
+                }
+            }
+
+            if (structureHeaderIdx >= 0) {
+                const before = headerLines.slice(0, structureHeaderIdx + 1);
+                const after = headerLines.slice(structureHeaderIdx + 1);
+                const freeObjLines = [];
+                for (const file in objMap) {
+                    freeObjLines.push(`\t.FreeObj(${objMap[file]}).Load (${file})`);
+                }
+                L.push(...before, ...freeObjLines, ...after);
+            } else {
+                L.push(...headerLines);
+                if (objIdx > 0) {
+                    L.push('With Structure');
+                    for (const file in objMap) {
+                        L.push(`\t.FreeObj(${objMap[file]}).Load (${file})`);
+                    }
+                    L.push('');
+                }
+            }
+
+            L.push('With Track');
+            L.push('');
+
+            const dMap = {};
+            function addCmd(d, cmd) {
+                const distKey = Math.round(d);
+                if (!dMap[distKey]) dMap[distKey] = [];
+                dMap[distKey].push(cmd);
+            }
+
+            if (S.nodes.length > 0) {
+                for (let i = 0; i < S.nodes.length; i++) {
+                    const nd = S.nodes[i];
+                    const d = nd.d !== undefined ? nd.d : (PD ? (PD.dists[i] || 0) : 0);
+                    
+                    if (i > 0 && i < S.nodes.length - 1 && nd.cr > 0 && PD && PD.tps[i] && PD.tps[i].valid) {
+                        const tp = PD.tps[i];
+                        const sign = tp.defl > 0 ? -1 : 1;
+                        addCmd(d, `.Curve(${nd.cr * sign}; ${tp.cant || 0})`);
+                    }
+
+                    if (i < S.nodes.length - 1) {
+                        const nextNd = S.nodes[i + 1];
+                        const d2 = PD ? (PD.dists[i + 1] || 0) : 0;
+                        const sL = d2 - d;
+                        if (sL > 0.1) {
+                            const grad = (nextNd.elev - nd.elev) / sL * 1000;
+                            if (Math.abs(grad) > 0.01) {
+                                addCmd(d, `.Pitch(${grad.toFixed(2)})`);
+                            }
+                        }
+                    }
+                }
+            }
+
+            S.stations.forEach(st => {
+                if (st.rawArgs) {
+                    addCmd(st.distance, `.Sta(${st.rawArgs.join('; ')})`);
+                } else {
+                    const doorCode = st.doors === -1 ? -1 : (st.doors === 1 ? 1 : 0);
+                    addCmd(st.distance, `.Sta(${st.name}; ; ; ; ${doorCode}; 0; ; ; ${st.stopTime})`);
+                }
+            });
+
+            S.signals.forEach(sg => {
+                addCmd(sg.distance, `.SigF(${sg.type}; 1; ${sg.x}; ${sg.y})`);
+            });
+
+            S.objects.forEach(ob => {
+                if (ob.file) {
+                    const idx = objMap[ob.file];
+                    addCmd(ob.distance, `.FreeObj(0; ${idx}; ${ob.x}; ${ob.y}; ${ob.z || 0}; ${ob.yaw || 0}; ${ob.pitch || 0}; ${ob.roll || 0})`);
+                }
+            });
+
+            // Combine dynamic track commands with preserved comments and unparsed commands
+            const allDistsSet = new Set([
+                ...Object.keys(dMap).map(Number),
+                ...Object.keys(S.unparsedTrack || {}).map(Number)
+            ]);
+            const sortedTrackDists = Array.from(allDistsSet).sort((a, b) => a - b);
+
+            sortedTrackDists.forEach(d => {
+                const dynamicCmds = dMap[d] || [];
+                const unparsedItems = (S.unparsedTrack && S.unparsedTrack[d]) || [];
+                
+                const lineCmds = [...dynamicCmds];
+                unparsedItems.forEach(item => {
+                    if (item.type === 'comment') {
+                        L.push(item.value);
+                    } else if (item.type === 'empty') {
+                        L.push('');
+                    } else if (item.type === 'unparsed') {
+                        lineCmds.push(item.value);
+                    }
+                });
+
+                if (lineCmds.length > 0) {
+                    L.push(`${d},\t${lineCmds[0]}`);
+                    for (let i = 1; i < lineCmds.length; i++) {
+                        L.push(`\t${lineCmds[i]}`);
+                    }
+                }
+            });
+
+            return L.join('\n');
+        }
+
+        function updateCSV() {
+            const csv = generateCSV();
+            document.getElementById('csv-out').value = csv;
+        }
+
+        function updateStats() {
+            const maxD = PD && PD.dists.length > 0 ? PD.dists[PD.dists.length - 1] : 0;
+            document.getElementById('stat-len').textContent = fN(maxD, 0) + ' m';
+            document.getElementById('stat-nodes').textContent = S.nodes.length;
+            document.getElementById('stat-stn').textContent = S.stations.length;
+            document.getElementById('stat-sig').textContent = S.signals.length;
+            document.getElementById('stat-obj').textContent = S.objects.length;
+        }
+
+        function render() {
+            if (S.activeView === 'plan') {
+                drawPlan();
+            } else {
+                drawProfile();
+            }
+        }
+
+        /* ================================================================
+           UI INTERACTIVE HANDLERS
+           ================================================================ */
+        function switchTab(btn, tabId) {
+            document.querySelectorAll('.pt button').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            document.querySelectorAll('.tp').forEach(t => t.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        function switchView(btn, view) {
+            document.querySelectorAll('.vt button').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            S.activeView = view;
+            if (view === 'plan') {
+                document.getElementById('c-plan').style.display = 'block';
+                document.getElementById('c-prof').style.display = 'none';
+            } else {
+                document.getElementById('c-plan').style.display = 'none';
+                document.getElementById('c-prof').style.display = 'block';
+            }
+            render();
+        }
+
+        function zoomIn() {
+            if (S.activeView === 'plan') cam.z = clamp(cam.z * 1.25, 0.005, 50);
+            else pcam.z = clamp(pcam.z * 1.25, 0.001, 10);
+            render();
+        }
+
+        function zoomOut() {
+            if (S.activeView === 'plan') cam.z = clamp(cam.z * 0.8, 0.005, 50);
+            else pcam.z = clamp(pcam.z * 0.8, 0.001, 10);
+            render();
+        }
+
+        function fitView() {
+            if (!PD || S.nodes.length < 2) return;
+            if (S.activeView === 'plan') {
+                let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+                for (const n of S.nodes) {
+                    minX = Math.min(minX, n.x); maxX = Math.max(maxX, n.x);
+                    minY = Math.min(minY, n.y); maxY = Math.max(maxY, n.y);
+                }
+                const wR = maxX - minX, hR = maxY - minY;
+                const r = cP.getBoundingClientRect();
+                cam.z = Math.min((r.width - 60) / Math.max(wR, 1), (r.height - 60) / Math.max(hR, 1));
+                cam.x = (minX + maxX) / 2; cam.y = (minY + maxY) / 2;
+            }
+            render();
+        }
+
+        function toggleSnap() {
+            S.snap = !S.snap;
+            const btn = document.getElementById('snapBtn');
+            if (S.snap) {
+                btn.innerHTML = '<i class="fa-solid fa-border-all"></i> Snap: On';
+                btn.classList.add('active');
+            } else {
+                btn.innerHTML = '<i class="fa-solid fa-border-all"></i> Snap: Off';
+                btn.classList.remove('active');
+            }
+            render();
+        }
+
+        function copyCSV() {
+            const out = document.getElementById('csv-out');
+            out.select();
+            document.execCommand('copy');
+            toast('CSV copied to clipboard!');
+        }
+
+
+        function exportCSV() {
+            const csv = generateCSV();
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'route.csv';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function importCSV(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                try {
+                    const text = evt.target.result;
+                    const lines = text.split('\n');
+                    let parsedStations = [];
+                    let parsedSignals = [];
+                    let parsedObjects = [];
+                    
+                    const structureMap = {};
+                    const distMap = {};
+                    let currentDistance = 0;
+                    let parserMode = '';
+                    let inTrack = false;
+                    let rawHeaderLines = [];
+
+                    // First pass: Parse structures, options, route metadata, and collect track commands grouped by distance
+                    lines.forEach(line => {
+                        const trimmed = line.trim();
+                        const lower = trimmed.toLowerCase();
+                        if (lower.startsWith('with track')) {
+                            inTrack = true;
+                        }
+
+                        if (!inTrack) {
+                            if (lower.startsWith('with route')) { parserMode = 'route'; }
+                            else if (lower.startsWith('with structure')) { parserMode = 'structure'; }
+                            else if (lower.startsWith('with options')) { parserMode = 'options'; }
+
+                            // Support both .FreeObj(index).Load (file) and .FreeObj(index) (file)
+                            const match = trimmed.match(/\.FreeObj\s*\(([^)]+)\)(?:\s*\.\s*Load)?\s*\(([^)]+)\)/i);
+                            if (match) {
+                                structureMap[match[1].trim()] = match[2].trim();
+                            } else {
+                                rawHeaderLines.push(line);
+                            }
+
+                            if (parserMode === 'route') {
+                                if (trimmed.startsWith('.Comment')) {
+                                    S.route.title = trimmed.replace('.Comment', '').replace(/[()]/g, '').trim();
+                                }
+                            } else if (parserMode === 'options') {
+                                if (trimmed.startsWith('.Gauge')) {
+                                    S.route.gauge = parseFloat(trimmed.replace('.Gauge', '').replace(/[()]/g, '').trim()) || 1435;
+                                }
+                            }
+                        } else {
+                            if (trimmed === '') {
+                                if (!distMap[currentDistance]) distMap[currentDistance] = [];
+                                distMap[currentDistance].push({ type: 'empty', value: '' });
+                                return;
+                            }
+                            if (trimmed.startsWith(';')) {
+                                if (!distMap[currentDistance]) distMap[currentDistance] = [];
+                                distMap[currentDistance].push({ type: 'comment', value: line.replace(/[\r\n]/g, '') });
+                                return;
+                            }
+
+                            let cmdPart = trimmed;
+                            const matchDist = trimmed.match(/^([\d.]+)\s*,\s*(.*)$/);
+                            if (matchDist) {
+                                currentDistance = parseFloat(matchDist[1]);
+                                cmdPart = matchDist[2];
+                            }
+                            if (!distMap[currentDistance]) {
+                                distMap[currentDistance] = [];
+                            }
+
+                            const cmds = cmdPart.split(/(?=\.[a-zA-Z])/);
+                            cmds.forEach(cmd => {
+                                const c = cmd.trim();
+                                if (!c) return;
+                                if (c.startsWith('.')) {
+                                    if (c.startsWith('.Curve') || c.startsWith('.Pitch') || c.startsWith('.Height') || c.startsWith('.Sta') || c.startsWith('.SigF') || c.startsWith('.Signal') || c.startsWith('.FreeObj')) {
+                                        distMap[currentDistance].push({ type: 'parsed', value: c });
+                                    } else {
+                                        distMap[currentDistance].push({ type: 'unparsed', value: c });
+                                    }
+                                } else if (c.startsWith(';')) {
+                                    distMap[currentDistance].push({ type: 'comment', value: cmd.replace(/[\r\n]/g, '') });
+                                }
+                            });
+                        }
+                    });
+
+                    // Store raw headers for exporting back later
+                    S.rawHeaderLines = rawHeaderLines;
+
+                    // Get sorted distances
+                    const sortedDists = Object.keys(distMap).map(Number).sort((a, b) => a - b);
+
+                    let parsedNodes = [];
+                    let unparsedTrack = {};
+
+                    if (sortedDists.length > 0) {
+                        if (!distMap[0]) {
+                            distMap[0] = [];
+                            sortedDists.unshift(0);
+                        }
+
+                        let activeRadius = 0;
+                        let activeElevation = 0;
+                        let activePitch = 0;
+                        let lastDist = 0;
+                        let px = 0, py = 0;
+                        let angle = Math.PI / 2; // Face north/up initially
+
+                        sortedDists.forEach(d => {
+                            const deltaD = d - lastDist;
+                            if (deltaD > 0) {
+                                if (activeRadius !== 0) {
+                                    const deltaAngle = -deltaD / activeRadius;
+                                    const avgAngle = angle + deltaAngle / 2;
+                                    px += Math.cos(avgAngle) * deltaD;
+                                    py += Math.sin(avgAngle) * deltaD;
+                                    angle += deltaAngle;
+                                } else {
+                                    px += Math.cos(angle) * deltaD;
+                                    py += Math.sin(angle) * deltaD;
+                                }
+                                activeElevation += (activePitch / 1000) * deltaD;
+                            }
+
+                            const cmds = distMap[d];
+                            let radiusAtThisNode = 0;
+                            let hasCurveCmd = false;
+
+                            // Filter out unparsed, comments, and empty lines to preserve them
+                            unparsedTrack[d] = cmds.filter(x => x.type !== 'parsed');
+
+                            cmds.forEach(c => {
+                                if (c.type !== 'parsed') return;
+                                const val = c.value;
+                                if (val.startsWith('.Curve')) {
+                                    const args = val.replace('.Curve', '').replace(/[()]/g, '').split(';');
+                                    const radius = parseFloat(args[0]) || 0;
+                                    activeRadius = radius;
+                                    radiusAtThisNode = Math.abs(radius);
+                                    hasCurveCmd = true;
+                                } else if (val.startsWith('.Pitch')) {
+                                    const args = val.replace('.Pitch', '').replace(/[()]/g, '').split(';');
+                                    activePitch = parseFloat(args[0]) || 0;
+                                } else if (val.startsWith('.Height')) {
+                                    const args = val.replace('.Height', '').replace(/[()]/g, '').split(';');
+                                    activeElevation = parseFloat(args[0]) || 0;
+                                } else if (val.startsWith('.Sta')) {
+                                    const args = val.replace('.Sta', '').replace(/[()]/g, '').split(';').map(x => x.trim());
+                                    let doorVal = (args[4] || '').trim().toUpperCase();
+                                    let doorsMapped = 0;
+                                    if (doorVal === '-1' || doorVal === 'L') doorsMapped = -1;
+                                    else if (doorVal === '1' || doorVal === 'R') doorsMapped = 1;
+                                    else if (doorVal === 'B') doorsMapped = 'B';
+                                    parsedStations.push({
+                                        name: args[0] || 'Station',
+                                        distance: d,
+                                        stopTime: parseInt(args[8]) || 20,
+                                        doors: doorsMapped,
+                                        file: '',
+                                        rawArgs: args
+                                    });
+                                } else if (val.startsWith('.SigF') || val.startsWith('.Signal')) {
+                                    const cleanCmd = val.startsWith('.SigF') ? '.SigF' : '.Signal';
+                                    const args = val.replace(cleanCmd, '').replace(/[()]/g, '').split(';');
+                                    parsedSignals.push({
+                                        distance: d,
+                                        type: args[0] || '0',
+                                        x: parseFloat(args[2]) || 0,
+                                        y: parseFloat(args[3]) || 0,
+                                        z: 0
+                                    });
+                                } else if (val.startsWith('.FreeObj')) {
+                                    const args = val.replace('.FreeObj', '').replace(/[()]/g, '').split(';');
+                                    const index = (args[1] || '').trim();
+                                    const file = structureMap[index] || ('FreeObj' + index);
+                                    parsedObjects.push({
+                                        file: file,
+                                        distance: d,
+                                        x: parseFloat(args[2]) || 0,
+                                        y: parseFloat(args[3]) || 0,
+                                        z: parseFloat(args[4]) || 0,
+                                        yaw: parseFloat(args[5]) || 0,
+                                        pitch: parseFloat(args[6]) || 0,
+                                        roll: parseFloat(args[7]) || 0
+                                    });
+                                }
+                            });
+
+                            parsedNodes.push({
+                                id: NID++,
+                                x: px,
+                                y: py,
+                                cr: hasCurveCmd ? radiusAtThisNode : Math.abs(activeRadius),
+                                elev: activeElevation,
+                                d: d
+                            });
+
+                            lastDist = d;
+                        });
+                    }
+
+                    S.unparsedTrack = unparsedTrack;
+
+                    if (parsedNodes.length >= 2) {
+                        S.nodes = parsedNodes;
+                    } else {
+                        S.nodes = [
+                            { id: NID++, x: -100, y: 100, cr: 0, elev: 0, d: 100 },
+                            { id: NID++, x: 100, y: 300, cr: 0, elev: 0, d: 300 }
+                        ];
+                    }
+                    S.stations = parsedStations;
+                    S.signals = parsedSignals;
+                    S.objects = parsedObjects;
+
+                    recomp();
+                    refreshAll();
+                    toast('CSV Imported!');
+                } catch (err) {
+                    alert('Import error: ' + err.message);
+                }
+            };
+            reader.readAsText(file);
+            e.target.value = '';
+        }
+
+        function newRoute() {
+            saveU();
+            S.nodes = [
+                { id: NID++, x: -100, y: 100, cr: 0, elev: 0, d: 100 },
+                { id: NID++, x: 100, y: 300, cr: 0, elev: 0, d: 300 }
+            ];
+            S.stations = [];
+            S.signals = [];
+            S.objects = [];
+            S.route = { title: 'New Route', description: '', image: '', speed: 0, gauge: 1435 };
+            recomp();
+            refreshAll();
+        }
+
+        function refreshAll() {
+            renderStations();
+            renderSignals();
+            renderObjects();
+            updateProps();
+            render();
+            document.getElementById('r-title').value = S.route.title;
+            document.getElementById('r-desc').value = S.route.description;
+            document.getElementById('r-img').value = S.route.image;
+            document.getElementById('r-speed').value = S.route.speed;
+            document.getElementById('r-gauge').value = S.route.gauge;
+        }
+
+        // Resizer Logic
+        window.addEventListener('resize', () => {
+            setupCv(cP); setupCv(cR); render();
+        });
+
+        const csvResizer = document.getElementById('csv-resizer');
+        const csvBody = document.getElementById('csv-body');
+        csvResizer.addEventListener('mousedown', e => {
+            e.preventDefault();
+            const startY = e.clientY;
+            const startHeight = csvBody.offsetHeight;
+            function onMouseMove(moveEvent) {
+                const deltaY = moveEvent.clientY - startY;
+                const newHeight = Math.max(60, Math.min(600, startHeight - deltaY));
+                csvBody.style.height = newHeight + 'px';
+                setupCv(cP); setupCv(cR); render();
+            }
+            function onMouseUp() {
+                window.removeEventListener('mousemove', onMouseMove);
+                window.removeEventListener('mouseup', onMouseUp);
+            }
+            window.addEventListener('mousemove', onMouseMove);
+            window.addEventListener('mouseup', onMouseUp);
+        });
+
+        // Boot
+        window.addEventListener('DOMContentLoaded', () => {
+            setupCv(cP); setupCv(cR);
+            newRoute();
+        });
+    </script>
+</body>
+
+</html>

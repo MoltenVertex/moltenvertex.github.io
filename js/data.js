@@ -89,6 +89,8 @@ const PROJECTS = [
     section: 'operational',
   },
 
+
+
   // ── In Service ──
   {
     name: 'Project Two',
@@ -102,6 +104,16 @@ const PROJECTS = [
   },
 
   // ── Under Construction ──
+  {
+    name: 'OpenBVE route.csv Editor',
+    href: './routecsveditor/',
+    description: 'A visual configuration editor for BVE route.csv files.',
+    tech: 'HTML/JS',
+    line: 'green',
+    lineName: 'GREEN LINE',
+    platform: '4',
+    section: 'construction',
+  },
   {
     name: 'Project Three',
     href: '/project3',
