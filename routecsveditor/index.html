@@ -552,6 +552,49 @@
             display: none
         }
 
+        #dropzone {
+            position: fixed;
+            inset: 0;
+            background: rgba(8, 12, 20, .82);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            pointer-events: none
+        }
+        #dropzone.show {
+            display: flex
+        }
+        #dropzone .dz-box {
+            border: 2px dashed var(--ac);
+            border-radius: 12px;
+            padding: 48px 64px;
+            color: var(--tx);
+            font-size: 18px;
+            text-align: center;
+            background: var(--sf2)
+        }
+        #dropzone .dz-box i {
+            font-size: 42px;
+            display: block;
+            margin-bottom: 12px;
+            color: var(--ac)
+        }
+
+        .file-tag {
+            font-size: 11px;
+            color: var(--tx2);
+            max-width: 220px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            margin-left: 4px
+        }
+        .file-tag.dirty::before {
+            content: "● ";
+            color: var(--wr)
+        }
+
         .stat-row {
             display: flex;
             justify-content: space-between;
@@ -598,6 +641,8 @@
         </div>
         <div class="ts"></div>
         <div class="tg">
+            <button id="toolSelBtn" class="active" onclick="setTool('select')" title="Select / Edit (V)"><i class="fa-solid fa-arrow-pointer"></i> Select</button>
+            <button id="toolAddBtn" onclick="setTool('add')" title="Add nodes (A)"><i class="fa-solid fa-plus"></i> Add</button>
             <button onclick="zoomIn()"><i class="fa-solid fa-magnifying-glass-plus"></i></button>
             <button onclick="zoomOut()"><i class="fa-solid fa-magnifying-glass-minus"></i></button>
             <button onclick="fitView()"><i class="fa-solid fa-expand"></i> Fit</button>
@@ -608,8 +653,17 @@
             <button onclick="undo()" title="Undo (Ctrl+Z)"><i class="fa-solid fa-rotate-left"></i></button>
             <button onclick="redo()" title="Redo (Ctrl+Y)"><i class="fa-solid fa-rotate-right"></i></button>
         </div>
+        <div class="ts"></div>
+        <div class="tg">
+            <button onclick="document.getElementById('fi').click()"><i class="fa-solid fa-folder-open"></i> Open</button>
+            <button onclick="newRoute()"><i class="fa-solid fa-file"></i> New</button>
+            <span id="file-tag" class="file-tag"></span>
+        </div>
         <input type="file" id="fi" accept=".csv,.txt" onchange="importCSV(event)">
     </header>
+
+    <div id="dropzone"><div class="dz-box"><i class="fa-solid fa-arrow-up-from-bracket"></i>Drop CSV route file to load</div></div>
+
 
     <main>
         <aside class="pl">
@@ -699,7 +753,8 @@
         const S = {
             nodes: [], stations: [], signals: [], objects: [],
             route: { title: 'Untitled Route', description: '', image: '', speed: 0, gauge: 1435 },
-            selId: null, activeView: 'plan', snap: false
+            selId: null, activeView: 'plan', snap: false, tool: 'select',
+            loaded: false, dirty: false, fileName: ''
         };
         const cam = { x: 0, y: 400, z: 0.35 };
         const pcam = { x: 0, y: 0, z: 0.5 };
@@ -736,22 +791,42 @@
         function computePath() {
             const nd = S.nodes, n = nd.length;
             if (n < 2) { PD = { segs: [], dists: [], tps: [], bears: [] }; return; }
+
+            // Per-segment bearings (between every adjacent pair). Marker nodes
+            // (Sta/SigF/FreeObj) are skipped when deriving curve deflection so
+            // they don't split an arc. `gb[i]` = bearing arriving at node i
+            // along the *geometric* path (ignoring markers sitting mid-segment).
             const bears = [];
             for (let i = 0; i < n - 1; i++) bears.push(Math.atan2(nd[i + 1].y - nd[i].y, nd[i + 1].x - nd[i].x));
+            const gb = new Array(n).fill(null);
+            let lastDir = bears[0];
+            for (let i = 0; i < n; i++) {
+                if (i > 0) lastDir = nd[i]._marker ? lastDir : bears[i - 1];
+                gb[i] = lastDir;
+            }
 
             const tps = new Array(n).fill(null);
             for (let i = 1; i < n - 1; i++) {
-                const R = nd[i].cr;
+                if (nd[i]._marker) continue;
+                const R = effCr(nd[i]);
                 if (R <= 0) continue;
-                const defl = nAng(bears[i] - bears[i - 1]);
+                // direction before node i: last geometric direction arriving here
+                let bi = i - 1;
+                while (bi > 0 && nd[bi]._marker) bi--;
+                const dirIn = gb[bi >= 0 ? bi : 0];
+                // direction after node i
+                let ai = i + 1;
+                while (ai < n - 1 && nd[ai]._marker) ai++;
+                const dirOut = (ai < n) ? gb[ai] : bears[n - 2];
+                const defl = nAng(dirOut - dirIn);
                 if (Math.abs(defl) < 0.003) continue;
                 const T = R * Math.tan(Math.abs(defl) / 2);
-                const sL = dist(nd[i - 1], nd[i]), sA = dist(nd[i], nd[i + 1]);
+                const sL = dist(nd[bi], nd[i]), sA = dist(nd[i], nd[ai < n ? ai : n - 1]);
                 if (T >= sL * 0.95 || T >= sA * 0.95) { tps[i] = { valid: false, R }; continue; }
-                const t1 = { x: nd[i].x - T * Math.cos(bears[i - 1]), y: nd[i].y - T * Math.sin(bears[i - 1]) };
-                const t2 = { x: nd[i].x + T * Math.cos(bears[i]), y: nd[i].y + T * Math.sin(bears[i]) };
+                const t1 = { x: nd[i].x - T * Math.cos(dirIn), y: nd[i].y - T * Math.sin(dirIn) };
+                const t2 = { x: nd[i].x + T * Math.cos(dirOut), y: nd[i].y + T * Math.sin(dirOut) };
                 const sg = defl > 0 ? 1 : -1;
-                const ctr = { x: t1.x + R * Math.cos(bears[i - 1] + sg * Math.PI / 2), y: t1.y + R * Math.sin(bears[i - 1] + sg * Math.PI / 2) };
+                const ctr = { x: t1.x + R * Math.cos(dirIn + sg * Math.PI / 2), y: t1.y + R * Math.sin(dirIn + sg * Math.PI / 2) };
                 tps[i] = { t1, t2, ctr, R, aLen: R * Math.abs(defl), defl, sg, valid: true };
             }
 
@@ -775,7 +850,7 @@
                 }
                 dists[i + 1] = cd;
             }
-            PD = { segs, dists, tps, bears };
+            PD = { segs, dists, tps, bears, gb };
         }
 
         function posAtDist(d) {
@@ -795,6 +870,37 @@
             if (last.type === 's') return { x: last.e.x, y: last.e.y, dir: Math.atan2(last.e.y - last.s.y, last.e.x - last.s.x) };
             const wa = Math.atan2(last.t2.y - last.ctr.y, last.t2.x - last.ctr.x);
             return { x: last.t2.x, y: last.t2.y, dir: wa + last.sg * Math.PI / 2 };
+        }
+
+        // Recompute geometric commands (Curve/Pitch) for ONE node only, so
+        // imported verbatim geometry on other nodes is never clobbered by
+        // marker nodes (Sta/SigF/FreeObj) that would otherwise split arcs.
+        function writeNodeGeom(nd) {
+            if (!S.geom) S.geom = {};
+            const d = Math.round(nd.d !== undefined ? nd.d : (PD ? (PD.dists[S.nodes.indexOf(nd)] || 0) : 0));
+            let arr = (S.geom[d] || []).filter(c => !/^\.(Curve|Pitch|Height)/.test(c));
+            const i = S.nodes.indexOf(nd);
+            if (i > 0 && i < S.nodes.length && effCr(nd) > 0 && PD && PD.gb) {
+                let bi = i - 1; while (bi > 0 && S.nodes[bi]._marker) bi--;
+                let ai = i + 1; while (ai < S.nodes.length - 1 && S.nodes[ai]._marker) ai++;
+                const dirIn = PD.gb[bi >= 0 ? bi : 0];
+                const dirOut = ai < S.nodes.length ? PD.gb[ai] : PD.bears[S.nodes.length - 2];
+                const defl = nAng(dirOut - dirIn);
+                if (Math.abs(defl) >= 0.003) {
+                    const sign = defl > 0 ? 1 : -1;
+                    arr.push(`.Curve(${effCr(nd) * sign}; ${nd.cant || 0})`);
+                }
+            }
+            if (i < S.nodes.length - 1) {
+                const nx = S.nodes[i + 1];
+                const d2 = PD ? (PD.dists[i + 1] || 0) : 0;
+                const sL = d2 - d;
+                if (sL > 0.1) {
+                    const grad = (nx.elev - nd.elev) / sL * 1000;
+                    if (Math.abs(grad) > 0.01) arr.push(`.Pitch(${grad.toFixed(2)})`);
+                }
+            }
+            S.geom[d] = arr;
         }
 
         function recomp() {
@@ -946,6 +1052,30 @@
                 ctx.fillText(st.name, sx, sy - 16);
             }
 
+            // FreeObj markers on plan — a point offset laterally from the rail
+            // by the object's X value (OpenBVE: +X = left of travel direction).
+            for (const ob of S.objects) {
+                if (!ob.file) continue;
+                const p = posAtDist(ob.distance);
+                const nx = Math.cos(p.dir + Math.PI / 2), ny = Math.sin(p.dir + Math.PI / 2);
+                const ox = p.x + nx * (ob.x || 0), oy = p.y + ny * (ob.x || 0);
+                const sx = w2sx(ox), sy = w2sy(oy);
+                if (sx < -20 || sx > W + 20 || sy < -20 || sy > H + 20) continue;
+                // connector from rail to object
+                ctx.strokeStyle = 'rgba(120,170,255,0.35)'; ctx.lineWidth = 1; ctx.setLineDash([2, 2]);
+                ctx.beginPath(); ctx.moveTo(w2sx(p.x), w2sy(p.y)); ctx.lineTo(sx, sy); ctx.stroke();
+                ctx.setLineDash([]);
+                // marker: small blue square (icon-ish)
+                ctx.fillStyle = 'rgba(120,170,255,0.18)';
+                ctx.fillRect(sx - 6, sy - 6, 12, 12);
+                ctx.fillStyle = '#78aaff';
+                ctx.fillRect(sx - 3, sy - 3, 6, 6);
+                // index / file label
+                ctx.fillStyle = '#aac4ff'; ctx.font = '500 9px Space Grotesk'; ctx.textAlign = 'left';
+                const lbl = ob.file.length > 14 ? ob.file.slice(0, 12) + '…' : ob.file;
+                ctx.fillText(lbl, sx + 8, sy + 3);
+            }
+
             // Selected node info
             const sn = selN();
             if (sn) {
@@ -997,6 +1127,31 @@
                 // Center dot
                 ctx.fillStyle = sel ? '#3ec9b0' : 'rgba(62,201,176,0.8)';
                 ctx.beginPath(); ctx.arc(sx, sy, 1.5, 0, Math.PI * 2); ctx.fill();
+            }
+
+            // Tangent handles for the selected node (smooth/auto interpolation)
+            S._handles = [];
+            const sn2 = selN();
+            if (sn2 && effCr(sn2) > 0 && S.tool === 'select') {
+                const idx = S.nodes.indexOf(sn2);
+                const prev = S.nodes[idx - 1], next = S.nodes[idx + 1];
+                const hr = clamp(effCr(sn2) * cam.z, 24, 160);
+                const dirIn = prev ? Math.atan2(sn2.y - prev.y, sn2.x - prev.x) : (next ? Math.atan2(sn2.y - next.y, sn2.x - next.x) + Math.PI : -Math.PI / 2);
+                const dirOut = next ? Math.atan2(next.y - sn2.y, next.x - sn2.x) : dirIn;
+                const handles = [
+                    { id: sn2.id, side: 'in', x: sn2.x + Math.cos(dirIn) * (hr / cam.z), y: sn2.y + Math.sin(dirIn) * (hr / cam.z) },
+                    { id: sn2.id, side: 'out', x: sn2.x + Math.cos(dirOut) * (hr / cam.z), y: sn2.y + Math.sin(dirOut) * (hr / cam.z) }
+                ];
+                ctx.strokeStyle = 'rgba(232,148,58,0.55)'; ctx.lineWidth = 1.2;
+                for (const h of handles) {
+                    const hx = w2sx(h.x), hy = w2sy(h.y);
+                    ctx.beginPath(); ctx.moveTo(w2sx(sn2.x), w2sy(sn2.y)); ctx.lineTo(hx, hy); ctx.stroke();
+                    ctx.fillStyle = 'rgba(232,148,58,0.95)';
+                    ctx.beginPath(); ctx.arc(hx, hy, 5, 0, Math.PI * 2); ctx.fill();
+                    ctx.fillStyle = '#0d0f14';
+                    ctx.beginPath(); ctx.arc(hx, hy, 2, 0, Math.PI * 2); ctx.fill();
+                    S._handles.push({ ...h, sx: hx, sy: hy });
+                }
             }
 
             // Preview line
@@ -1115,7 +1270,7 @@
         /* ================================================================
            PLAN INTERACTION
            ================================================================ */
-        const pi = { mode: 'idle', dragId: null, sx: 0, sy: 0, moved: false, mx: 0, my: 0, pan: false, pc: null, pm: null, sp: false };
+        const pi = { mode: 'idle', dragId: null, handle: null, sx: 0, sy: 0, moved: false, mx: 0, my: 0, pan: false, pc: null, pm: null, sp: false };
 
         cP.addEventListener('mousedown', e => {
             if (S.activeView !== 'plan') return;
@@ -1125,11 +1280,42 @@
             }
             if (e.button !== 0) return;
             const wx = s2wx(sx), wy = s2wy(sy);
+
+            // 1) Handle hit (curve radius edit)
+            if (S.tool === 'select' && S._handles && S._handles.length) {
+                for (const h of S._handles) {
+                    if (Math.hypot(h.sx - sx, h.sy - sy) < 9) {
+                        saveU(); pi.mode = 'handle'; pi.handle = h; pi.moved = false;
+                        S.selId = h.id; render(); return;
+                    }
+                }
+            }
+
+            // 2) Node hit
             let hitId = null, hitD = 14;
             for (const nd of S.nodes) { const d = Math.hypot(w2sx(nd.x) - sx, w2sy(nd.y) - sy); if (d < hitD) { hitD = d; hitId = nd.id; } }
-            if (hitId != null) { saveU(); pi.mode = 'dragging'; pi.dragId = hitId; pi.sx = wx; pi.sy = wy; pi.moved = false; S.selId = hitId; updateProps(); }
-            else { pi.mode = 'adding'; pi.sx = wx; pi.sy = wy; pi.moved = false; }
-            pi.mx = sx; pi.my = sy;
+            if (hitId != null) { saveU(); pi.mode = 'dragging'; pi.dragId = hitId; pi.sx = wx; pi.sy = wy; pi.moved = false; S.selId = hitId; updateProps(); render(); return; }
+
+            // 3) Add tool: click empty inserts node on nearest segment
+            if (S.tool === 'add') {
+                pi.mode = 'adding'; pi.sx = wx; pi.sy = wy; pi.moved = false; pi.mx = sx; pi.my = sy; render(); return;
+            }
+
+            // 4) Select tool: click empty near a segment inserts node there (split)
+            if (S.tool === 'select') {
+                let bestS = -1, bestD = 12;
+                for (let i = 0; i < S.nodes.length - 1; i++) {
+                    const d = ptSegD(wx, wy, S.nodes[i], S.nodes[i + 1]);
+                    const sd = d * cam.z; if (sd < bestD) { bestD = sd; bestS = i; }
+                }
+                if (bestS >= 0) {
+                    saveU();
+                    const nn = { id: NID++, x: wx, y: wy, cr: 0, elev: lerp(S.nodes[bestS].elev, S.nodes[bestS + 1].elev, .5), interp: 'auto' };
+                    S.nodes.splice(bestS + 1, 0, nn);
+                    S.selId = nn.id; pi.moved = true; recomp(); updateProps(); render(); return;
+                }
+                S.selId = null; updateProps(); render();
+            }
         });
 
         cP.addEventListener('mousemove', e => {
@@ -1137,51 +1323,73 @@
             const r = cP.getBoundingClientRect(), sx = e.clientX - r.left, sy = e.clientY - r.top;
             pi.mx = sx; pi.my = sy;
             if (pi.pan) { cam.x = pi.pc.x - (e.clientX - pi.pm.x) / cam.z; cam.y = pi.pc.y + (e.clientY - pi.pm.y) / cam.z; render(); return; }
+
+            if (pi.mode === 'handle') {
+                const nd = gN(pi.handle.id);
+                if (nd) {
+                    const wx = s2wx(sx), wy = s2wy(sy);
+                    const rad = dist({ x: nd.x, y: nd.y }, { x: wx, y: wy }) / cam.z;
+                    const cr = Math.round(clamp(rad, 5, 100000) / 5) * 5;
+                    setCR(nd.id, cr);
+                    pi.moved = true;
+                }
+                render(); return;
+            }
+
             if (pi.mode === 'dragging') {
                 const nd = gN(pi.dragId);
                 if (nd) {
                     let wx = s2wx(sx), wy = s2wy(sy);
-                    if (S.snap) {
-                        wx = Math.round(wx / 10) * 10;
-                        wy = Math.round(wy / 10) * 10;
-                    }
+                    if (S.snap) { wx = Math.round(wx / 10) * 10; wy = Math.round(wy / 10) * 10; }
                     if (Math.abs(wx - pi.sx) > 2 || Math.abs(wy - pi.sy) > 2) pi.moved = true;
                     nd.x = wx; nd.y = wy; recomp(); updateProps();
                 }
                 render(); return;
             }
             if (pi.mode === 'adding') { if (Math.abs(s2wx(sx) - pi.sx) > 2 || Math.abs(s2wy(sy) - pi.sy) > 2) pi.moved = true; render(); return; }
+
             let hit = false;
             for (const nd of S.nodes) if (Math.hypot(w2sx(nd.x) - sx, w2sy(nd.y) - sy) < 12) { hit = true; break; }
-            cP.style.cursor = pi.sp ? 'grab' : hit ? 'pointer' : 'crosshair';
+            let hh = false;
+            if (S._handles) for (const h of S._handles) if (Math.hypot(h.sx - sx, h.sy - sy) < 9) { hh = true; break; }
+            cP.style.cursor = pi.sp ? 'grab' : (hh ? 'ew-resize' : hit ? 'pointer' : (S.tool === 'add' ? 'crosshair' : 'default'));
         });
 
         cP.addEventListener('mouseup', e => {
             if (S.activeView !== 'plan') return;
             if (pi.pan) { pi.pan = false; return; }
-            if (pi.mode === 'dragging') { if (!pi.moved) uStack.pop(); pi.mode = 'idle'; render(); return; }
-            if (pi.mode === 'adding' && !pi.moved) {
+            if (pi.mode === 'handle' || pi.mode === 'dragging') { if (!pi.moved) uStack.pop(); pi.mode = 'idle'; pi.handle = null; render(); return; }
+            if (pi.mode === 'adding' && !pi.moved && S.tool === 'add') {
                 saveU();
                 const r = cP.getBoundingClientRect(), sx = e.clientX - r.left, sy = e.clientY - r.top;
                 let wx = s2wx(sx), wy = s2wy(sy);
-                if (S.snap) {
-                    wx = Math.round(wx / 10) * 10;
-                    wy = Math.round(wy / 10) * 10;
-                }
+                if (S.snap) { wx = Math.round(wx / 10) * 10; wy = Math.round(wy / 10) * 10; }
                 let bestS = -1, bestD = 15;
                 for (let i = 0; i < S.nodes.length - 1; i++) { const d = ptSegD(wx, wy, S.nodes[i], S.nodes[i + 1]); const sd = d * cam.z; if (sd < bestD) { bestD = sd; bestS = i; } }
                 let nn;
                 if (bestS >= 0 && S.nodes.length >= 2) {
-                    nn = { id: NID++, x: wx, y: wy, cr: 0, elev: lerp(S.nodes[bestS].elev, S.nodes[bestS + 1].elev, .5) };
+                    nn = { id: NID++, x: wx, y: wy, cr: 0, elev: lerp(S.nodes[bestS].elev, S.nodes[bestS + 1].elev, .5), interp: 'auto' };
                     S.nodes.splice(bestS + 1, 0, nn);
                 } else {
                     const le = S.nodes.length > 0 ? S.nodes[S.nodes.length - 1].elev : 0;
-                    nn = { id: NID++, x: wx, y: wy, cr: 0, elev: le };
+                    nn = { id: NID++, x: wx, y: wy, cr: 0, elev: le, interp: 'auto' };
                     S.nodes.push(nn);
                 }
                 S.selId = nn.id; recomp(); updateProps(); render();
             }
             pi.mode = 'idle'; render();
+        });
+
+        cP.addEventListener('dblclick', e => {
+            if (S.activeView !== 'plan') return;
+            const r = cP.getBoundingClientRect(), sx = e.clientX - r.left, sy = e.clientY - r.top;
+            for (const nd of S.nodes) {
+                if (Math.hypot(w2sx(nd.x) - sx, w2sy(nd.y) - sy) < 14) {
+                    saveU(); S.nodes = S.nodes.filter(n => n.id !== nd.id);
+                    if (S.selId === nd.id) S.selId = null;
+                    recomp(); updateProps(); render(); return;
+                }
+            }
         });
 
         cP.addEventListener('contextmenu', e => {
@@ -1241,7 +1449,12 @@
             if (e.ctrlKey && e.code === 'KeyZ') { e.preventDefault(); undo(); }
             if (e.ctrlKey && e.code === 'KeyY') { e.preventDefault(); redo(); }
         });
-        document.addEventListener('keyup', e => { if (e.code === 'Space') { pi.sp = false; cP.style.cursor = 'crosshair'; } });
+        document.addEventListener('keyup', e => { if (e.code === 'Space') { pi.sp = false; cP.style.cursor = S.tool === 'add' ? 'crosshair' : 'default'; } });
+        document.addEventListener('keydown', e => {
+            if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA' || document.activeElement.tagName === 'SELECT') return;
+            if (e.code === 'KeyA') { setTool('add'); }
+            else if (e.code === 'KeyV') { setTool('select'); }
+        });
 
         /* ================================================================
            PROPERTIES PANEL
@@ -1258,14 +1471,23 @@
             const tp = PD ? PD.tps[idx] : null;
             const ok = tp && tp.valid, bad = tp && !tp.valid && tp.R > 0;
 
+            const ip = nd.interp || 'auto';
             el.innerHTML = `
     <div class="fl fl-ro"><label>Distance</label><input value="${fN(d, 1)} m" readonly></div>
     <div class="fl fl-ro"><label>X</label><input value="${fN(nd.x, 1)}" readonly></div>
     <div class="fl fl-ro"><label>Y</label><input value="${fN(nd.y, 1)}" readonly></div>
     <div class="sep"></div>
+    <div class="fl"><label>Interpolation</label>
+      <select onchange="setInterp(${nd.id},this.value)">
+        <option value="auto" ${ip === 'auto' ? 'selected' : ''}>Auto (smooth)</option>
+        <option value="smooth" ${ip === 'smooth' ? 'selected' : ''}>Smooth</option>
+        <option value="sharp" ${ip === 'sharp' ? 'selected' : ''}>Sharp</option>
+        <option value="linear" ${ip === 'linear' ? 'selected' : ''}>Linear</option>
+      </select>
+    </div>
     <div class="fl"><label>Curve Radius (m)</label>
-      <input type="range" min="0" max="10000" step="10" value="${nd.cr}" oninput="setCR(${nd.id},+this.value);this.nextElementSibling.value=this.value">
-      <input type="number" min="0" max="100000" step="10" value="${nd.cr}" oninput="setCR(${nd.id},+this.value);this.previousElementSibling.value=this.value" style="margin-top:3px">
+      <input type="range" min="0" max="10000" step="10" value="${nd.cr}" oninput="setCR(${nd.id},+this.value);this.nextElementSibling.value=this.value" ${ip === 'sharp' || ip === 'linear' ? 'disabled' : ''}>
+      <input type="number" min="0" max="100000" step="10" value="${nd.cr}" oninput="setCR(${nd.id},+this.value);this.previousElementSibling.value=this.value" style="margin-top:3px" ${ip === 'sharp' || ip === 'linear' ? 'disabled' : ''}>
     </div>
     ${ok ? `<div class="curve-info curve-ok">Arc: ${fN(tp.aLen, 1)}m &middot; Defl: ${fN(Math.abs(tp.defl) * 180 / Math.PI, 1)}&deg;</div>` : ''}
     ${bad ? `<div class="curve-info curve-err">R too small for angle</div>` : ''}
@@ -1280,8 +1502,9 @@
     <button class="btn btn-d btn-blk" style="margin-top:8px" onclick="delNd(${nd.id})"><i class="fa-solid fa-trash"></i> Delete Node</button>
   `;
         }
-        function setCR(id, v) { const nd = gN(id); if (nd) { nd.cr = Math.max(0, v); recomp(); updateProps(); render(); } }
-        function setElev(id, v) { const nd = gN(id); if (nd) { nd.elev = v; recomp(); updateProps(); render(); } }
+        function setCR(id, v) { const nd = gN(id); if (nd) { nd.cr = Math.max(0, v); nd.interp = v > 0 ? 'smooth' : 'auto'; recomp(); writeNodeGeom(nd); updateProps(); render(); } }
+        function setInterp(id, v) { const nd = gN(id); if (nd) { nd.interp = v; if (v === 'sharp' || v === 'linear') nd.cr = 0; recomp(); writeNodeGeom(nd); updateProps(); render(); } }
+        function setElev(id, v) { const nd = gN(id); if (nd) { nd.elev = v; recomp(); writeNodeGeom(nd); updateProps(); render(); } }
         function delNd(id) { saveU(); S.nodes = S.nodes.filter(n => n.id !== id); if (S.selId === id) S.selId = null; recomp(); updateProps(); render(); }
         function moveNd(id, dir) {
             const idx = S.nodes.findIndex(n => n.id === id), ni = idx + dir;
@@ -1323,15 +1546,22 @@
     <div class="li">
       <div class="li-h"><span>Signal ${i + 1}</span><button onclick="rmSig(${i})"><i class="fa-solid fa-xmark"></i></button></div>
       <div class="fl"><label>Distance (m)</label><input type="number" value="${sg.distance}" oninput="S.signals[${i}].distance=+this.value;updateCSV()"></div>
-      <div class="fl"><label>Type</label><input value="${sg.type}" oninput="S.signals[${i}].type=this.value;updateCSV()"></div>
+      <div class="fr">
+        <div class="fl"><label>Index</label><input value="${sg.type}" oninput="S.signals[${i}].type=this.value;updateCSV()"></div>
+        <div class="fl"><label>Section</label><input type="number" step="1" value="${sg.section || 0}" oninput="S.signals[${i}].section=+this.value;updateCSV()"></div>
+      </div>
       <div class="fr">
         <div class="fl"><label>X</label><input type="number" step="0.1" value="${sg.x}" oninput="S.signals[${i}].x=+this.value;updateCSV()"></div>
         <div class="fl"><label>Y</label><input type="number" step="0.1" value="${sg.y}" oninput="S.signals[${i}].y=+this.value;updateCSV()"></div>
-        <div class="fl"><label>Z</label><input type="number" step="0.1" value="${sg.z || 0}" oninput="S.signals[${i}].z=+this.value;updateCSV()"></div>
+      </div>
+      <div class="fr">
+        <div class="fl"><label>Yaw</label><input type="number" step="1" value="${sg.yaw || 0}" oninput="S.signals[${i}].yaw=+this.value;updateCSV()"></div>
+        <div class="fl"><label>Pitch</label><input type="number" step="1" value="${sg.pitch || 0}" oninput="S.signals[${i}].pitch=+this.value;updateCSV()"></div>
+        <div class="fl"><label>Roll</label><input type="number" step="1" value="${sg.roll || 0}" oninput="S.signals[${i}].roll=+this.value;updateCSV()"></div>
       </div>
     </div>`).join('');
         }
-        function addSignal() { saveU(); const d = PD ? (PD.dists[PD.dists.length - 1] || 0) / 2 : 0; S.signals.push({ distance: Math.round(d), type: '0', x: 0, y: 0, z: 0 }); renderSignals(); updateCSV(); render(); }
+        function addSignal() { saveU(); const d = PD ? (PD.dists[PD.dists.length - 1] || 0) / 2 : 0; S.signals.push({ distance: Math.round(d), type: '0', section: 0, x: 0, y: 0, yaw: 0, pitch: 0, roll: 0 }); renderSignals(); updateCSV(); render(); }
         function rmSig(i) { saveU(); S.signals.splice(i, 1); renderSignals(); updateCSV(); }
 
         function renderObjects() {
@@ -1343,7 +1573,6 @@
       <div class="fr">
         <div class="fl"><label>X</label><input type="number" step="0.1" value="${ob.x}" oninput="S.objects[${i}].x=+this.value;updateCSV()"></div>
         <div class="fl"><label>Y</label><input type="number" step="0.1" value="${ob.y}" oninput="S.objects[${i}].y=+this.value;updateCSV()"></div>
-        <div class="fl"><label>Z</label><input type="number" step="0.1" value="${ob.z || 0}" oninput="S.objects[${i}].z=+this.value;updateCSV()"></div>
       </div>
       <div class="fr">
         <div class="fl"><label>Yaw</label><input type="number" step="1" value="${ob.yaw || 0}" oninput="S.objects[${i}].yaw=+this.value;updateCSV()"></div>
@@ -1352,7 +1581,7 @@
       </div>
     </div>`).join('');
         }
-        function addObject() { saveU(); const d = PD ? (PD.dists[PD.dists.length - 1] || 0) / 2 : 0; S.objects.push({ file: '', distance: Math.round(d), x: 0, y: 0, z: 0, yaw: 0, pitch: 0, roll: 0 }); renderObjects(); updateCSV(); render(); }
+        function addObject() { saveU(); const d = PD ? (PD.dists[PD.dists.length - 1] || 0) / 2 : 0; S.objects.push({ file: '', distance: Math.round(d), x: 0, y: 0, yaw: 0, pitch: 0, roll: 0 }); renderObjects(); updateCSV(); render(); }
         function rmObj(i) { saveU(); S.objects.splice(i, 1); renderObjects(); updateCSV(); }
 
         /* ================================================================
@@ -1370,36 +1599,32 @@
                 }
             });
 
-            const headerLines = S.rawHeaderLines || [];
-            let structureHeaderIdx = -1;
-            for (let i = 0; i < headerLines.length; i++) {
-                if (headerLines[i].trim().toLowerCase() === 'with structure') {
-                    structureHeaderIdx = i;
-                    break;
-                }
-            }
+            const sections = S.sections || [];
+            const structure = S.structure || {};
 
-            if (structureHeaderIdx >= 0) {
-                const before = headerLines.slice(0, structureHeaderIdx + 1);
-                const after = headerLines.slice(structureHeaderIdx + 1);
-                const freeObjLines = [];
-                for (const file in objMap) {
-                    freeObjLines.push(`\t.FreeObj(${objMap[file]}).Load (${file})`);
+            // Write preserved header sections in their original order.
+            sections.forEach(sec => {
+                if (sec.name === 'route') {
+                    const has = s => sec.lines.some(l => l.trim().toLowerCase().startsWith(s.toLowerCase()));
+                    if (S.route.title && !has('.comment')) L.push(`\t.Comment (${S.route.title})`);
+                    sec.lines.forEach(l => L.push(l));
+                } else if (sec.name === 'structure') {
+                    // preserve original index->file lines verbatim
+                    sec.lines.forEach(l => L.push(l));
+                } else {
+                    sec.lines.forEach(l => L.push(l));
                 }
-                L.push(...before, ...freeObjLines, ...after);
-            } else {
-                L.push(...headerLines);
-                if (objIdx > 0) {
-                    L.push('With Structure');
-                    for (const file in objMap) {
-                        L.push(`\t.FreeObj(${objMap[file]}).Load (${file})`);
-                    }
-                    L.push('');
-                }
+            });
+
+            // If the source had no sections at all, emit a default With Route.
+            if (!sections.length) {
+                L.push('With Route');
+                if (S.route.title) L.push(`\t.Comment (${S.route.title})`);
+                if (S.route.gauge) L.push(`\t.Gauge ${S.route.gauge}`);
+                if (S.route.speed) L.push(`\t.Speed ${S.route.speed}`);
             }
 
             L.push('With Track');
-            L.push('');
 
             const dMap = {};
             function addCmd(d, cmd) {
@@ -1408,87 +1633,87 @@
                 dMap[distKey].push(cmd);
             }
 
-            if (S.nodes.length > 0) {
-                for (let i = 0; i < S.nodes.length; i++) {
-                    const nd = S.nodes[i];
-                    const d = nd.d !== undefined ? nd.d : (PD ? (PD.dists[i] || 0) : 0);
-                    
-                    if (i > 0 && i < S.nodes.length - 1 && nd.cr > 0 && PD && PD.tps[i] && PD.tps[i].valid) {
-                        const tp = PD.tps[i];
-                        const sign = tp.defl > 0 ? -1 : 1;
-                        addCmd(d, `.Curve(${nd.cr * sign}; ${tp.cant || 0})`);
-                    }
-
-                    if (i < S.nodes.length - 1) {
-                        const nextNd = S.nodes[i + 1];
-                        const d2 = PD ? (PD.dists[i + 1] || 0) : 0;
-                        const sL = d2 - d;
-                        if (sL > 0.1) {
-                            const grad = (nextNd.elev - nd.elev) / sL * 1000;
-                            if (Math.abs(grad) > 0.01) {
-                                addCmd(d, `.Pitch(${grad.toFixed(2)})`);
-                            }
-                        }
-                    }
-                }
-            }
-
-            S.stations.forEach(st => {
-                if (st.rawArgs) {
-                    addCmd(st.distance, `.Sta(${st.rawArgs.join('; ')})`);
-                } else {
-                    const doorCode = st.doors === -1 ? -1 : (st.doors === 1 ? 1 : 0);
-                    addCmd(st.distance, `.Sta(${st.name}; ; ; ; ${doorCode}; 0; ; ; ${st.stopTime})`);
-                }
-            });
-
-            S.signals.forEach(sg => {
-                addCmd(sg.distance, `.SigF(${sg.type}; 1; ${sg.x}; ${sg.y})`);
-            });
-
-            S.objects.forEach(ob => {
-                if (ob.file) {
-                    const idx = objMap[ob.file];
-                    addCmd(ob.distance, `.FreeObj(0; ${idx}; ${ob.x}; ${ob.y}; ${ob.z || 0}; ${ob.yaw || 0}; ${ob.pitch || 0}; ${ob.roll || 0})`);
-                }
-            });
-
-            // Combine dynamic track commands with preserved comments and unparsed commands
+            // Geometric commands (Curve/Pitch/Height) come from S.geom so edited
+            // nodes round-trip correctly; all other commands come verbatim from
+            // S.unparsedTrack in their original order.
+            const geom = S.geom || {};
+            const isGeom = v => v.startsWith('.Curve') || v.startsWith('.Pitch') || v.startsWith('.Height');
             const allDistsSet = new Set([
-                ...Object.keys(dMap).map(Number),
+                ...Object.keys(geom).map(Number),
                 ...Object.keys(S.unparsedTrack || {}).map(Number)
             ]);
             const sortedTrackDists = Array.from(allDistsSet).sort((a, b) => a - b);
 
             sortedTrackDists.forEach(d => {
-                const dynamicCmds = dMap[d] || [];
-                const unparsedItems = (S.unparsedTrack && S.unparsedTrack[d]) || [];
-                
-                const lineCmds = [...dynamicCmds];
-                unparsedItems.forEach(item => {
-                    if (item.type === 'comment') {
-                        L.push(item.value);
-                    } else if (item.type === 'empty') {
+                const items = (S.unparsedTrack && S.unparsedTrack[d]) || [];
+                const geomOverrides = (geom[d] || []).slice();
+                let startedDistStr = null;
+                const startLine = (distStr, first) => {
+                    L.push(`${distStr},\t${first}`);
+                    startedDistStr = distStr;
+                };
+                items.forEach(item => {
+                    if (item.type === 'empty') {
                         L.push('');
-                    } else if (item.type === 'unparsed') {
-                        lineCmds.push(item.value);
+                    } else if (item.type === 'comment') {
+                        L.push(item.value);
+                    } else if (item.type === 'unparsed' || item.type === 'parsed') {
+                        let val = item.value;
+                        if (isGeom(val) && geomOverrides.length) {
+                            val = geomOverrides.shift();
+                        } else if (isGeom(val)) {
+                            return; // geom without override already absent; skip
+                        }
+                        const distStr = item.distStr != null ? item.distStr : d;
+                        if (startedDistStr === null) {
+                            startLine(distStr, val);
+                        } else if (startedDistStr === distStr) {
+                            L.push(`\t${val}`);
+                        } else {
+                            startLine(distStr, val);
+                        }
                     }
                 });
-
-                if (lineCmds.length > 0) {
-                    L.push(`${d},\t${lineCmds[0]}`);
-                    for (let i = 1; i < lineCmds.length; i++) {
-                        L.push(`\t${lineCmds[i]}`);
-                    }
-                }
+                // any geom overrides without a matching original (new nodes)
+                geomOverrides.forEach(g => {
+                    const distStr = (S.distFmt && S.distFmt[d] != null) ? S.distFmt[d] : d;
+                    if (startedDistStr === null) startLine(distStr, g);
+                    else if (startedDistStr === distStr) L.push(`\t${g}`);
+                    else startLine(distStr, g);
+                });
             });
 
-            return L.join('\n');
+            // Collapse runs of blank lines into a single blank and trim edges
+            // so the preview stays clean without affecting OpenBVE parsing.
+            const cleaned = [];
+            for (let i = 0; i < L.length; i++) {
+                const blank = L[i].trim() === '';
+                if (blank && cleaned.length && cleaned[cleaned.length - 1].trim() === '') continue;
+                if (blank && (i === 0 || i === L.length - 1)) continue;
+                cleaned.push(L[i]);
+            }
+            return cleaned.join('\r\n');
         }
 
         function updateCSV() {
+            if (!S._importing) markDirty();
             const csv = generateCSV();
             document.getElementById('csv-out').value = csv;
+        }
+
+        function markDirty() {
+            if (!S.loaded) return;
+            if (!S.dirty) {
+                S.dirty = true;
+                updateFileTag();
+            }
+        }
+
+        function updateFileTag() {
+            const el = document.getElementById('file-tag');
+            if (!el) return;
+            el.textContent = S.fileName || (S.loaded ? 'untitled.csv' : '');
+            el.classList.toggle('dirty', S.dirty);
         }
 
         function updateStats() {
@@ -1573,6 +1798,21 @@
             render();
         }
 
+        function setTool(t) {
+            S.tool = t;
+            document.getElementById('toolSelBtn').classList.toggle('active', t === 'select');
+            document.getElementById('toolAddBtn').classList.toggle('active', t === 'add');
+            cP.style.cursor = t === 'add' ? 'crosshair' : 'default';
+            render();
+        }
+
+        // Effective curve radius for a node given its interpolation mode.
+        function effCr(nd) {
+            const ip = nd.interp || 'auto';
+            if (ip === 'sharp' || ip === 'linear') return 0;
+            return Math.max(0, nd.cr || 0);
+        }
+
         function copyCSV() {
             const out = document.getElementById('csv-out');
             out.select();
@@ -1593,23 +1833,50 @@
         }
 
         function importCSV(e) {
-            const file = e.target.files[0];
+            const file = e.target.files && e.target.files[0];
             if (!file) return;
             const reader = new FileReader();
             reader.onload = function(evt) {
-                try {
-                    const text = evt.target.result;
-                    const lines = text.split('\n');
-                    let parsedStations = [];
-                    let parsedSignals = [];
-                    let parsedObjects = [];
-                    
-                    const structureMap = {};
-                    const distMap = {};
+                const text = evt.target.result;
+                loadCSVText(text, file.name);
+            };
+            reader.readAsText(file);
+            e.target.value = '';
+        }
+
+        // Guards against clobbering unsaved edits, then parses + loads.
+        function loadCSVText(text, fileName) {
+            if (S.dirty) {
+                const choice = confirm(
+                    'You have unsaved changes to "' + (S.fileName || 'the current route') + '".\n' +
+                    'OK = Save current route first, then load new file\n' +
+                    'Cancel = Discard changes and load new file\n' +
+                    'To abort, press Esc.'
+                );
+                if (choice) {
+                    // OK -> save current, then load
+                    exportCSV();
+                }
+                // Cancel (false) -> just discard and load
+            }
+            try {
+                const lines = text.split('\n');
+                let parsedStations = [];
+                let parsedSignals = [];
+                let parsedObjects = [];
+
+                const structureMap = {};
+                const distMap = {};
+                    const distFmt = {};
                     let currentDistance = 0;
                     let parserMode = '';
                     let inTrack = false;
                     let rawHeaderLines = [];
+                    let routeExtraLines = [];
+                    let extraHeaders = [];
+                    let sections = [];
+                    let currentSection = null;
+                    function sectionName(l){ const m=l.trim().match(/^with\s+([a-z0-9]+)/i); return m?m[1].toLowerCase():null; }
 
                     // First pass: Parse structures, options, route metadata, and collect track commands grouped by distance
                     lines.forEach(line => {
@@ -1620,36 +1887,52 @@
                         }
 
                         if (!inTrack) {
-                            if (lower.startsWith('with route')) { parserMode = 'route'; }
-                            else if (lower.startsWith('with structure')) { parserMode = 'structure'; }
-                            else if (lower.startsWith('with options')) { parserMode = 'options'; }
+                            const sec = sectionName(trimmed);
+                            if (sec) {
+                                parserMode = sec;
+                                currentSection = { name: sec, lines: [line] };
+                                sections.push(currentSection);
+                            } else if (currentSection) {
+                                currentSection.lines.push(line);
+                            }
+
+                            if (sec === 'route' || sec === 'structure' || sec === 'options') {
+                                // handled via sections; no extra capture
+                            } else if (!sec && !currentSection) {
+                                extraHeaders.push(line);
+                            }
 
                             // Support both .FreeObj(index).Load (file) and .FreeObj(index) (file)
                             const match = trimmed.match(/\.FreeObj\s*\(([^)]+)\)(?:\s*\.\s*Load)?\s*\(([^)]+)\)/i);
                             if (match) {
                                 structureMap[match[1].trim()] = match[2].trim();
-                            } else {
-                                rawHeaderLines.push(line);
                             }
 
                             if (parserMode === 'route') {
                                 if (trimmed.startsWith('.Comment')) {
                                     S.route.title = trimmed.replace('.Comment', '').replace(/[()]/g, '').trim();
-                                }
-                            } else if (parserMode === 'options') {
-                                if (trimmed.startsWith('.Gauge')) {
+                                } else if (trimmed.startsWith('.Image')) {
+                                    S.route.image = trimmed.replace('.Image', '').replace(/[()]/g, '').trim();
+                                } else if (trimmed.startsWith('.Gauge')) {
                                     S.route.gauge = parseFloat(trimmed.replace('.Gauge', '').replace(/[()]/g, '').trim()) || 1435;
+                                } else if (trimmed.startsWith('.Speed')) {
+                                    S.route.speed = parseFloat(trimmed.replace('.Speed', '').replace(/[()]/g, '').trim()) || 0;
                                 }
+                                routeExtraLines = (currentSection && currentSection.name === 'route') ? currentSection.lines : routeExtraLines;
                             }
                         } else {
+                            if (!distMap[currentDistance]) distMap[currentDistance] = [];
+
                             if (trimmed === '') {
-                                if (!distMap[currentDistance]) distMap[currentDistance] = [];
-                                distMap[currentDistance].push({ type: 'empty', value: '' });
+                                const curDistStr = distFmt[currentDistance] != null ? distFmt[currentDistance] : String(currentDistance);
+                                const pushItem = o => { o.distStr = curDistStr; distMap[currentDistance].push(o); };
+                                pushItem({ type: 'empty', value: '' });
                                 return;
                             }
                             if (trimmed.startsWith(';')) {
-                                if (!distMap[currentDistance]) distMap[currentDistance] = [];
-                                distMap[currentDistance].push({ type: 'comment', value: line.replace(/[\r\n]/g, '') });
+                                const curDistStr = distFmt[currentDistance] != null ? distFmt[currentDistance] : String(currentDistance);
+                                const pushItem = o => { o.distStr = curDistStr; distMap[currentDistance].push(o); };
+                                pushItem({ type: 'comment', value: line.replace(/[\r\n]/g, '') });
                                 return;
                             }
 
@@ -1657,24 +1940,35 @@
                             const matchDist = trimmed.match(/^([\d.]+)\s*,\s*(.*)$/);
                             if (matchDist) {
                                 currentDistance = parseFloat(matchDist[1]);
+                                distFmt[currentDistance] = matchDist[1];
                                 cmdPart = matchDist[2];
                             }
                             if (!distMap[currentDistance]) {
                                 distMap[currentDistance] = [];
                             }
+                            const curDistStr = distFmt[currentDistance] != null ? distFmt[currentDistance] : String(currentDistance);
+                            const pushItem = o => { o.distStr = curDistStr; distMap[currentDistance].push(o); };
 
-                            const cmds = cmdPart.split(/(?=\.[a-zA-Z])/);
+                            const cmds = cmdPart.split(/,(?![^(]*\))/);
+                            let lastItem = null;
                             cmds.forEach(cmd => {
                                 const c = cmd.trim();
                                 if (!c) return;
-                                if (c.startsWith('.')) {
-                                    if (c.startsWith('.Curve') || c.startsWith('.Pitch') || c.startsWith('.Height') || c.startsWith('.Sta') || c.startsWith('.SigF') || c.startsWith('.Signal') || c.startsWith('.FreeObj')) {
-                                        distMap[currentDistance].push({ type: 'parsed', value: c });
+                                if (c.startsWith(';')) {
+                                    // Inline comment — attach to the preceding command if any
+                                    // so ",; comment" round-trips on the same line.
+                                    if (lastItem && (lastItem.type === 'unparsed' || lastItem.type === 'parsed')) {
+                                        lastItem.value = lastItem.value + ' ,; ' + c.replace(/^;+/, '').trim();
                                     } else {
-                                        distMap[currentDistance].push({ type: 'unparsed', value: c });
+                                        pushItem({ type: 'comment', value: c.replace(/[\r\n]/g, '') });
                                     }
-                                } else if (c.startsWith(';')) {
-                                    distMap[currentDistance].push({ type: 'comment', value: cmd.replace(/[\r\n]/g, '') });
+                                } else if (c.startsWith('.')) {
+                                    if (c.startsWith('.Curve') || c.startsWith('.Pitch') || c.startsWith('.Height') || c.startsWith('.Sta') || c.startsWith('.SigF') || c.startsWith('.Signal') || c.startsWith('.FreeObj')) {
+                                        lastItem = { type: 'parsed', value: c };
+                                    } else {
+                                        lastItem = { type: 'unparsed', value: c };
+                                    }
+                                    pushItem(lastItem);
                                 }
                             });
                         }
@@ -1688,6 +1982,8 @@
 
                     let parsedNodes = [];
                     let unparsedTrack = {};
+                    let geomMap = {};
+                    let markerDists = {};
 
                     if (sortedDists.length > 0) {
                         if (!distMap[0]) {
@@ -1696,6 +1992,7 @@
                         }
 
                         let activeRadius = 0;
+                        let activeCant = 0;
                         let activeElevation = 0;
                         let activePitch = 0;
                         let lastDist = 0;
@@ -1721,9 +2018,15 @@
                             const cmds = distMap[d];
                             let radiusAtThisNode = 0;
                             let hasCurveCmd = false;
+                            let hasGeomCmd = false;
+                            let hasAnyCmd = cmds.length > 0;
+                            let heightOverridden = false;
 
-                            // Filter out unparsed, comments, and empty lines to preserve them
-                            unparsedTrack[d] = cmds.filter(x => x.type !== 'parsed');
+                            // Preserve every command at this distance (parsed geom, stations,
+                            // signals, objects, unparsed, comments, empties) in original order
+                            // so the file round-trips exactly. Geom commands are also tracked in
+                            // geomMap for node editing; writeNodeGeom() keeps both in sync.
+                            unparsedTrack[d] = cmds.slice();
 
                             cmds.forEach(c => {
                                 if (c.type !== 'parsed') return;
@@ -1732,104 +2035,162 @@
                                     const args = val.replace('.Curve', '').replace(/[()]/g, '').split(';');
                                     const radius = parseFloat(args[0]) || 0;
                                     activeRadius = radius;
+                                    activeCant = parseFloat(args[1]) || 0;
                                     radiusAtThisNode = Math.abs(radius);
                                     hasCurveCmd = true;
+                                    hasGeomCmd = true;
+                                    (geomMap[d] = geomMap[d] || []).push(val);
                                 } else if (val.startsWith('.Pitch')) {
                                     const args = val.replace('.Pitch', '').replace(/[()]/g, '').split(';');
                                     activePitch = parseFloat(args[0]) || 0;
+                                    hasGeomCmd = true;
+                                    (geomMap[d] = geomMap[d] || []).push(val);
                                 } else if (val.startsWith('.Height')) {
                                     const args = val.replace('.Height', '').replace(/[()]/g, '').split(';');
                                     activeElevation = parseFloat(args[0]) || 0;
+                                    heightOverridden = true;
+                                    hasGeomCmd = true;
+                                    (geomMap[d] = geomMap[d] || []).push(val);
                                 } else if (val.startsWith('.Sta')) {
                                     const args = val.replace('.Sta', '').replace(/[()]/g, '').split(';').map(x => x.trim());
                                     let doorVal = (args[4] || '').trim().toUpperCase();
                                     let doorsMapped = 0;
-                                    if (doorVal === '-1' || doorVal === 'L') doorsMapped = -1;
-                                    else if (doorVal === '1' || doorVal === 'R') doorsMapped = 1;
+                                    if (doorVal === 'L' || doorVal === '-1') doorsMapped = -1;
+                                    else if (doorVal === 'R' || doorVal === '1') doorsMapped = 1;
                                     else if (doorVal === 'B') doorsMapped = 'B';
                                     parsedStations.push({
                                         name: args[0] || 'Station',
                                         distance: d,
-                                        stopTime: parseInt(args[8]) || 20,
+                                        stopTime: parseInt(args[8]) || 15,
                                         doors: doorsMapped,
                                         file: '',
-                                        rawArgs: args
+                                        rawArgs: args,
+                                        raw: val
                                     });
+                                    markerDists[d] = true;
                                 } else if (val.startsWith('.SigF') || val.startsWith('.Signal')) {
                                     const cleanCmd = val.startsWith('.SigF') ? '.SigF' : '.Signal';
-                                    const args = val.replace(cleanCmd, '').replace(/[()]/g, '').split(';');
+                                    const args = val.replace(cleanCmd, '').replace(/[()]/g, '').split(';').map(x => x.trim());
                                     parsedSignals.push({
                                         distance: d,
                                         type: args[0] || '0',
+                                        section: parseFloat(args[1]) || 0,
                                         x: parseFloat(args[2]) || 0,
                                         y: parseFloat(args[3]) || 0,
-                                        z: 0
+                                        yaw: parseFloat(args[4]) || 0,
+                                        pitch: parseFloat(args[5]) || 0,
+                                        roll: parseFloat(args[6]) || 0,
+                                        raw: val
                                     });
+                                    markerDists[d] = true;
                                 } else if (val.startsWith('.FreeObj')) {
-                                    const args = val.replace('.FreeObj', '').replace(/[()]/g, '').split(';');
+                                    const args = val.replace('.FreeObj', '').replace(/[()]/g, '').split(';').map(x => x.trim());
                                     const index = (args[1] || '').trim();
                                     const file = structureMap[index] || ('FreeObj' + index);
                                     parsedObjects.push({
                                         file: file,
+                                        idx: index,
                                         distance: d,
                                         x: parseFloat(args[2]) || 0,
                                         y: parseFloat(args[3]) || 0,
-                                        z: parseFloat(args[4]) || 0,
-                                        yaw: parseFloat(args[5]) || 0,
-                                        pitch: parseFloat(args[6]) || 0,
-                                        roll: parseFloat(args[7]) || 0
+                                        yaw: parseFloat(args[4]) || 0,
+                                        pitch: parseFloat(args[5]) || 0,
+                                        roll: parseFloat(args[6]) || 0,
+                                        raw: val
                                     });
+                                    markerDists[d] = true;
                                 }
                             });
 
-                            parsedNodes.push({
-                                id: NID++,
-                                x: px,
-                                y: py,
-                                cr: hasCurveCmd ? radiusAtThisNode : Math.abs(activeRadius),
-                                elev: activeElevation,
-                                d: d
-                            });
+                            const isFirst = (d === sortedDists[0]);
+                            const isLast = (d === sortedDists[sortedDists.length - 1]);
+                            if (hasGeomCmd || isFirst || hasAnyCmd || isLast) {
+                                parsedNodes.push({
+                                    id: NID++,
+                                    x: px,
+                                    y: py,
+                                    cr: hasCurveCmd ? radiusAtThisNode : 0,
+                                    cant: hasCurveCmd ? activeCant : 0,
+                                    elev: activeElevation,
+                                    d: d,
+                                    interp: hasCurveCmd ? 'smooth' : 'auto',
+                                    _marker: !!markerDists[d] && !hasGeomCmd
+                                });
+                            }
 
+                            if (heightOverridden) activePitch = 0;
                             lastDist = d;
                         });
+
+                        // If the final node carries a curve, append a synthetic
+                        // straight node so the arc has a valid exit segment.
+                        if (parsedNodes.length) {
+                            const last = parsedNodes[parsedNodes.length - 1];
+                            if (last.cr > 0) {
+                                const prev = parsedNodes[parsedNodes.length - 2] || last;
+                                const dx = last.x - prev.x, dy = last.y - prev.y;
+                                const a = Math.atan2(dy, dx);
+                                const ext = 50;
+                                parsedNodes.push({
+                                    id: NID++,
+                                    x: last.x + Math.cos(a) * ext,
+                                    y: last.y + Math.sin(a) * ext,
+                                    cr: 0,
+                                    elev: last.elev,
+                                    d: last.d + ext
+                                });
+                            }
+                        }
                     }
 
                     S.unparsedTrack = unparsedTrack;
+                    S.geom = geomMap;
+                    S.distFmt = distFmt;
+                    S.structure = structureMap;
+                    S.extraHeaders = extraHeaders;
+                    S.routeExtraLines = routeExtraLines;
+                    S.sections = sections;
 
                     if (parsedNodes.length >= 2) {
                         S.nodes = parsedNodes;
                     } else {
                         S.nodes = [
-                            { id: NID++, x: -100, y: 100, cr: 0, elev: 0, d: 100 },
-                            { id: NID++, x: 100, y: 300, cr: 0, elev: 0, d: 300 }
+                            { id: NID++, x: -100, y: 100, cr: 0, elev: 0, d: 100, interp: 'auto' },
+                            { id: NID++, x: 100, y: 300, cr: 0, elev: 0, d: 300, interp: 'auto' }
                         ];
                     }
                     S.stations = parsedStations;
                     S.signals = parsedSignals;
                     S.objects = parsedObjects;
 
+                    S._importing = true;
                     recomp();
+                    S._importing = false;
                     refreshAll();
-                    toast('CSV Imported!');
+                    S.loaded = true;
+                    S.dirty = false;
+                    S.fileName = fileName || '';
+                    updateFileTag();
+                    toast('Loaded: ' + (fileName || 'route'));
                 } catch (err) {
                     alert('Import error: ' + err.message);
                 }
-            };
-            reader.readAsText(file);
-            e.target.value = '';
         }
 
         function newRoute() {
+            if (S.dirty && !confirm('Discard unsaved changes and start a new route?')) return;
             saveU();
             S.nodes = [
-                { id: NID++, x: -100, y: 100, cr: 0, elev: 0, d: 100 },
-                { id: NID++, x: 100, y: 300, cr: 0, elev: 0, d: 300 }
+                { id: NID++, x: -100, y: 100, cr: 0, elev: 0, d: 100, interp: 'auto' },
+                { id: NID++, x: 100, y: 300, cr: 0, elev: 0, d: 300, interp: 'auto' }
             ];
             S.stations = [];
             S.signals = [];
             S.objects = [];
             S.route = { title: 'New Route', description: '', image: '', speed: 0, gauge: 1435 };
+            S.geom = {}; S.unparsedTrack = {};
+            S.loaded = true; S.dirty = false; S.fileName = 'untitled.csv';
+            updateFileTag();
             recomp();
             refreshAll();
         }
@@ -1873,8 +2234,33 @@
         });
 
         // Boot
+        function setupDnD() {
+            const dz = document.getElementById('dropzone');
+            const hasFiles = e => e.dataTransfer && Array.from(e.dataTransfer.types || []).indexOf('Files') >= 0;
+            window.addEventListener('dragenter', e => { if (hasFiles(e)) { e.preventDefault(); dz.classList.add('show'); } });
+            window.addEventListener('dragover', e => { if (hasFiles(e)) e.preventDefault(); });
+            window.addEventListener('dragleave', e => { if (e.relatedTarget === null) dz.classList.remove('show'); });
+            window.addEventListener('drop', e => {
+                if (!hasFiles(e)) return;
+                e.preventDefault();
+                dz.classList.remove('show');
+                const f = e.dataTransfer.files && e.dataTransfer.files[0];
+                if (f) loadCSVTextFromFile(f);
+            });
+        }
+
+        function loadCSVTextFromFile(file) {
+            const reader = new FileReader();
+            reader.onload = evt => loadCSVText(evt.target.result, file.name);
+            reader.readAsText(file);
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
             setupCv(cP); setupCv(cR);
+            setupDnD();
+            window.addEventListener('beforeunload', e => {
+                if (S.dirty) { e.preventDefault(); e.returnValue = ''; }
+            });
             newRoute();
         });
     </script>
