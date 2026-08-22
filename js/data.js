@@ -35,12 +35,6 @@ const STATION_CONFIG = {
       icon: 'check',
     },
     {
-      id: 'in-service',
-      label: 'In Service',
-      color: 'var(--orange)',
-      icon: 'clock',
-    },
-    {
       id: 'construction',
       label: 'Under Construction',
       color: 'var(--purple)',
@@ -93,14 +87,14 @@ const PROJECTS = [
 
   // ── In Service ──
   {
-    name: 'Project Two',
-    href: '/project2',
-    description: 'An open-source CLI tool for automating developer workflows.',
-    tech: 'Rust',
+    name: 'PPKA Simulator',
+    href: './ppkasimulator/',
+    description: 'Game simulasi Pengatur Perjalanan Kereta Api di Stasiun Gambir berdasarkan GAPEKA 2025.',
+    tech: 'HTML/Canvas',
     line: 'red',
     lineName: 'RED LINE',
-    platform: '2',
-    section: 'in-service',
+    platform: '5',
+    section: 'construction',
   },
 
   // ── Under Construction ──
@@ -112,26 +106,6 @@ const PROJECTS = [
     line: 'green',
     lineName: 'GREEN LINE',
     platform: '4',
-    section: 'construction',
-  },
-  {
-    name: 'Project Three',
-    href: '/project3',
-    description: 'An experiment blending real-time data with generative visuals.',
-    tech: 'Three.js',
-    line: 'orange',
-    lineName: 'ORANGE LINE',
-    platform: '3',
-    section: 'construction',
-  },
-  {
-    name: 'Project Five',
-    href: '/project5',
-    description: 'Still on the drawing board. Coming to a platform near you.',
-    tech: 'TBD',
-    line: 'purple',
-    lineName: 'PURPLE LINE',
-    platform: '5',
     section: 'construction',
   },
 ];

@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Inter:wght@400;500;600;700;800;900&display=swap');
-
 * {
   margin: 0;
   padding: 0;
@@ -20,6 +18,24 @@
   --orange: #F39700;
   --purple: #9C7DB8;
   --teal: #00A7A7;
+  --hover-bg: #fafafa;
+  --input-bg: #ffffff;
+  --active-bg: #f0f7ff;
+  --danger-bg: #fff5f5;
+}
+
+[data-theme="dark"] {
+  --bg: #131417;
+  --sign-white: #1d1f24;
+  --fg: #ececec;
+  --fg-secondary: #b8bcc4;
+  --muted: #7c8089;
+  --border: #34373e;
+  --border-dark: #4a4e57;
+  --hover-bg: #24262c;
+  --input-bg: #16171b;
+  --active-bg: #17222b;
+  --danger-bg: #2b191b;
 }
 
 html {
@@ -216,7 +232,7 @@ a.station-card {
 
 a.station-card:hover {
   border-color: var(--border-dark);
-  background: #fafafa;
+  background: var(--hover-bg);
 }
 
 .platform {
@@ -379,6 +395,22 @@ a.station-card:hover .direction {
   gap: 6px;
 }
 
+.facility a,
+.facility button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: inherit;
+  text-decoration: none;
+  color: inherit;
+  transition: color .15s;
+}
+
 .facility svg {
   width: 22px;
   height: 22px;
@@ -393,17 +425,13 @@ a.station-card:hover .direction {
   text-transform: uppercase;
 }
 
-.facility a {
-  text-decoration: none;
-  color: inherit;
-  transition: color .15s;
-}
-
-.facility a:hover svg {
+.facility a:hover svg,
+.facility button:hover svg {
   color: var(--red);
 }
 
-.facility a:hover span {
+.facility a:hover span,
+.facility button:hover span {
   color: var(--red);
 }
 
@@ -811,7 +839,7 @@ main,
 
 .toolbar button:hover {
   border-color: var(--border-dark);
-  background: #fafafa;
+  background: var(--hover-bg);
 }
 
 .toolbar button.primary {
@@ -832,7 +860,7 @@ main,
 
 .toolbar button.danger:hover {
   border-color: var(--red);
-  background: #fff5f5;
+  background: var(--danger-bg);
 }
 
 .direction-bar .arrow {
@@ -880,11 +908,11 @@ main,
 }
 
 #blocklyDiv .blocklyTreeRow {
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--border);
 }
 
 #blocklyDiv .blocklyTreeRow:hover {
-  background: #fafafa;
+  background: var(--hover-bg);
 }
 
 #blocklyDiv .blocklyTreeLabel {
@@ -1064,11 +1092,11 @@ main,
 }
 
 .timeline-item:hover {
-  background: #fafafa;
+  background: var(--hover-bg);
 }
 
 .timeline-item.active {
-  background: #f0f7ff;
+  background: var(--active-bg);
   border-left: 4px solid var(--teal);
 }
 
@@ -1107,7 +1135,7 @@ main,
   padding: 14px;
   overflow-y: auto;
   max-height: 50%;
-  background: #fafafa;
+  background: var(--hover-bg);
   border-top: 1px solid var(--border);
 }
 
@@ -1140,7 +1168,8 @@ select {
   border: 1px solid var(--border);
   font-family: 'JetBrains Mono', monospace;
   font-size: 11px;
-  background: #fff;
+  background: var(--input-bg);
+  color: var(--fg);
 }
 
 .form-row input[type="color"] {
@@ -1149,6 +1178,7 @@ select {
   border: 1px solid var(--border);
   padding: 0;
   cursor: pointer;
+  background: var(--input-bg);
 }
 
 #rightContainer {
@@ -1210,7 +1240,7 @@ select {
   bottom: 10px;
   left: 10px;
   right: 10px;
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--sign-white);
   border: 2px solid var(--fg);
   padding: 10px 14px;
   display: flex;
@@ -1228,4 +1258,74 @@ select {
   font-size: 12px;
   font-weight: 700;
   min-width: 45px;
+}
+
+/* ── SOCIABUZZ SUPPORT BUTTON — station sign plate ── */
+
+#btnModal {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 9px !important;
+  background-color: var(--red) !important;
+  color: #fff !important;
+  border: 2px solid var(--fg) !important;
+  border-radius: 0 !important;
+  box-shadow: 0 0 0 4px var(--bg), 0 6px 16px rgba(0, 0, 0, 0.28);
+  font-family: 'Noto Sans JP', 'Inter', sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 900 !important;
+  font-style: normal !important;
+  line-height: 1.1 !important;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  min-height: 46px !important;
+  max-width: 200px;
+  padding: 13px 18px !important;
+  transition: filter .15s ease, transform .15s ease, box-shadow .15s ease;
+}
+
+#btnModal::before {
+  content: '';
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -960 960 960' fill='%23ffffff'%3E%3Cpath d='M160-340v-380q0-53 27.5-84.5t72.5-48 102.5-22T480-880q66 0 124.5 5.5t102 22 68.5 48 25 84.5v380q0 59-40.5 99.5T660-200l60 60v20h-80l-80-80H400l-80 80h-80v-20l60-60q-59 0-99.5-40.5T160-340m80-220h200v-120H240zm280 0h200v-120H520zM383-337q17-17 17-43t-17-43-43-17-43 17-17 43 17 43 43 17 43-17m280 0q17-17 17-43t-17-43-43-17-43 17-17 43 17 43 43 17 43-17'/%3E%3C/svg%3E") no-repeat center / contain;
+}
+
+#btnModal:hover {
+  filter: brightness(1.12);
+  transform: translateY(-2px);
+  box-shadow: 0 0 0 4px var(--bg), 0 10px 22px rgba(0, 0, 0, 0.32);
+}
+
+#btnModal:active {
+  transform: translateY(0);
+  box-shadow: 0 0 0 4px var(--bg), 0 3px 8px rgba(0, 0, 0, 0.28);
+}
+
+#btnModal:focus-visible {
+  outline: 2px dashed #fff;
+  outline-offset: 3px;
+}
+
+#wrapperFloatingBtn .floating-btn {
+  padding: 18px 20px;
+}
+
+@media (max-width: 540px) {
+  #wrapperFloatingBtn .floating-btn {
+    padding: 14px 16px;
+  }
+
+  #btnModal {
+    min-height: 42px;
+    padding: 11px 14px;
+    letter-spacing: 2px;
+  }
+
+  #btnModal::before {
+    width: 14px;
+    height: 14px;
+  }
 }

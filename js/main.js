@@ -13,6 +13,8 @@ const ICONS = {
   train: '<svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24" fill="#ffffffff"><path d="M160-340v-380q0-53 27.5-84.5t72.5-48 102.5-22T480-880q66 0 124.5 5.5t102 22 68.5 48 25 84.5v380q0 59-40.5 99.5T660-200l60 60v20h-80l-80-80H400l-80 80h-80v-20l60-60q-59 0-99.5-40.5T160-340m80-220h200v-120H240zm280 0h200v-120H520zM383-337q17-17 17-43t-17-43-43-17-43 17-17 43 17 43 43 17 43-17m280 0q17-17 17-43t-17-43-43-17-43 17-17 43 17 43 43 17 43-17"/></svg>',
   arrowRight: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>',
   chevron: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>',
+  sun: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>',
+  moon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>',
 };
 
 function renderHeader(cfg) {
@@ -85,11 +87,28 @@ function renderFacilities(facilities) {
         <a href="${f.href}">${ICONS[f.icon] || ''}<span>${f.label}</span></a>
       </div>`).join('');
 
-  return `<div class="facilities">${items}</div>`;
+  return `<div class="facilities">${items}
+    <div class="facility">
+      <button type="button" id="themeToggle" aria-label="Toggle theme"></button>
+    </div></div>`;
 }
 
 function renderFooter(text) {
   return `<div class="footer"><div class="line-sep"></div><span>${text}</span></div>`;
+}
+
+// ── Theme toggle ──
+
+function syncThemeToggle(btn) {
+  const dark = document.documentElement.dataset.theme === 'dark';
+  btn.innerHTML = (dark ? ICONS.sun : ICONS.moon) + `<span>${dark ? 'Light' : 'Dark'}</span>`;
+}
+
+function applyTheme(theme) {
+  document.documentElement.dataset.theme = theme;
+  try { localStorage.setItem('mv-theme', theme); } catch (e) { }
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute('content', theme === 'dark' ? '#131417' : '#f0f0f0');
 }
 
 // ── Bootstrap ──
@@ -101,5 +120,19 @@ document.addEventListener('DOMContentLoaded', () => {
       renderSections(STATION_CONFIG.sections, PROJECTS) +
       renderFacilities(STATION_CONFIG.facilities) +
       renderFooter(STATION_CONFIG.footerText);
+  }
+
+  const themeBtn = document.getElementById('themeToggle');
+  if (themeBtn) {
+    syncThemeToggle(themeBtn);
+    themeBtn.addEventListener('click', () => {
+      const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+      applyTheme(next);
+      syncThemeToggle(themeBtn);
+    });
+  }
+
+  if (typeof sbBoW !== 'undefined') {
+    sbBoW.draw('moltenvertex', 'U3VwcG9ydCBNZSE', 'position-bottom-right', '#D71920', '#FFFFFF');
   }
 });
