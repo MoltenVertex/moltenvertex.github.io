@@ -1,0 +1,1652 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PPKA Simulator — Stasiun Gambir</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    :root {
+      --ppka-bg: #0a0e14;
+      --ppka-panel: #111820;
+      --ppka-card: #1a2230;
+      --ppka-border: #263040;
+      --ppka-text: #e8edf3;
+      --ppka-muted: #6b7d94;
+      --ppka-red: #ff4444;
+      --ppka-yellow: #ffaa00;
+      --ppka-green: #00cc66;
+      --ppka-blue: #3399ff;
+      --ppka-kai-blue: #0057a8;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', 'Noto Sans JP', sans-serif;
+      background: var(--ppka-bg);
+      color: var(--ppka-text);
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .ppka-topbar {
+      background: linear-gradient(135deg, #003366 0%, #0057a8 100%);
+      color: #fff;
+      padding: 6px 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      flex-shrink: 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+
+    .ppka-topbar .back-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.3);
+      color: #fff;
+      text-decoration: none;
+      padding: 3px 12px;
+      font-size: 9px;
+      font-weight: 800;
+      border-radius: 3px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      transition: background 0.15s;
+    }
+
+    .ppka-topbar .back-chip:hover { background: rgba(255,255,255,0.3); }
+
+    .ppka-topbar .meta {
+      margin-left: auto;
+      font-weight: 500;
+      letter-spacing: 1px;
+      opacity: 0.8;
+      font-size: 10px;
+    }
+
+    .ppka-nameboard {
+      background: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
+      border-bottom: 3px solid #0057a8;
+      padding: 8px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-shrink: 0;
+    }
+
+    .ppka-medallion {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #0057a8 0%, #003d7a 100%);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      line-height: 1;
+      box-shadow: 0 2px 6px rgba(0,87,168,0.4);
+    }
+
+    .ppka-medallion .letter { font-size: 10px; font-weight: 800; letter-spacing: 1px; }
+    .ppka-medallion .number { font-size: 20px; font-weight: 800; margin-top: 1px; }
+    .ppka-nameboard .title-group { flex: 1; min-width: 0; }
+
+    .ppka-nameboard h1 {
+      font-family: 'Noto Sans JP', 'Inter', sans-serif;
+      font-size: clamp(18px, 2.5vw, 26px);
+      font-weight: 900;
+      letter-spacing: 4px;
+      line-height: 1.1;
+      color: #1a1a1a;
+    }
+
+    .ppka-nameboard .subtitle {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #666;
+      margin-top: 2px;
+    }
+
+    .ppka-nameboard .toolbar { display: flex; gap: 5px; }
+
+    .ppka-nameboard .toolbar button {
+      background: #fff;
+      color: #1a1a1a;
+      border: 2px solid #ccc;
+      padding: 5px 14px;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.15s;
+    }
+
+    .ppka-nameboard .toolbar button:hover { border-color: #999; background: #f5f5f5; }
+
+    .ppka-nameboard .toolbar button.primary {
+      background: var(--ppka-kai-blue);
+      color: #fff;
+      border-color: var(--ppka-kai-blue);
+    }
+
+    .ppka-nameboard .toolbar button.primary:hover { background: #004080; }
+
+    .ppka-nameboard .toolbar button.danger {
+      color: var(--ppka-red);
+      border-color: #ddd;
+    }
+
+    .ppka-nameboard .toolbar button.danger:hover { border-color: var(--ppka-red); background: #fff5f5; }
+
+    .ppka-main {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+      height: calc(100vh - 100px);
+    }
+
+    .ppka-canvas-wrap {
+      flex: 1;
+      position: relative;
+      background: var(--ppka-bg);
+      min-width: 0;
+    }
+
+    #ppkaCanvas { width: 100%; height: 100%; display: block; cursor: pointer; }
+
+    .ppka-time-display {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: rgba(10,14,20,0.92);
+      color: var(--ppka-green);
+      padding: 10px 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 28px;
+      font-weight: 700;
+      border: 1px solid var(--ppka-green);
+      border-radius: 4px;
+      pointer-events: none;
+      box-shadow: 0 0 20px rgba(0,204,102,0.15);
+    }
+
+    .ppka-time-display .date {
+      font-size: 9px;
+      color: var(--ppka-muted);
+      letter-spacing: 2px;
+      margin-bottom: 2px;
+    }
+
+    .ppka-hint {
+      position: absolute;
+      bottom: 12px;
+      left: 12px;
+      background: rgba(10,14,20,0.85);
+      color: var(--ppka-muted);
+      padding: 6px 12px;
+      font-size: 10px;
+      border-radius: 4px;
+      pointer-events: none;
+      border: 1px solid var(--ppka-border);
+    }
+
+    .ppka-hint b { color: var(--ppka-yellow); }
+
+    .ppka-panel {
+      width: 320px;
+      background: var(--ppka-panel);
+      border-left: 1px solid var(--ppka-border);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    .ppka-panel-section { border-bottom: 1px solid var(--ppka-border); }
+
+    .ppka-panel-header {
+      background: var(--ppka-card);
+      padding: 7px 12px;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--ppka-muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .ppka-panel-header .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--ppka-green);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .ppka-panel-body { padding: 8px 12px; }
+
+    .signal-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 5px;
+    }
+
+    .signal-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--ppka-muted);
+      width: 40px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .signal-btn {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: 2px solid var(--ppka-border);
+      cursor: pointer;
+      transition: all 0.12s;
+    }
+
+    .signal-btn.red { background: var(--ppka-red); border-color: var(--ppka-red); box-shadow: 0 0 10px rgba(255,68,68,0.5); }
+    .signal-btn.yellow { background: var(--ppka-yellow); border-color: var(--ppka-yellow); box-shadow: 0 0 10px rgba(255,170,0,0.5); }
+    .signal-btn.green { background: var(--ppka-green); border-color: var(--ppka-green); box-shadow: 0 0 10px rgba(0,204,102,0.5); }
+    .signal-btn.off { background: #1a2230; border-color: var(--ppka-border); }
+    .signal-btn:hover { transform: scale(1.12); }
+
+    .schedule-scroll { max-height: 180px; overflow-y: auto; }
+
+    .schedule-scroll::-webkit-scrollbar { width: 4px; }
+    .schedule-scroll::-webkit-scrollbar-track { background: var(--ppka-card); }
+    .schedule-scroll::-webkit-scrollbar-thumb { background: var(--ppka-border); border-radius: 2px; }
+
+    .schedule-item {
+      display: grid;
+      grid-template-columns: 38px 1fr 26px;
+      gap: 6px;
+      padding: 4px 0;
+      border-bottom: 1px solid rgba(38,48,64,0.5);
+      font-size: 10px;
+      align-items: center;
+    }
+
+    .schedule-item .time {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      color: var(--ppka-blue);
+      font-size: 10px;
+    }
+
+    .schedule-item .name {
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-size: 10px;
+    }
+
+    .schedule-item .jalur {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      text-align: center;
+      padding: 1px 3px;
+      background: var(--ppka-card);
+      border-radius: 2px;
+      font-size: 9px;
+    }
+
+    .schedule-item.active { background: rgba(0,204,102,0.08); border-left: 2px solid var(--ppka-green); padding-left: 6px; }
+    .schedule-item.done { opacity: 0.3; }
+
+    .score-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+
+    .score-box {
+      background: var(--ppka-card);
+      border: 1px solid var(--ppka-border);
+      padding: 6px 8px;
+      text-align: center;
+      border-radius: 3px;
+    }
+
+    .score-box .value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--ppka-green);
+    }
+
+    .score-box .label {
+      font-size: 8px;
+      font-weight: 600;
+      color: var(--ppka-muted);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-top: 1px;
+    }
+
+    .score-box.warn .value { color: var(--ppka-yellow); }
+    .score-box.danger .value { color: var(--ppka-red); }
+
+    .ppka-statusbar {
+      background: var(--ppka-card);
+      border-top: 1px solid var(--ppka-border);
+      padding: 4px 14px;
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      color: var(--ppka-muted);
+      flex-shrink: 0;
+    }
+
+    .ppka-statusbar .status-ok { color: var(--ppka-green); }
+
+    .comms-log {
+      max-height: 70px;
+      overflow-y: auto;
+      font-size: 9px;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--ppka-muted);
+    }
+
+    .comms-log .msg { padding: 2px 0; border-bottom: 1px solid rgba(38,48,64,0.3); }
+    .comms-log .msg .timestamp { color: var(--ppka-blue); margin-right: 5px; }
+    .comms-log .msg.success { color: var(--ppka-green); }
+    .comms-log .msg.error { color: var(--ppka-red); }
+
+    .speed-control { display: flex; align-items: center; gap: 4px; padding: 6px 0; }
+
+    .speed-btn {
+      background: var(--ppka-card);
+      border: 1px solid var(--ppka-border);
+      color: var(--ppka-text);
+      padding: 3px 8px;
+      cursor: pointer;
+      font-size: 9px;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+      transition: all 0.12s;
+      border-radius: 2px;
+    }
+
+    .speed-btn:hover { border-color: var(--ppka-blue); }
+    .speed-btn.active { background: var(--ppka-blue); border-color: var(--ppka-blue); color: #fff; }
+
+    @media (max-width: 700px) {
+      .ppka-main { flex-direction: column; }
+      .ppka-panel { width: 100%; height: 50%; border-left: none; border-top: 1px solid var(--ppka-border); }
+      .ppka-canvas-wrap { height: 50%; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="ppka-topbar">
+    <a href="../index.html" class="back-chip">← Station</a>
+    <span>PPKA Simulator</span>
+    <span class="meta">SiLSafe 4000 · PT Len Industri · Daop I Jakarta</span>
+  </div>
+
+  <div class="ppka-nameboard">
+    <div class="ppka-medallion">
+      <span class="letter">GMR</span>
+      <span class="number">04</span>
+    </div>
+    <div class="title-group">
+      <h1>STASIUN GAMBIR</h1>
+      <div class="subtitle">Km 5+540 · Lintas Jakarta Kota–Manggarai–Bogor · Stasiun Layang</div>
+    </div>
+    <div class="toolbar">
+      <button id="btnPlay" class="primary">▶ Play</button>
+      <button id="btnPause">⏸ Pause</button>
+      <button id="btnReset" class="danger">↺ Reset</button>
+    </div>
+  </div>
+
+  <div class="ppka-main">
+    <div class="ppka-canvas-wrap">
+      <canvas id="ppkaCanvas"></canvas>
+      <div class="ppka-time-display">
+        <div class="date">GAPEKA 2025</div>
+        <div id="gameTime">06:00</div>
+      </div>
+      <div class="ppka-hint"><b>Klik wesel</b> atau <b>sinyal</b> langsung di canvas · Scroll zoom · Drag geser</div>
+    </div>
+
+    <div class="ppka-panel">
+
+      <div class="ppka-panel-section" style="flex:1;overflow:hidden;display:flex;flex-direction:column">
+        <div class="ppka-panel-header"><span class="dot" style="background:var(--ppka-yellow)"></span> Jadwal KA (GAPEKA 2025)</div>
+        <div class="schedule-scroll" id="schedulePanel" style="flex:1;overflow-y:auto;padding:6px 12px"></div>
+      </div>
+
+      <div class="ppka-panel-section">
+        <div class="ppka-panel-header">Skor & Status</div>
+        <div class="ppka-panel-body">
+          <div class="score-grid">
+            <div class="score-box"><div class="value" id="scoreTotal">0</div><div class="label">Total</div></div>
+            <div class="score-box warn"><div class="value" id="scoreDelay">0</div><div class="label">Delay</div></div>
+            <div class="score-box danger"><div class="value" id="scoreCollision">0</div><div class="label">Tabrakan</div></div>
+            <div class="score-box"><div class="value" id="scoreDeparted">0</div><div class="label">Berangkat</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ppka-panel-section">
+        <div class="ppka-panel-header">Komunikasi</div>
+        <div class="ppka-panel-body"><div class="comms-log" id="commsLog"></div></div>
+      </div>
+
+      <div class="ppka-panel-section">
+        <div class="ppka-panel-header">Kecepatan</div>
+        <div class="ppka-panel-body">
+          <div class="speed-control">
+            <button class="speed-btn active" data-speed="1">1x</button>
+            <button class="speed-btn" data-speed="2">2x</button>
+            <button class="speed-btn" data-speed="5">5x</button>
+            <button class="speed-btn" data-speed="10">10x</button>
+            <button class="speed-btn" data-speed="30">30x</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ppka-statusbar">
+    <span>Sistem: <span class="status-ok">SiLSafe 4000 ONLINE</span></span>
+    <span>Interlocking: <span class="status-ok">AKTIF</span></span>
+    <span id="trainCount">KA Aktif: 0</span>
+    <span style="margin-left:auto">PPKA Simulator v2.1 · Stasiun Gambir</span>
+  </div>
+
+  <script>
+  'use strict';
+
+  /* ═══════════════════════════════════════════
+     GAPEKA 2025 — STASIUN GAMBIR (GMR)
+     ═══════════════════════════════════════════ */
+  const GAPEKA = [
+    { no:'KA 26',  nama:'Argo Merbabu',      kelas:'Eksekutif',     tujuan:'Semarang Tawang',   brkt:'06:00', jalur:1 },
+    { no:'KA 6',   nama:'Argo Semeru',        kelas:'Eksekutif',     tujuan:'Surabaya Gubeng',   brkt:'06:20', jalur:2 },
+    { no:'KA 130', nama:'Papandayan',         kelas:'Eksekutif',     tujuan:'Garut',             brkt:'06:35', jalur:1 },
+    { no:'KA 50F', nama:'Purwojaya',          kelas:'Eksek-Eko',     tujuan:'Kroya',             brkt:'07:00', jalur:2 },
+    { no:'KA 20A', nama:'Argo Muria',         kelas:'Eksekutif',     tujuan:'Semarang Tawang',   brkt:'07:15', jalur:1 },
+    { no:'KA 132B',nama:'Parahyangan',        kelas:'Eksekutif',     tujuan:'Bandung',           brkt:'07:30', jalur:2 },
+    { no:'KA 46',  nama:'Taksaka',            kelas:'Eksekutif',     tujuan:'Yogyakarta',        brkt:'07:45', jalur:1 },
+    { no:'KA 2B',  nama:'Argo Bromo Anggrek', kelas:'Eksekutif',     tujuan:'Surabaya Pasarturi', brkt:'08:20', jalur:2 },
+    { no:'KA 128', nama:'Pangandaran',        kelas:'Eksek-Eko',     tujuan:'Banjar',            brkt:'08:30', jalur:1 },
+    { no:'KA 16',  nama:'Argo Dwipangga',     kelas:'Eksekutif',     tujuan:'Solo Balapan',      brkt:'08:50', jalur:2 },
+    { no:'KA 118B',nama:'Gunungjati',         kelas:'Eksek-Eko',     tujuan:'Semarang Tawang',   brkt:'09:00', jalur:1 },
+    { no:'KA 138B',nama:'Parahyangan',        kelas:'Eksekutif',     tujuan:'Bandung',           brkt:'09:15', jalur:2 },
+    { no:'KA 136B',nama:'Parahyangan',        kelas:'Eksekutif',     tujuan:'Bandung',           brkt:'10:05', jalur:1 },
+    { no:'KA 40',  nama:'Sembrani',           kelas:'Eksekutif',     tujuan:'Surabaya Pasarturi', brkt:'10:20', jalur:2 },
+    { no:'KA 62',  nama:'Manahan',            kelas:'Eksekutif',     tujuan:'Solo Balapan',      brkt:'10:30', jalur:1 },
+    { no:'KA 122B',nama:'Cakrabuana',         kelas:'Eksek-Eko',     tujuan:'Cirebon',           brkt:'10:50', jalur:2 },
+    { no:'KA 24',  nama:'Argo Merbabu',       kelas:'Eksekutif',     tujuan:'Semarang Tawang',   brkt:'12:00', jalur:1 },
+    { no:'KA 53',  nama:'Purwojaya',          kelas:'Eksek-Eko',     tujuan:'Cilacap',           brkt:'12:30', jalur:2 },
+    { no:'KA 44',  nama:'Taksaka',            kelas:'Eksekutif',     tujuan:'Yogyakarta',        brkt:'14:00', jalur:1 },
+    { no:'KA 38',  nama:'Brawijaya',          kelas:'Eksekutif',     tujuan:'Malang',            brkt:'15:45', jalur:2 },
+    { no:'KA 18',  nama:'Argo Sindoro',       kelas:'Eksekutif',     tujuan:'Semarang Tawang',   brkt:'16:45', jalur:1 },
+    { no:'KA 8',   nama:'Bima',               kelas:'Eksekutif',     tujuan:'Surabaya Gubeng',   brkt:'17:00', jalur:2 },
+    { no:'KA 134B',nama:'Parahyangan',        kelas:'Eksekutif',     tujuan:'Bandung',           brkt:'18:25', jalur:1 },
+    { no:'KA 36',  nama:'Gajayana',           kelas:'Eksekutif',     tujuan:'Malang',            brkt:'18:50', jalur:2 },
+    { no:'KA 124B',nama:'Cakrabuana',         kelas:'Eksek-Eko',     tujuan:'Purwokerto',        brkt:'19:10', jalur:1 },
+    { no:'KA 42',  nama:'Sembrani',           kelas:'Eksekutif',     tujuan:'Surabaya Pasarturi', brkt:'19:30', jalur:2 },
+    { no:'KA 28',  nama:'Argo Merbabu',       kelas:'Eksekutif',     tujuan:'Semarang Tawang',   brkt:'19:45', jalur:1 },
+    { no:'KA 32',  nama:'Pandalungan',        kelas:'Eksekutif',     tujuan:'Jember',            brkt:'19:55', jalur:2 },
+    { no:'KA 4',   nama:'Argo Bromo Anggrek', kelas:'Eksekutif',     tujuan:'Surabaya Pasarturi', brkt:'20:30', jalur:1 },
+    { no:'KA 14',  nama:'Argo Lawu',          kelas:'Eksekutif',     tujuan:'Solo Balapan',      brkt:'20:45', jalur:2 },
+    { no:'KA 54',  nama:'Purwojaya',          kelas:'Eksek-Eko',     tujuan:'Cilacap',           brkt:'20:55', jalur:1 },
+    { no:'KA 48',  nama:'Taksaka',            kelas:'Eksekutif',     tujuan:'Yogyakarta',        brkt:'21:20', jalur:2 },
+    { no:'KA 120B',nama:'Gunungjati',         kelas:'Eksek-Eko',     tujuan:'Cirebon',           brkt:'22:05', jalur:1 },
+    { no:'KA 64',  nama:'Argo Muria',         kelas:'Eksekutif',     tujuan:'Semarang Tawang',   brkt:'22:40', jalur:2 },
+    { no:'KA 140B',nama:'Parahyangan',        kelas:'Eksekutif',     tujuan:'Bandung',           brkt:'23:05', jalur:1 },
+  ];
+
+  /* ═══════════════════════════════════════════
+     GAME STATE
+     ═══════════════════════════════════════════ */
+  const STATE = {
+    playing: false,
+    speed: 1,
+    time: 360,
+    score: { total: 0, delay: 0, collision: 0, departed: 0 },
+    signals: {
+      in:  { 1:'red', 2:'red', 3:'red', 4:'red' },
+      out: { 1:'red', 2:'red', 3:'red', 4:'red' }
+    },
+    switches: { W1:'nwr', W2:'nwr', W3:'nwr', W4:'nwr', W5:'nwr', W6:'nwr' },
+    trains: [],
+    scheduleIdx: 0,
+    comms: [],
+    lastTick: 0,
+    selectedTrain: null
+  };
+
+  /* ═══════════════════════════════════════════
+     CANVAS
+     ═══════════════════════════════════════════ */
+  const canvas = document.getElementById('ppkaCanvas');
+  const ctx = canvas.getContext('2d');
+  let W, H, DPR;
+
+  // Fixed design canvas dimensions
+  const DESIGN_W = 1400;
+  const DESIGN_H = 400;
+
+  // Infinite canvas state
+  let viewX = 0, viewY = 0, viewZoom = 1;
+  let isPanning = false, panMoved = false;
+  let panStartX = 0, panStartY = 0, panViewX = 0, panViewY = 0;
+
+  function resize() {
+    const wrap = canvas.parentElement;
+    DPR = window.devicePixelRatio || 1;
+    W = wrap.clientWidth;
+    H = wrap.clientHeight;
+    canvas.width = W * DPR;
+    canvas.height = H * DPR;
+    canvas.style.width = W + 'px';
+    canvas.style.height = H + 'px';
+  }
+
+  window.addEventListener('resize', resize);
+  resize();
+
+  // Initial zoom to fit design in viewport
+  viewZoom = Math.min(W / DESIGN_W, H / DESIGN_H) * 0.85;
+
+   /* ═══════════════════════════════════════════
+     TRACK LAYOUT
+     Double-track main line (Jakarta Kota ↔ Manggarai).
+     TrackA (upper) = J2 level — sepur lurus arah Jakarta Kota
+     TrackB (lower) = J3 level — sepur lurus arah Bogor/Manggarai
+     Switches on TrackA route to J1/J2/J3/J4 via ladder.
+     TrackB is straight visual (no switches in simplified layout).
+     W1 RWR→J1(top), NWR→lanjut W2
+     W2 NWR→J2,      RWR→lanjut W3
+     W3 NWR→J3,      RWR→J4(bottom)
+     ═══════════════════════════════════════════ */
+  function layout() {
+    const pad = 25;
+    const approachX = pad;
+    const stationLeft = approachX + 290;
+    const stationRight = DESIGN_W - pad - 250;
+    const departX = DESIGN_W - pad;
+    const centerY = DESIGN_H / 2;
+    const gap = Math.min(60, (DESIGN_H - 100) / 3);
+
+    const trackY = [
+      centerY - gap * 1.5,
+      centerY - gap * 0.5,
+      centerY + gap * 0.5,
+      centerY + gap * 1.5
+    ];
+
+    // Double-track approach Y values (same levels as J2 and J3)
+    const approachY_H = trackY[1];
+    const approachY_L = trackY[2];
+
+    const swX = [
+      approachX + 70,
+      approachX + 130,
+      approachX + 190
+    ];
+
+    const swX_R = [
+      stationRight + 30,
+      stationRight + 100,
+      stationRight + 170
+    ];
+
+    return { pad, approachX, approachY_H, approachY_L, stationLeft, stationRight, departX, centerY, gap, trackY, swX, swX_R };
+  }
+
+  /* ═══════════════════════════════════════════
+     SWITCH ROUTING LOGIC
+     W1: RWR→J1, NWR→continue to W2
+     W2: NWR→J2, RWR→continue to W3
+     W3: NWR→J3, RWR→J4
+     W4: NWR→J2, RWR→J1
+     W5: NWR→J3, RWR→continue to W4
+     W6: RWR→J4, NWR→continue to W5
+     ═══════════════════════════════════════════ */
+  function getRouteJalur() {
+    const s = STATE.switches;
+    if (s.W1 === 'rwr') return 1;
+    if (s.W2 === 'nwr') return 2;
+    if (s.W3 === 'nwr') return 3;
+    return 4;
+  }
+
+  function getRoutePath() {
+    const L = layout();
+    const s = STATE.switches;
+    const points = [];
+    points.push({ x: L.approachX, y: L.approachY_H });
+
+    if (s.W1 === 'rwr') {
+      const cpX = (L.swX[0] + L.stationLeft) / 2;
+      const cpY = L.approachY_H + (L.trackY[0] - L.approachY_H) * 0.4;
+      points.push({ x: L.swX[0], y: L.approachY_H });
+      points.push({ x: cpX, y: cpY });
+      points.push({ x: L.stationLeft, y: L.trackY[0] });
+    } else if (s.W2 === 'nwr') {
+      const cpX = (L.swX[1] + L.stationLeft) / 2;
+      const cpY = L.approachY_H + (L.trackY[1] - L.approachY_H) * 0.4;
+      points.push({ x: L.swX[0], y: L.approachY_H });
+      points.push({ x: L.swX[1], y: L.approachY_H });
+      points.push({ x: cpX, y: cpY });
+      points.push({ x: L.stationLeft, y: L.trackY[1] });
+    } else if (s.W3 === 'nwr') {
+      const cpX = (L.swX[2] + L.stationLeft) / 2;
+      const cpY = L.approachY_H + (L.trackY[2] - L.approachY_H) * 0.4;
+      points.push({ x: L.swX[0], y: L.approachY_H });
+      points.push({ x: L.swX[1], y: L.approachY_H });
+      points.push({ x: L.swX[2], y: L.approachY_H });
+      points.push({ x: cpX, y: cpY });
+      points.push({ x: L.stationLeft, y: L.trackY[2] });
+    } else {
+      const cpX = (L.swX[2] + L.stationLeft) / 2;
+      const cpY = L.approachY_H + (L.trackY[3] - L.approachY_H) * 0.4;
+      points.push({ x: L.swX[0], y: L.approachY_H });
+      points.push({ x: L.swX[1], y: L.approachY_H });
+      points.push({ x: L.swX[2], y: L.approachY_H });
+      points.push({ x: cpX, y: cpY });
+      points.push({ x: L.stationLeft, y: L.trackY[3] });
+    }
+
+    return points;
+  }
+
+  /* ═══════════════════════════════════════════
+     DRAW HELPERS
+     ═══════════════════════════════════════════ */
+  const SIGNAL_COLORS = { red:'#ff4444', yellow:'#ffaa00', green:'#00cc66' };
+
+  function drawRails(x1, y1, x2, y2) {
+    drawRailBed(x1, y1, x2, y2);
+    drawSleepers(x1, y1, x2, y2);
+    drawRailLines(x1, y1, x2, y2);
+  }
+
+  function drawRailBed(x1, y1, x2, y2) {
+    ctx.strokeStyle = '#2a2e34';
+    ctx.lineWidth = 7;
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+  }
+
+  function drawSleepers(x1, y1, x2, y2) {
+    const dx = x2 - x1, dy = y2 - y1;
+    const len = Math.sqrt(dx*dx + dy*dy);
+    if (len < 1) return;
+    const steps = Math.floor(len / 8);
+    ctx.strokeStyle = '#3a3f46';
+    ctx.lineWidth = 1.5;
+    for (let i = 0; i <= steps; i++) {
+      const t = i / steps;
+      const sx = x1 + dx * t, sy = y1 + dy * t;
+      const px = -dy / len * 4, py = dx / len * 4;
+      ctx.beginPath();
+      ctx.moveTo(sx - px, sy - py);
+      ctx.lineTo(sx + px, sy + py);
+      ctx.stroke();
+    }
+  }
+
+  function drawRailLines(x1, y1, x2, y2) {
+    const dx = x2 - x1, dy = y2 - y1;
+    const len = Math.sqrt(dx*dx + dy*dy);
+    if (len < 1) return;
+    const px = -dy / len * 2.5, py = dx / len * 2.5;
+    ctx.strokeStyle = '#8899aa';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(x1 + px, y1 + py); ctx.lineTo(x2 + px, y2 + py);
+    ctx.moveTo(x1 - px, y1 - py); ctx.lineTo(x2 - px, y2 - py);
+    ctx.stroke();
+  }
+
+  function drawCurvedRail(x1, y1, cx, cy, x2, y2) {
+    ctx.strokeStyle = '#2a2e34';
+    ctx.lineWidth = 7;
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.quadraticCurveTo(cx, cy, x2, y2);
+    ctx.stroke();
+
+    // Sleepers along curve
+    ctx.strokeStyle = '#3a3f46';
+    ctx.lineWidth = 1.5;
+    for (let t = 0; t <= 1; t += 0.04) {
+      const mt = 1 - t;
+      const px = mt * mt * x1 + 2 * mt * t * cx + t * t * x2;
+      const py = mt * mt * y1 + 2 * mt * t * cy + t * t * y2;
+      // Tangent direction
+      const dx = 2 * mt * (cx - x1) + 2 * t * (x2 - cx);
+      const dy = 2 * mt * (cy - y1) + 2 * t * (y2 - cy);
+      const len = Math.sqrt(dx * dx + dy * dy) || 1;
+      const spx = -dy / len * 4, spy = dx / len * 4;
+      ctx.beginPath();
+      ctx.moveTo(px - spx, py - spy);
+      ctx.lineTo(px + spx, py + spy);
+      ctx.stroke();
+    }
+
+    // Rail lines
+    ctx.strokeStyle = '#8899aa';
+    ctx.lineWidth = 1.5;
+    for (let side = -1; side <= 1; side += 2) {
+      ctx.beginPath();
+      for (let t = 0; t <= 1; t += 0.02) {
+        const mt = 1 - t;
+        const px = mt * mt * x1 + 2 * mt * t * cx + t * t * x2;
+        const py = mt * mt * y1 + 2 * mt * t * cy + t * t * y2;
+        const dx = 2 * mt * (cx - x1) + 2 * t * (x2 - cx);
+        const dy = 2 * mt * (cy - y1) + 2 * t * (y2 - cy);
+        const len = Math.sqrt(dx * dx + dy * dy) || 1;
+        const rx = -dy / len * 2.5 * side, ry = dx / len * 2.5 * side;
+        t === 0 ? ctx.moveTo(px + rx, py + ry) : ctx.lineTo(px + rx, py + ry);
+      }
+      ctx.stroke();
+    }
+  }
+
+  function drawRailsH(x1, y, x2) { drawRails(x1, y, x2, y); }
+
+  function drawSignalHead(x, y, color, label, clickable) {
+    ctx.fillStyle = '#2a3040';
+    ctx.fillRect(x - 1.5, y - 26, 3, 26);
+
+    ctx.fillStyle = '#0d1117';
+    ctx.beginPath();
+    ctx.roundRect(x - 8, y - 46, 16, 22, 3);
+    ctx.fill();
+    ctx.strokeStyle = '#333';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    const c = SIGNAL_COLORS[color] || '#1a2030';
+    ctx.fillStyle = c;
+    ctx.beginPath();
+    ctx.arc(x, y - 35, 5, 0, Math.PI * 2);
+    ctx.fill();
+
+    if (color && color !== 'off') {
+      ctx.save();
+      ctx.shadowColor = c;
+      ctx.shadowBlur = 15;
+      ctx.fillStyle = c;
+      ctx.beginPath();
+      ctx.arc(x, y - 35, 3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    ctx.fillStyle = '#5a6a7a';
+    ctx.font = '8px "JetBrains Mono", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(label, x, y + 12);
+
+    if (clickable) {
+      ctx.fillStyle = 'rgba(51,153,255,0.3)';
+      ctx.beginPath();
+      ctx.arc(x, y - 35, 10, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  function drawPlatform(x, y, w, h, label) {
+    ctx.fillStyle = '#1a2030';
+    ctx.beginPath();
+    ctx.roundRect(x, y, w, h, 2);
+    ctx.fill();
+
+    ctx.fillStyle = '#ffcc00';
+    ctx.fillRect(x, y, w, 2);
+    ctx.fillRect(x, y + h - 2, w, 2);
+
+    ctx.fillStyle = 'rgba(255,204,0,0.1)';
+    ctx.fillRect(x + 4, y + 4, w - 8, 3);
+    ctx.fillRect(x + 4, y + h - 7, w - 8, 3);
+
+    ctx.fillStyle = '#8899aa';
+    ctx.font = 'bold 9px "Inter", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(label, x + w / 2, y + h / 2 + 3);
+  }
+
+  function drawStationBuilding(x, y, w, h) {
+    const grd = ctx.createLinearGradient(x, y, x, y + h);
+    grd.addColorStop(0, '#2d5a3d');
+    grd.addColorStop(0.5, '#1e4a2e');
+    grd.addColorStop(1, '#1a3d26');
+    ctx.fillStyle = grd;
+    ctx.beginPath();
+    ctx.roundRect(x, y, w, h, 4);
+    ctx.fill();
+
+    ctx.fillStyle = '#3d7a52';
+    ctx.beginPath();
+    ctx.moveTo(x - 8, y + 4);
+    ctx.lineTo(x + w / 2, y - 12);
+    ctx.lineTo(x + w + 8, y + 4);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.fillStyle = 'rgba(255,255,200,0.15)';
+    const winW = 14, winH = 10;
+    const cols = Math.floor(w / 24);
+    for (let i = 0; i < cols; i++) {
+      const wx = x + 12 + i * 24;
+      if (wx + winW > x + w - 12) break;
+      ctx.fillRect(wx, y + 10, winW, winH);
+    }
+
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 9px "Inter", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('GAMBIR', x + w / 2, y + h / 2 + 3);
+  }
+
+  function drawSwitchJunction(x, y, straightY, divergeY, state, label) {
+    const nwr = state === 'nwr';
+    const angle = Math.atan2(divergeY - straightY, 40);
+    const cosA = Math.cos(angle), sinA = Math.sin(angle);
+
+    // Frog diamond (aligned to diverging direction)
+    ctx.fillStyle = '#0d1117';
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x + 10 + cosA * 6, y - 4);
+    ctx.lineTo(x + 18, y);
+    ctx.lineTo(x + 10 + cosA * 6, y + 4);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = '#445566';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // Rails through frog
+    ctx.strokeStyle = '#667788';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(x, y - 3);
+    ctx.lineTo(x + 16, y + 3);
+    ctx.moveTo(x, y + 3);
+    ctx.lineTo(x + 16, y - 3);
+    ctx.stroke();
+
+    // Points (lidah wesel)
+    ctx.fillStyle = nwr ? '#00cc66' : '#ffaa00';
+    ctx.beginPath();
+    ctx.moveTo(x - 6, y);
+    ctx.lineTo(x - 12, y - 4);
+    ctx.lineTo(x - 12, y + 4);
+    ctx.closePath();
+    ctx.fill();
+
+    // Glow
+    ctx.save();
+    ctx.shadowColor = nwr ? '#00cc66' : '#ffaa00';
+    ctx.shadowBlur = 10;
+    ctx.fillStyle = 'transparent';
+    ctx.beginPath();
+    ctx.arc(x - 6, y, 2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    // Active route arrow
+    const activeIsStraight = nwr;
+    const arrowEndX = x + 22;
+    const arrowY = activeIsStraight ? straightY : divergeY;
+    ctx.strokeStyle = activeIsStraight ? 'rgba(0,204,102,0.2)' : 'rgba(255,170,0,0.2)';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([3, 4]);
+    ctx.beginPath();
+    ctx.moveTo(x + 12, y);
+    ctx.lineTo(arrowEndX, arrowY);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Label
+    ctx.fillStyle = '#6b7d94';
+    ctx.font = 'bold 7px "JetBrains Mono", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(label, x + 9, y + 16);
+
+    // Track direction labels
+    ctx.font = '6px "JetBrains Mono", monospace';
+    if (straightY === y) {
+      ctx.fillText('→', x + 24, y + 4);
+    }
+    ctx.fillText(divergeY < y ? '↗' : '↘', x + 24, divergeY > y ? divergeY - y + y + 6 : y - (y - divergeY) + 6);
+  }
+
+  function drawTrain(x, y, train) {
+    const carLen = 18;
+    const carGap = 2;
+    const cars = train.panjang || 8;
+    const totalLen = cars * (carLen + carGap);
+    const isEksek = train.kelas === 'Eksekutif';
+    const bodyColor = isEksek ? '#0057a8' : '#cc6600';
+    const stripeColor = isEksek ? '#ffcc00' : '#ffffff';
+
+    // shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.4)';
+    ctx.beginPath();
+    ctx.roundRect(x - 1, y - 7, totalLen + 2, 14, 4);
+    ctx.fill();
+
+    // locomotive
+    ctx.fillStyle = bodyColor;
+    ctx.beginPath();
+    ctx.roundRect(x, y - 8, carLen + 6, 14, 3);
+    ctx.fill();
+
+    ctx.fillStyle = stripeColor;
+    ctx.fillRect(x, y - 1, carLen + 6, 2);
+
+    ctx.fillStyle = '#1a1a1a';
+    ctx.fillRect(x + carLen + 2, y - 6, 4, 10);
+
+    // carriages
+    for (let i = 1; i < cars; i++) {
+      const cx = x + i * (carLen + carGap) + 6;
+      ctx.fillStyle = bodyColor;
+      ctx.beginPath();
+      ctx.roundRect(cx, y - 6, carLen, 10, 2);
+      ctx.fill();
+
+      ctx.fillStyle = stripeColor;
+      ctx.fillRect(cx, y - 1, carLen, 1.5);
+
+      ctx.fillStyle = 'rgba(200,230,255,0.3)';
+      for (let w = 0; w < 4; w++) {
+        ctx.fillRect(cx + 2 + w * 4, y - 4, 3, 3);
+      }
+    }
+
+    // number plate
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 7px "JetBrains Mono", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(train.no, x + totalLen / 2, y - 14);
+
+    // status indicator
+    if (train.status === 'stopped') {
+      ctx.fillStyle = 'rgba(255,170,0,0.6)';
+      ctx.beginPath();
+      ctx.arc(x + totalLen / 2, y - 20, 3, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  /* ═══════════════════════════════════════════
+     CANVAS HIT TESTING
+     ═══════════════════════════════════════════ */
+  function getCanvasClickTargets() {
+    const L = layout();
+    const targets = [];
+
+    // Switches (clickable)
+    ['W1','W2','W3','W4','W5','W6'].forEach((w, i) => {
+      const arr = i < 3 ? L.swX : L.swX_R;
+      const sx = arr[i < 3 ? i : i - 3];
+      const sy = L.approachY_H;
+      targets.push({ type: 'switch', id: w, x: sx, y: sy, r: 18 });
+    });
+
+    // Signals (clickable)
+    for (let j = 0; j < 4; j++) {
+      targets.push({ type: 'signal_in', jalur: j + 1, x: L.stationLeft - 28, y: L.trackY[j] - 35, r: 16 });
+      targets.push({ type: 'signal_out', jalur: j + 1, x: L.stationRight - 28, y: L.trackY[j] - 35, r: 16 });
+    }
+
+    return targets;
+  }
+
+  function screenToWorld(sx, sy) {
+    return {
+      x: (sx - W/2 - viewX) / viewZoom + DESIGN_W/2,
+      y: (sy - H/2 - viewY) / viewZoom + DESIGN_H/2
+    };
+  }
+
+  canvas.addEventListener('click', (e) => {
+    if (panMoved) return;
+    const rect = canvas.getBoundingClientRect();
+    const cssX = e.clientX - rect.left;
+    const cssY = e.clientY - rect.top;
+    const w = screenToWorld(cssX, cssY);
+
+    const targets = getCanvasClickTargets();
+    for (const t of targets) {
+      const dx = w.x - t.x;
+      const dy = w.y - t.y;
+      if (dx * dx + dy * dy < t.r * t.r) {
+        if (t.type === 'switch') {
+          STATE.switches[t.id] = STATE.switches[t.id] === 'nwr' ? 'rwr' : 'nwr';
+          const routeJ = getRouteJalur();
+          addComm(`Wesel ${t.id} → ${STATE.switches[t.id] === 'nwr' ? 'NWR' : 'RWR'} (rute ke J${routeJ})`);
+        } else if (t.type === 'signal_in') {
+          const colors = ['red', 'yellow', 'green'];
+          const cur = STATE.signals.in[t.jalur];
+          const next = colors[(colors.indexOf(cur) + 1) % 3];
+          STATE.signals.in[t.jalur] = next;
+          addComm(`Sinyal Masuk J${t.jalur} → ${next.toUpperCase()}`);
+        } else if (t.type === 'signal_out') {
+          const colors = ['red', 'yellow', 'green'];
+          const cur = STATE.signals.out[t.jalur];
+          const next = colors[(colors.indexOf(cur) + 1) % 3];
+          STATE.signals.out[t.jalur] = next;
+          addComm(`Sinyal Keluar J${t.jalur} → ${next.toUpperCase()}`);
+        }
+        return;
+      }
+    }
+  });
+
+  // Hover cursor + drag pan
+  canvas.addEventListener('mousemove', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const cssX = e.clientX - rect.left;
+    const cssY = e.clientY - rect.top;
+    const w = screenToWorld(cssX, cssY);
+
+    // Drag pan
+    if (isPanning) {
+      const dx = cssX - panStartX;
+      const dy = cssY - panStartY;
+      if (Math.sqrt(dx*dx + dy*dy) > 3) panMoved = true;
+      viewX = panViewX + dx;
+      viewY = panViewY + dy;
+    }
+
+    const targets = getCanvasClickTargets();
+    let hit = false;
+    for (const t of targets) {
+      const dx = w.x - t.x;
+      const dy = w.y - t.y;
+      if (dx * dx + dy * dy < t.r * t.r) {
+        hit = true;
+        break;
+      }
+    }
+    canvas.style.cursor = hit ? 'pointer' : (isPanning ? 'grabbing' : 'default');
+  });
+
+  canvas.addEventListener('mousedown', (e) => {
+    if (e.button === 0) {
+      isPanning = true;
+      panMoved = false;
+      const r = canvas.getBoundingClientRect();
+      panStartX = e.clientX - r.left;
+      panStartY = e.clientY - r.top;
+      panViewX = viewX;
+      panViewY = viewY;
+    }
+  });
+
+  canvas.addEventListener('mouseup', (e) => {
+    isPanning = false;
+  });
+
+  canvas.addEventListener('mouseleave', (e) => {
+    isPanning = false;
+  });
+
+  canvas.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    const rect = canvas.getBoundingClientRect();
+    const cssX = e.clientX - rect.left;
+    const cssY = e.clientY - rect.top;
+
+    // Capture world pos BEFORE zoom changes
+    const world = screenToWorld(cssX, cssY);
+
+    const delta = -e.deltaY * 0.001;
+    viewZoom = Math.max(0.2, Math.min(5, viewZoom * (1 + delta)));
+
+    // Zoom toward cursor (keep same world point under cursor)
+    viewX = cssX - W/2 - (world.x - DESIGN_W/2) * viewZoom;
+    viewY = cssY - H/2 - (world.y - DESIGN_H/2) * viewZoom;
+  }, { passive: false });
+
+  /* ═══════════════════════════════════════════
+     MAIN RENDER
+     ═══════════════════════════════════════════ */
+  function render() {
+    // Reset to identity before clearing
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Apply view transform (zoom + pan, centered on design)
+    const ox = W/2 + viewX - DESIGN_W/2 * viewZoom;
+    const oy = H/2 + viewY - DESIGN_H/2 * viewZoom;
+    ctx.setTransform(viewZoom * DPR, 0, 0, viewZoom * DPR, ox * DPR, oy * DPR);
+
+    const L = layout();
+
+    // Background grid (in world coords, covering visible area)
+    const vLeft = (0 - ox) / viewZoom;
+    const vRight = vLeft + W / viewZoom;
+    const vTop = (0 - oy) / viewZoom;
+    const vBottom = vTop + H / viewZoom;
+    ctx.strokeStyle = 'rgba(40,60,80,0.12)';
+    ctx.lineWidth = 1;
+    const gridSpacing = 50;
+    const gx0 = Math.floor(vLeft / gridSpacing) * gridSpacing;
+    const gy0 = Math.floor(vTop / gridSpacing) * gridSpacing;
+    for (let x = gx0; x <= vRight; x += gridSpacing) {
+      ctx.beginPath(); ctx.moveTo(x, vTop); ctx.lineTo(x, vBottom); ctx.stroke();
+    }
+    for (let y = gy0; y <= vBottom; y += gridSpacing) {
+      ctx.beginPath(); ctx.moveTo(vLeft, y); ctx.lineTo(vRight, y); ctx.stroke();
+    }
+
+    // Direction labels
+    ctx.fillStyle = '#3a4a5a';
+    ctx.font = 'bold 11px "Inter", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('← JAKARTA KOTA / JUANDA', L.approachX, L.trackY[0] - 40);
+    ctx.fillText('MANGGARAI / BANDUNG →', L.departX, L.trackY[0] - 40);
+
+    // Double-track labels
+    ctx.fillStyle = '#5a7a9a';
+    ctx.font = '8px "JetBrains Mono", monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('TRACK A (upper)', L.pad, L.approachY_H - 10);
+    ctx.fillText('TRACK B (lower)', L.pad, L.approachY_L + 14);
+
+    // Km marker
+    ctx.fillStyle = '#2a3a4a';
+    ctx.font = '8px "JetBrains Mono", monospace';
+    ctx.fillText('Km 5+540', (L.stationLeft + L.stationRight) / 2, L.trackY[0] - 40);
+
+    // ── TRACK RENDERING ──
+    // Double-track main line: TrackA (upper, at J2 level) with switch ladder,
+    // TrackB (lower, at J3 level) straight through — sepur lurus arah Bogor
+    // W1 RWR→J1(top), NWR→lanjut W2
+    // W2 NWR→J2,      RWR→lanjut W3
+    // W3 NWR→J3,      RWR→J4(bottom)
+
+    // TrackA main line approach (with switches)
+    drawRailsH(L.pad, L.approachY_H, L.swX[0]);
+
+    // TrackB main line (straight, no switches)
+    drawRailsH(L.pad, L.approachY_L, L.stationLeft);
+
+    // Main line continuation between switches (dimmed when route diverges)
+    const r1 = STATE.switches.W1 === 'nwr';
+    const r2 = STATE.switches.W2 === 'rwr';
+    ctx.globalAlpha = r1 ? 1.0 : 0.12;
+    drawRailsH(L.swX[0], L.approachY_H, L.swX[1]);
+    ctx.globalAlpha = 1;
+    ctx.globalAlpha = (r1 && r2) ? 1.0 : 0.12;
+    drawRailsH(L.swX[1], L.approachY_H, L.swX[2]);
+    ctx.globalAlpha = 1;
+
+    // ── SWITCH FAN-OUT CURVES ──
+    // Long smooth curves from each switch to station tracks
+    // Control at geometric midpoint for balanced start/end angles
+    // W1: curve to J1 (RWR only)
+    {
+      const nwr = STATE.switches.W1 === 'nwr';
+      ctx.globalAlpha = nwr ? 0.12 : 1.0;
+      const cpX = (L.swX[0] + L.stationLeft) / 2;
+      const cpY = L.approachY_H + (L.trackY[0] - L.approachY_H) * 0.4;
+      drawCurvedRail(L.swX[0], L.approachY_H, cpX, cpY, L.stationLeft, L.trackY[0]);
+      ctx.globalAlpha = 1;
+    }
+    // W2: curve to J2 (NWR, sepur lurus)
+    {
+      const nwr = STATE.switches.W2 === 'nwr';
+      ctx.globalAlpha = nwr ? 1.0 : 0.12;
+      const cpX = (L.swX[1] + L.stationLeft) / 2;
+      const cpY = L.approachY_H + (L.trackY[1] - L.approachY_H) * 0.4;
+      drawCurvedRail(L.swX[1], L.approachY_H, cpX, cpY, L.stationLeft, L.trackY[1]);
+      ctx.globalAlpha = 1;
+    }
+    // W3: curve to J3 (NWR) or J4 (RWR)
+    {
+      const nwr = STATE.switches.W3 === 'nwr';
+      const cpX = (L.swX[2] + L.stationLeft) / 2;
+      ctx.globalAlpha = nwr ? 1.0 : 0.12;
+      const cpY3 = L.approachY_H + (L.trackY[2] - L.approachY_H) * 0.4;
+      drawCurvedRail(L.swX[2], L.approachY_H, cpX, cpY3, L.stationLeft, L.trackY[2]);
+      ctx.globalAlpha = 1;
+      ctx.globalAlpha = nwr ? 0.12 : 1.0;
+      const cpY4 = L.approachY_H + (L.trackY[3] - L.approachY_H) * 0.4;
+      drawCurvedRail(L.swX[2], L.approachY_H, cpX, cpY4, L.stationLeft, L.trackY[3]);
+      ctx.globalAlpha = 1;
+    }
+
+    // ── STATION TRACKS (also serve as curve continuations) ──
+    for (let j = 0; j < 4; j++) {
+      const y = L.trackY[j];
+      drawRailsH(L.stationLeft, y, L.stationRight);
+
+      if (j === 0 || j === 2) {
+        const py = (L.trackY[j] + L.trackY[j + 1]) / 2;
+        const platH = L.gap * 0.48;
+        drawPlatform(L.stationLeft + 50, py - platH / 2, L.stationRight - L.stationLeft - 100, platH,
+          j === 0 ? 'Peron 1 — 2' : 'Peron 3 — 4');
+      }
+
+      ctx.fillStyle = (j === 1 || j === 2) ? '#00cc66' : '#5a6a7a';
+      ctx.font = 'bold 11px "JetBrains Mono", monospace';
+      ctx.textAlign = 'right';
+      ctx.fillText('J' + (j + 1), L.stationLeft - 10, y + 4);
+
+      if (j === 1 || j === 2) {
+        ctx.fillStyle = '#00cc66';
+        ctx.font = '6px "Inter", sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText('SEPUR LURUS', L.stationRight + 10, y - 4);
+      }
+    }
+
+    // ── SWITCH JUNCTIONS ──
+    drawSwitchJunction(L.swX[0], L.approachY_H, L.approachY_H, L.trackY[0], STATE.switches.W1, 'W1');
+    drawSwitchJunction(L.swX[1], L.approachY_H, L.trackY[1], L.approachY_H, STATE.switches.W2, 'W2');
+    drawSwitchJunction(L.swX[2], L.approachY_H, L.trackY[2], L.trackY[3], STATE.switches.W3, 'W3');
+
+    // ── RIGHT SIDE (Manggarai approach, mirror of left) ──
+    // W6 (rightmost): RWR→J4, NWR→lanjut W5
+    // W5:             NWR→J3, RWR→lanjut W4
+    // W4:             NWR→J2, RWR→J1
+
+    // Main line approach from right
+    drawRailsH(L.departX, L.approachY_H, L.swX_R[2]);
+
+    // TrackB departure (straight, no switches)
+    drawRailsH(L.stationRight, L.approachY_L, L.departX);
+
+    // Main line continuation (dimmed when route diverges)
+    const r6 = STATE.switches.W6 === 'nwr';
+    const r5 = STATE.switches.W5 === 'rwr';
+    ctx.globalAlpha = r6 ? 1.0 : 0.12;
+    drawRailsH(L.swX_R[2], L.approachY_H, L.swX_R[1]);
+    ctx.globalAlpha = 1;
+    ctx.globalAlpha = (r6 && r5) ? 1.0 : 0.12;
+    drawRailsH(L.swX_R[1], L.approachY_H, L.swX_R[0]);
+    ctx.globalAlpha = 1;
+
+    // Right-side fan-out curves (go RIGHT→LEFT to station)
+    // W6 → J4 (mirror of W1→J1)
+    {
+      const nwr = STATE.switches.W6 === 'nwr';
+      ctx.globalAlpha = nwr ? 0.12 : 1.0;
+      const cpX = (L.swX_R[2] + L.stationRight) / 2;
+      const cpY = L.approachY_H + (L.trackY[3] - L.approachY_H) * 0.4;
+      drawCurvedRail(L.swX_R[2], L.approachY_H, cpX, cpY, L.stationRight, L.trackY[3]);
+      ctx.globalAlpha = 1;
+    }
+    // W5 → J3 (NWR, sepur lurus arah Bogor)
+    {
+      const nwr = STATE.switches.W5 === 'nwr';
+      ctx.globalAlpha = nwr ? 1.0 : 0.12;
+      const cpX = (L.swX_R[1] + L.stationRight) / 2;
+      const cpY = L.approachY_H + (L.trackY[2] - L.approachY_H) * 0.4;
+      drawCurvedRail(L.swX_R[1], L.approachY_H, cpX, cpY, L.stationRight, L.trackY[2]);
+      ctx.globalAlpha = 1;
+    }
+    // W4 → J2 (NWR) or J1 (RWR)
+    {
+      const nwr = STATE.switches.W4 === 'nwr';
+      const cpX = (L.swX_R[0] + L.stationRight) / 2;
+      ctx.globalAlpha = nwr ? 1.0 : 0.12;
+      const cpY2 = L.approachY_H + (L.trackY[1] - L.approachY_H) * 0.4;
+      drawCurvedRail(L.swX_R[0], L.approachY_H, cpX, cpY2, L.stationRight, L.trackY[1]);
+      ctx.globalAlpha = 1;
+      ctx.globalAlpha = nwr ? 0.12 : 1.0;
+      const cpY1 = L.approachY_H + (L.trackY[0] - L.approachY_H) * 0.4;
+      drawCurvedRail(L.swX_R[0], L.approachY_H, cpX, cpY1, L.stationRight, L.trackY[0]);
+      ctx.globalAlpha = 1;
+    }
+
+    // Right-side switch junctions
+    drawSwitchJunction(L.swX_R[2], L.approachY_H, L.approachY_H, L.trackY[3], STATE.switches.W6, 'W6');
+    drawSwitchJunction(L.swX_R[1], L.approachY_H, L.trackY[2], L.approachY_H, STATE.switches.W5, 'W5');
+    drawSwitchJunction(L.swX_R[0], L.approachY_H, L.trackY[1], L.trackY[0], STATE.switches.W4, 'W4');
+
+    // Station building
+    const bldgW = (L.stationRight - L.stationLeft) * 0.4;
+    const bldgX = (L.stationLeft + L.stationRight) / 2 - bldgW / 2;
+    drawStationBuilding(bldgX, L.trackY[0] - 48, bldgW, 24);
+
+    // ── SIGNALS ──
+    for (let j = 0; j < 4; j++) {
+      const y = L.trackY[j];
+      drawSignalHead(L.stationLeft - 28, y, STATE.signals.in[j + 1], 'SM J' + (j + 1), true);
+      drawSignalHead(L.stationRight - 28, y, STATE.signals.out[j + 1], 'SK J' + (j + 1), true);
+    }
+
+    // Route path preview (dimmed line showing where next train will go)
+    if (STATE.playing && STATE.scheduleIdx < GAPEKA.length) {
+      const routeJalur = getRouteJalur();
+      const path = getRoutePath();
+      ctx.strokeStyle = 'rgba(0,204,102,0.12)';
+      ctx.lineWidth = 6;
+      ctx.setLineDash([6, 8]);
+      ctx.beginPath();
+      ctx.moveTo(path[0].x, path[0].y);
+      for (let i = 1; i < path.length; i++) {
+        ctx.lineTo(path[i].x, path[i].y);
+      }
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    // ── TRAINS ──
+    STATE.trains.forEach(train => {
+      const y = L.trackY[train.jalur - 1];
+      const progress = train.posisi / 100;
+
+      let px, py;
+      if (train.status === 'approaching') {
+        const path = getRoutePath();
+        const totalLen = path.length - 1;
+        const idx = Math.min(Math.floor(progress * totalLen), totalLen - 1);
+        const frac = (progress * totalLen) - idx;
+        const p1 = path[Math.min(idx, totalLen - 1)];
+        const p2 = path[Math.min(idx + 1, totalLen)];
+        if (p1 && p2) {
+          px = p1.x + (p2.x - p1.x) * frac;
+          py = p1.y + (p2.y - p1.y) * frac;
+        } else {
+          px = L.approachX;
+          py = L.approachY_H;
+        }
+      } else if (train.status === 'stopped') {
+        px = L.stationLeft + 50 + (train.parkirIdx || 0) * 35;
+        py = y;
+      } else {
+        px = L.stationLeft + progress * (L.stationRight - L.stationLeft);
+        py = y;
+      }
+
+      drawTrain(px, py, train);
+    });
+
+    // LAA (overhead catenary)
+    ctx.strokeStyle = 'rgba(100,120,140,0.2)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([8, 4]);
+    for (let j = 0; j < 4; j++) {
+      const y = L.trackY[j] - 18;
+      ctx.beginPath();
+      ctx.moveTo(L.stationLeft, y);
+      ctx.lineTo(L.stationRight, y);
+      ctx.stroke();
+
+      for (let x = L.stationLeft; x <= L.stationRight; x += 80) {
+        ctx.fillStyle = 'rgba(100,120,140,0.15)';
+        ctx.fillRect(x - 1, L.trackY[j] - 18, 2, 12);
+      }
+    }
+    ctx.setLineDash([]);
+  }
+
+  /* ═══════════════════════════════════════════
+     TRAIN AI
+     ═══════════════════════════════════════════ */
+  function parseTime(s) { const [h,m] = s.split(':').map(Number); return h*60+m; }
+  function fmtTime(m) { const h=Math.floor(m/60)%24, mi=Math.floor(m%60); return String(h).padStart(2,'0')+':'+String(mi).padStart(2,'0'); }
+
+  function spawnTrains() {
+    while (STATE.scheduleIdx < GAPEKA.length) {
+      const s = GAPEKA[STATE.scheduleIdx];
+      const spawn = parseTime(s.brkt) - 8;
+      if (STATE.time >= spawn) {
+        const routeJalur = getRouteJalur();
+        STATE.trains.push({
+          id: s.no + '_' + STATE.scheduleIdx,
+          no: s.no, nama: s.nama, kelas: s.kelas,
+          tujuan: s.tujuan,
+          targetJalur: s.jalur,
+          jalur: routeJalur,
+          brkt: parseTime(s.brkt),
+          posisi: 0, status: 'approaching', speed: 1.5,
+          panjang: s.kelas === 'Eksekutif' ? 8 : 6,
+          delayed: false, collided: false,
+          parkirIdx: 0
+        });
+
+        const isCorrect = routeJalur === s.jalur;
+        const correctStr = isCorrect ? 'rute sesuai jadwal' : `rute ke J${routeJalur} (seharusnya J${s.jalur})`;
+        addComm(`${s.no} ${s.nama} → ${s.tujuan} memasuki area (${correctStr})`, isCorrect ? 'success' : 'error');
+        STATE.scheduleIdx++;
+      } else break;
+    }
+  }
+
+  function updateTrains(dt) {
+    const L = layout();
+
+    STATE.trains.forEach(t => {
+      if (t.status === 'departed') return;
+
+      if (t.status === 'approaching') {
+        t.jalur = getRouteJalur();
+        const sig = STATE.signals.in[t.jalur];
+        if (sig === 'red' && t.posisi > 15) {
+          t.speed = 0;
+        } else {
+          t.speed = 1.5;
+          t.posisi += t.speed * dt * STATE.speed;
+        }
+
+        if (t.posisi >= 100) {
+          t.posisi = 100;
+          t.status = 'stopped';
+          t.speed = 0;
+          const sameTrack = STATE.trains.filter(tr => tr.status === 'stopped' && tr.jalur === t.jalur && tr.id !== t.id);
+          t.parkirIdx = sameTrack.length;
+
+          const correctRoute = t.jalur === t.targetJalur;
+          if (correctRoute) {
+            addComm(`${t.no} berhenti di Jalur ${t.jalur} (sesuai jadwal)`, 'success');
+          } else {
+            addComm(`${t.no} berhenti di Jalur ${t.jalur} (seharusnya J${t.targetJalur})`, 'error');
+            STATE.score.total -= 100;
+          }
+        }
+      }
+
+      if (t.status === 'stopped') {
+        if (STATE.time >= t.brkt) {
+          if (STATE.signals.out[t.jalur] === 'green' || STATE.signals.out[t.jalur] === 'yellow') {
+            t.status = 'departing';
+            t.speed = 1.2;
+            addComm(`${t.no} bersiap berangkat dari Jalur ${t.jalur}`, 'success');
+            if (STATE.time <= t.brkt + 2) {
+              STATE.score.total += 100;
+              STATE.score.departed++;
+            }
+          }
+        } else if (STATE.time > t.brkt + 2 && !t.delayed) {
+          t.delayed = true;
+          STATE.score.delay++;
+          STATE.score.total -= 200;
+          addComm(`${t.no} TERLAMBAT berangkat!`, 'error');
+        }
+      }
+
+      if (t.status === 'departing') {
+        t.posisi += t.speed * dt * STATE.speed;
+        if (t.posisi >= 120) {
+          t.status = 'departed';
+          addComm(`${t.no} telah berangkat dari Jalur ${t.jalur}`, 'success');
+        }
+      }
+    });
+
+    STATE.trains = STATE.trains.filter(t => t.status !== 'departed');
+  }
+
+  function checkCollisions() {
+    const trks = {};
+    STATE.trains.forEach(t => {
+      if (t.status === 'departed' || t.status === 'approaching') return;
+      if (!trks[t.jalur]) trks[t.jalur] = [];
+      trks[t.jalur].push(t);
+    });
+    Object.values(trks).forEach(list => {
+      for (let i = 0; i < list.length; i++) {
+        for (let j = i + 1; j < list.length; j++) {
+          if (!list[i].collided && !list[j].collided) {
+            STATE.score.collision++;
+            STATE.score.total -= 1000;
+            list[i].collided = true;
+            list[j].collided = true;
+            addComm(`TABRAKAN! ${list[i].no} & ${list[j].no} di Jalur ${list[i].jalur}!`, 'error');
+          }
+        }
+      }
+    });
+  }
+
+  /* ═══════════════════════════════════════════
+     COMMS
+     ═══════════════════════════════════════════ */
+  function addComm(msg, type) {
+    STATE.comms.push({ time: fmtTime(STATE.time), msg, type });
+    if (STATE.comms.length > 50) STATE.comms.shift();
+    const el = document.getElementById('commsLog');
+    el.innerHTML = STATE.comms.slice(-12).reverse().map(c =>
+      `<div class="msg ${c.type||''}"><span class="timestamp">[${c.time}]</span>${c.msg}</div>`
+    ).join('');
+  }
+
+  /* ═══════════════════════════════════════════
+     UI PANELS
+      ═══════════════════════════════════════════ */
+  function setSignal(type, jalur, color) {
+    STATE.signals[type][jalur] = color;
+    addComm(`Sinyal ${type==='in'?'Masuk':'Keluar'} J${jalur} → ${color.toUpperCase()}`);
+  }
+
+  function toggleSwitch(id, state) {
+    STATE.switches[id] = state;
+    const routeJ = getRouteJalur();
+    addComm(`Wesel ${id} → ${state.toUpperCase()} (rute ke J${routeJ})`);
+  }
+
+  function renderSchedule() {
+    document.getElementById('schedulePanel').innerHTML = GAPEKA.map((s,i) => {
+      let cls = i < STATE.scheduleIdx ? 'done' : i === STATE.scheduleIdx ? 'active' : '';
+      return `<div class="schedule-item ${cls}">
+        <span class="time">${s.brkt}</span>
+        <span class="name">${s.no} ${s.nama}</span>
+        <span class="jalur">J${s.jalur}</span>
+      </div>`;
+    }).join('');
+  }
+
+  function renderScore() {
+    document.getElementById('scoreTotal').textContent = STATE.score.total;
+    document.getElementById('scoreDelay').textContent = STATE.score.delay;
+    document.getElementById('scoreCollision').textContent = STATE.score.collision;
+    document.getElementById('scoreDeparted').textContent = STATE.score.departed;
+    document.getElementById('trainCount').textContent = `KA Aktif: ${STATE.trains.filter(t=>t.status!=='departed').length}`;
+  }
+
+  /* ═══════════════════════════════════════════
+     GAME LOOP
+     ═══════════════════════════════════════════ */
+  function loop(ts) {
+    if (!STATE.lastTick) STATE.lastTick = ts;
+    const dt = (ts - STATE.lastTick) / 1000;
+    STATE.lastTick = ts;
+
+    if (STATE.playing) {
+      STATE.time += dt * STATE.speed * (1/6);
+      spawnTrains();
+      updateTrains(dt);
+      checkCollisions();
+      document.getElementById('gameTime').textContent = fmtTime(STATE.time);
+    }
+
+    render();
+    renderScore();
+    requestAnimationFrame(loop);
+  }
+
+  /* ═══════════════════════════════════════════
+     EVENTS
+     ═══════════════════════════════════════════ */
+  document.getElementById('btnPlay').addEventListener('click', () => { STATE.playing = true; addComm('Simulasi dimulai', 'success'); });
+  document.getElementById('btnPause').addEventListener('click', () => { STATE.playing = false; addComm('Simulasi dijeda'); });
+  document.getElementById('btnReset').addEventListener('click', () => {
+    STATE.playing = false;
+    STATE.time = 360;
+    STATE.score = { total:0, delay:0, collision:0, departed:0 };
+    STATE.signals = { in:{1:'red',2:'red',3:'red',4:'red'}, out:{1:'red',2:'red',3:'red',4:'red'} };
+    STATE.switches = { W1:'nwr', W2:'nwr', W3:'nwr', W4:'nwr', W5:'nwr', W6:'nwr' };
+    STATE.trains = [];
+    STATE.scheduleIdx = 0;
+    STATE.comms = [];
+    STATE.lastTick = 0;
+    STATE.selectedTrain = null;
+    document.getElementById('gameTime').textContent = '06:00';
+    addComm('Simulasi direset', 'success');
+    renderSchedule();
+  });
+
+  document.querySelectorAll('.speed-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      STATE.speed = parseInt(btn.dataset.speed);
+    });
+  });
+
+  /* ═══════════════════════════════════════════
+     INIT
+     ═══════════════════════════════════════════ */
+  renderSchedule();
+  addComm('PPKA Simulator v2.1 siap', 'success');
+  addComm('Stasiun Gambir (GMR) — Daop I Jakarta', 'success');
+  addComm('Atur wesel dan sinyal untuk mensimulasikan persilangan KA', 'success');
+  requestAnimationFrame(loop);
+
+  </script>
+</body>
+
+</html>
