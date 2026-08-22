@@ -1,0 +1,458 @@
+/* ═══════════════════════════════════════════
+   MV COMPONENTS — mini component library
+   (DaisyUI-style semantic classes, no deps)
+
+   Load order on every page:
+     tokens.css → components.css → page css
+
+   Available components:
+     .btn .btn-primary .btn-danger      buttons
+     .badge + .red|.blue|.green|...     line badges
+     .chip                              small pill link (back button)
+     .card                              bordered sign-white box
+     .modal / .modal-content            overlay dialog
+     .toolbar                           right-aligned button row
+     .medallion (+.letter/.number)      circular station number
+     .panel-header (+.panel-title/.actions)
+     .statusbar                         thin info bar
+     .form-group/.form-row/.input       form fields
+     .resizer / .resizer-v              drag handles
+   ═══════════════════════════════════════════ */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* ── BUTTON ─────────────────────────────── */
+
+.btn,
+.toolbar button {
+  background: var(--sign-white);
+  color: var(--fg);
+  border: 2px solid var(--border);
+  padding: 6px 13px;
+  border-radius: 0;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-family: 'Inter', sans-serif;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+
+.btn:hover,
+.toolbar button:hover {
+  border-color: var(--border-dark);
+  background: var(--hover-bg);
+}
+
+.btn-primary,
+.toolbar button.primary {
+  background: var(--theme-primary, var(--blue));
+  color: #fff;
+  border-color: var(--theme-primary, var(--blue));
+}
+
+.btn-primary:hover,
+.toolbar button.primary:hover {
+  background: var(--theme-hover, var(--blue));
+  border-color: var(--theme-hover, var(--blue));
+}
+
+.btn-danger,
+.toolbar button.danger {
+  color: var(--red);
+  border-color: var(--border);
+}
+
+.btn-danger:hover,
+.toolbar button.danger:hover {
+  border-color: var(--red);
+  background: var(--danger-bg);
+}
+
+/* ── BADGE (line colors) ────────────────── */
+
+.badge,
+.line-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 8px;
+  border-radius: 3px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+  color: #fff;
+}
+
+.badge.red,    .line-badge.red    { background: var(--red); }
+.badge.blue,   .line-badge.blue   { background: var(--blue); }
+.badge.green,  .line-badge.green  { background: var(--green); }
+.badge.orange, .line-badge.orange { background: var(--orange); }
+.badge.purple, .line-badge.purple { background: var(--purple); }
+.badge.teal,   .line-badge.teal   { background: var(--teal); }
+
+/* ── CHIP (back-station pill) ───────────── */
+
+.chip,
+.back-station-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: #fff;
+  text-decoration: none;
+  padding: 2px 10px;
+  font-size: 9.5px;
+  font-weight: 800;
+  border-radius: 12px;
+  transition: background 0.15s, border-color 0.15s;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.chip:hover,
+.back-station-chip:hover {
+  background: rgba(255, 255, 255, 0.35);
+  border-color: #fff;
+}
+
+/* ── CARD ───────────────────────────────── */
+
+.card {
+  background: var(--sign-white);
+  border: 2px solid var(--border);
+  color: var(--fg);
+}
+
+/* ── MODAL ──────────────────────────────── */
+
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(26, 26, 26, 0.5);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal.show {
+  display: flex;
+  animation: fadeIn 0.2s ease;
+}
+
+.modal-content {
+  background: var(--sign-white);
+  border: 3px solid var(--fg);
+  padding: 20px 24px;
+  border-radius: 0;
+  max-width: 460px;
+  width: 90%;
+  color: var(--fg);
+}
+
+.modal-content h3 {
+  font-family: 'Noto Sans JP', 'Inter', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--theme-primary, var(--red));
+}
+
+.modal-content button:hover {
+  background: var(--theme-primary, var(--red));
+}
+
+/* ── TOOLBAR container ──────────────────── */
+
+.toolbar {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+/* ── MEDALLION (station number) ─────────── */
+
+.medallion,
+.station-medallion {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--theme-medallion, var(--red));
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.medallion .letter,
+.station-medallion .letter {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  font-family: 'Noto Sans JP', sans-serif;
+}
+
+.medallion .number,
+.station-medallion .number {
+  font-size: 20px;
+  font-weight: 800;
+  font-family: 'Noto Sans JP', sans-serif;
+  margin-top: 1px;
+}
+
+/* ── PANEL HEADER (dark strip) ──────────── */
+
+.panel-header {
+  background: var(--fg);
+  color: #fff;
+  padding: 8px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 2px solid var(--fg);
+  flex-shrink: 0;
+}
+
+.panel-header .line-badge {
+  background: var(--theme-accent, var(--blue));
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 2px 6px;
+  border-radius: 2px;
+  text-transform: uppercase;
+  font-family: 'Inter', sans-serif;
+}
+
+.panel-header .panel-title {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-family: 'Noto Sans JP', 'Inter', sans-serif;
+  color: #fff;
+}
+
+.panel-header .actions {
+  margin-left: auto;
+  display: flex;
+  gap: 4px;
+}
+
+.panel-header .actions button {
+  background: transparent;
+  color: #fff;
+  border: 1px solid #555;
+  padding: 3px 9px;
+  border-radius: 0;
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  font-family: 'Inter', sans-serif;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.panel-header .actions button:hover {
+  border-color: var(--theme-accent, var(--blue));
+  color: var(--theme-accent, var(--blue));
+}
+
+/* ── SECTION TITLE (sidebar strip) ──────── */
+
+.section-title {
+  padding: 10px 14px;
+  background: var(--fg);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.section-title button {
+  background: transparent;
+  border: 1px solid #555;
+  color: #fff;
+  padding: 2px 8px;
+  font-size: 9px;
+  cursor: pointer;
+}
+
+.section-title button:hover {
+  background: var(--red);
+  border-color: var(--red);
+  color: #fff;
+}
+
+/* ── STATUS BAR ─────────────────────────── */
+
+.statusbar,
+#statusBar {
+  background: var(--sign-white);
+  color: var(--fg-secondary);
+  padding: 5px 16px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.statusbar #statusText.error,
+#statusBar #statusText.error {
+  color: var(--red);
+}
+
+.statusbar #statusText.ok,
+#statusBar #statusText.ok {
+  color: var(--green);
+}
+
+.statusbar #blockCount,
+#statusBar #blockCount {
+  margin-left: auto;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+/* ── FORM FIELDS ────────────────────────── */
+
+.form-group {
+  margin-bottom: 12px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--fg-secondary);
+  margin-bottom: 4px;
+}
+
+.form-row {
+  display: flex;
+  gap: 8px;
+}
+
+.input,
+.form-row input[type="number"],
+.form-row input[type="text"],
+select {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  padding: 6px;
+  border: 1px solid var(--border);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  background: var(--input-bg);
+  color: var(--fg);
+}
+
+.color-input,
+.form-row input[type="color"] {
+  width: 40px;
+  height: 28px;
+  border: 1px solid var(--border);
+  padding: 0;
+  cursor: pointer;
+  background: var(--input-bg);
+}
+
+/* ── RESIZERS ───────────────────────────── */
+
+.resizer {
+  width: 8px;
+  background: var(--border);
+  cursor: col-resize;
+  flex-shrink: 0;
+  border-left: 3px solid var(--sign-white);
+  border-right: 3px solid var(--sign-white);
+  transition: background 0.15s;
+}
+
+.resizer-v {
+  height: 8px;
+  background: var(--border);
+  cursor: row-resize;
+  flex-shrink: 0;
+  border-top: 3px solid var(--sign-white);
+  border-bottom: 3px solid var(--sign-white);
+  transition: background 0.15s;
+}
+
+.resizer:hover,
+.resizer-v:hover {
+  background: var(--theme-accent, var(--blue));
+}
+
+/* ── ANIMATIONS ─────────────────────────── */
+
+@keyframes fadeDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0s !important;
+    transition-duration: 0s !important;
+  }
+}

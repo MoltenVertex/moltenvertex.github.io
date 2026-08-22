@@ -1,0 +1,48 @@
+/* ═══════════════════════════════════════════
+   MV DESIGN TOKENS — Molten Vertex
+   Load this first on every page:
+     <link rel="stylesheet" href="css/tokens.css">
+   Theme is set via <html data-theme="light|dark">
+   (see js/theme.js). Swap/extend colors here only.
+   ═══════════════════════════════════════════ */
+
+:root {
+  /* Surfaces & text */
+  --bg: #f0f0f0;
+  --sign-white: #ffffff;
+  --fg: #1a1a1a;
+  --fg-secondary: #444;
+  --muted: #999;
+
+  /* Lines & borders */
+  --border: #d4d4d4;
+  --border-dark: #bbb;
+
+  /* Line colors (railway network palette) */
+  --red: #D71920;
+  --blue: #00A1E9;
+  --green: #009944;
+  --orange: #F39700;
+  --purple: #9C7DB8;
+  --teal: #00A7A7;
+
+  /* Component states */
+  --hover-bg: #fafafa;
+  --input-bg: #ffffff;
+  --active-bg: #f0f7ff;
+  --danger-bg: #fff5f5;
+}
+
+[data-theme="dark"] {
+  --bg: #131417;
+  --sign-white: #1d1f24;
+  --fg: #ececec;
+  --fg-secondary: #b8bcc4;
+  --muted: #7c8089;
+  --border: #34373e;
+  --border-dark: #4a4e57;
+  --hover-bg: #24262c;
+  --input-bg: #16171b;
+  --active-bg: #17222b;
+  --danger-bg: #2b191b;
+}
