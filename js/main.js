@@ -89,7 +89,9 @@ function renderFacilities(facilities) {
 
   return `<div class="facilities">${items}
     <div class="facility">
-      <button type="button" id="themeToggle" aria-label="Toggle theme"></button>
+      <button type="button" id="themeToggle" class="theme-toggle" aria-label="Toggle theme">
+        <span class="tt-icon"></span><span class="tt-label"></span>
+      </button>
     </div></div>`;
 }
 
@@ -101,11 +103,18 @@ function renderFooter(text) {
 
 function syncThemeToggle(btn) {
   const dark = document.documentElement.dataset.theme === 'dark';
-  btn.innerHTML = (dark ? ICONS.sun : ICONS.moon) + `<span>${dark ? 'Light' : 'Dark'}</span>`;
+  btn.querySelector('.tt-icon').innerHTML = dark ? ICONS.sun : ICONS.moon;
+  btn.querySelector('.tt-label').textContent = dark ? 'Light' : 'Dark';
 }
 
-function applyTheme(theme) {
-  document.documentElement.dataset.theme = theme;
+function applyTheme(theme, animate) {
+  const root = document.documentElement;
+  if (animate) {
+    root.classList.add('theme-anim');
+    clearTimeout(applyTheme._t);
+    applyTheme._t = setTimeout(() => root.classList.remove('theme-anim'), 500);
+  }
+  root.dataset.theme = theme;
   try { localStorage.setItem('mv-theme', theme); } catch (e) { }
   const meta = document.querySelector('meta[name="theme-color"]');
   if (meta) meta.setAttribute('content', theme === 'dark' ? '#131417' : '#f0f0f0');
@@ -127,8 +136,11 @@ document.addEventListener('DOMContentLoaded', () => {
     syncThemeToggle(themeBtn);
     themeBtn.addEventListener('click', () => {
       const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
-      applyTheme(next);
+      applyTheme(next, true);
       syncThemeToggle(themeBtn);
+      themeBtn.classList.remove('swap');
+      void themeBtn.offsetWidth;
+      themeBtn.classList.add('swap');
     });
   }
 

@@ -46,3 +46,16 @@
   --active-bg: #17222b;
   --danger-bg: #2b191b;
 }
+
+/* Smooth theme switch — class applied briefly by the toggle (js/main.js) */
+html.theme-anim *,
+html.theme-anim *::before,
+html.theme-anim *::after {
+  transition:
+    background-color .4s ease,
+    color .4s ease,
+    border-color .4s ease,
+    fill .4s ease,
+    stroke .4s ease,
+    box-shadow .4s ease !important;
+}

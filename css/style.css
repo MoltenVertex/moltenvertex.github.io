@@ -344,6 +344,27 @@ a.station-card:hover .direction {
   color: var(--red);
 }
 
+/* Theme toggle icon swap animation */
+.theme-toggle .tt-icon {
+  display: flex;
+}
+
+.theme-toggle.swap .tt-icon {
+  animation: ttSpin .45s cubic-bezier(.34, 1.4, .64, 1) both;
+}
+
+@keyframes ttSpin {
+  from {
+    transform: rotate(-150deg) scale(.2);
+    opacity: 0;
+  }
+
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
 /* FOOTER */
 
 .footer {
