@@ -12,6 +12,26 @@ body.doc-page.cab-theme {
   overflow: visible;
 }
 
+/* Theme accent for the cab page (panel badges etc.) */
+.cab-theme {
+  --theme-accent: var(--orange);
+}
+
+/* Panel headers use var(--fg) as background. In dark mode --fg is light,
+   so hardcoded white text from components.css becomes unreadable.
+   Re-paint header text with the background token instead. */
+.cab-theme .panel-header {
+  color: var(--bg);
+}
+
+.cab-theme .panel-header .panel-title {
+  color: var(--bg);
+}
+
+.cab-theme .panel-header .actions button {
+  color: var(--bg);
+}
+
 .doc-main {
   display: block;
   overflow: visible;
@@ -27,10 +47,12 @@ body.doc-page.cab-theme {
   align-items: start;
 }
 
+/* Animation must not leave a transform behind: a lingering transform creates a
+   containing block that breaks the Sociabuzz modal's fixed overlay (unclickable X). */
 .doc-article {
   min-width: 0;
   padding: clamp(24px, 4vw, 48px);
-  animation: fadeUp 0.5s ease both;
+  animation: fadeUp 0.5s ease backwards;
 }
 
 .doc-aside {
@@ -316,9 +338,6 @@ html[data-lang="id"] .lang-panel[data-lang="id"] {
 
 /* ── DOWNLOAD PANEL ─────────────────────── */
 
-.download-card {
-  overflow: hidden;
-}
 
 .dl-note {
   padding: 10px 14px;
@@ -348,17 +367,118 @@ html[data-lang="id"] .lang-panel[data-lang="id"] {
 }
 
 .download-list a {
+  position: relative;
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  padding: 9px 4px;
+  margin: 4px 0;
+  padding: 11px 118px 11px 8px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--border);
+  background: var(--input-bg);
   color: var(--fg);
   text-decoration: none;
-  transition: background 0.15s;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.download-list a::after {
+  content: 'DOWNLOAD \2193';
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 4px 9px;
+  border: 1px solid var(--orange);
+  color: var(--orange);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
 }
 
 .download-list a:hover {
   background: var(--hover-bg);
+  border-color: var(--orange);
+  border-left-color: var(--orange);
+}
+
+.download-list a:hover::after {
+  background: var(--orange);
+  color: #fff;
+}
+
+/* Donate button slot (Sociabuzz) — pinned inline, never floating */
+.donate-slot {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: center;
+}
+
+/* The modal overlay is relocated to <body> by JS, but keep it usable even if that fails */
+.donate-slot #sbModalOverlay,
+.donate-slot #sbModal {
+  position: fixed !important;
+}
+
+.download-card {
+  overflow: visible;
+}
+
+.donate-slot #wrapperFloatingBtn {
+  position: static !important;
+  inset: auto !important;
+  z-index: auto !important;
+  width: auto !important;
+  margin: 0 !important;
+}
+
+.donate-slot .floating-btn {
+  padding: 0 !important;
+}
+
+.donate-slot #btnModal {
+  border: 2px solid var(--fg) !important;
+  border-radius: 0 !important;
+  font-family: 'Inter', 'Noto Sans JP', sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  min-height: 42px !important;
+  padding: 11px 20px !important;
+}
+
+/* SHA-256 checksum line */
+.dl-hash {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  line-height: 1.6;
+  word-break: break-all;
+  overflow-wrap: anywhere;
+}
+
+.dl-hash .hash-label {
+  display: block;
+  font-family: 'Inter', 'Noto Sans JP', sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 3px;
+}
+
+.dl-hash code {
+  font-family: inherit;
+  font-size: inherit;
+  color: var(--fg);
+  background: none;
+  padding: 0;
 }
 
 .file-type {

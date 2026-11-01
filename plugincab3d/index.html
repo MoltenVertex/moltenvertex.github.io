@@ -4,11 +4,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MVCab3D — 3D Cab Plugin for BVE Trainsim 5/6</title>
-  <meta name="description" content="MVCab3D is a static 3D cab plugin for BVE Trainsim 5/6. Blog post and installation tutorial in English, Japanese, and Indonesian.">
+  <title>MVCab3D — 3D Cab Plugin for BVE Trainsim 5</title>
+  <meta name="description" content="MVCab3D is a static 3D cab plugin for BVE Trainsim 5. Blog post and installation tutorial in English, Japanese, and Indonesian.">
   <meta name="theme-color" content="#f0f0f0">
   <meta property="og:type" content="article">
-  <meta property="og:title" content="MVCab3D — 3D Cab Plugin for BVE Trainsim 5/6">
+  <meta property="og:title" content="MVCab3D — 3D Cab Plugin for BVE Trainsim 5">
   <meta property="og:description" content="Install a real 3D cab in BVE with the MVCab3D BveEX plugin. Tutorial available in EN / JP / ID.">
   <meta property="og:url" content="https://moltenvertex.github.io/plugincab3d/">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23F39700'/%3E%3Ctext x='32' y='43' font-family='Arial,sans-serif' font-size='24' font-weight='900' fill='%23ffffff' text-anchor='middle'%3EMV%3C/text%3E%3C/svg%3E">
@@ -49,7 +49,7 @@
     </div>
     <div class="title-group">
       <h1>MVCab3D</h1>
-      <div class="subtitle">Static 3D cab plugin for BVE Trainsim 5/6</div>
+      <div class="subtitle">Static 3D cab plugin for BVE Trainsim 5</div>
     </div>
     <div class="lang-switch" role="group" aria-label="Language">
       <button type="button" class="btn lang-btn" data-lang="en" aria-pressed="true">EN</button>
@@ -62,7 +62,7 @@
     <span class="line-stripe"></span>
     <span class="arrow">&#8594;</span>
     <span class="label">Article</span>
-    <span class="dest">Install a static 3D cab &middot; BVE Trainsim 5/6 &middot; BveEX</span>
+    <span class="dest">Install a static 3D cab &middot; BVE Trainsim 5 &middot; BveEX</span>
   </div>
 
   <main class="doc-main">
@@ -77,7 +77,7 @@
           <div class="doc-meta">
             <span>November 1, 2026</span>
             <span>~8 min read</span>
-            <span class="badge orange">BVE 5/6</span>
+            <span class="badge orange">BVE 5</span>
             <span class="badge teal">BveEX</span>
           </div>
           <p class="doc-lead">MVCab3D replaces the flat 2D cab image with a DirectX <code>.x</code> mesh pinned to the driver's eye point. Install it once in a train folder and the 3D cab follows that train on every route &mdash; no route edits and no changes to BVE itself.</p>
@@ -100,7 +100,7 @@
                   <tr><th>Component</th><th>Requirement</th></tr>
                 </thead>
                 <tbody>
-                  <tr><td>BVE Trainsim</td><td>5.x, also works on 6.x</td></tr>
+                  <tr><td>BVE Trainsim</td><td>5.x (BVE 6 untested)</td></tr>
                   <tr><td>BveEX</td><td>2.0.8 or newer</td></tr>
                   <tr><td>.NET Framework</td><td>4.8 (already included in Windows 10/11)</td></tr>
                   <tr><td>Cab model</td><td>DirectX <code>.x</code> mesh plus its textures</td></tr>
@@ -112,7 +112,7 @@
 
           <section class="doc-section">
             <h3>1. Download the plugin files</h3>
-            <p>Get the three files from the download panel on this page:</p>
+            <p>Get <code>MVCab3D.zip</code> from the download panel on this page and unpack it. You need the three vehicle plugin files:</p>
             <ul class="doc-list">
               <li><code>MVCab3D.dll</code> &mdash; the vehicle plugin.</li>
               <li><code>VehiclePluginUsing.xml</code> &mdash; tells BveEX to load the plugin.</li>
@@ -124,14 +124,14 @@
             <h3>2. Install per train</h3>
             <ol class="doc-steps">
               <li><strong>Install BveEX 2.0.8 or newer.</strong> Launch BVE once after installing so BveEX initialises its folders.</li>
-              <li><strong>Open the train folder.</strong> This is the folder that contains the vehicle's <code>.dat</code> or <code>.txt</code> file.</li>
+              <li><strong>Open the train folder.</strong> This is the folder that contains the vehicle's <code>.txt</code> file.</li>
               <li><strong>Copy the files.</strong> Put <code>MVCab3D.dll</code>, <code>VehiclePluginUsing.xml</code> and <code>MVCab3D.txt</code> next to the vehicle file.</li>
               <li><strong>Add your cab.</strong> Copy your <code>Cab3D.x</code> and every texture it uses into the same folder. Textures must sit next to the <code>.x</code> file.</li>
               <li><strong>Point the config at the mesh.</strong> Open <code>MVCab3D.txt</code> and set <code>MeshPath = Cab3D.x</code>. A relative path is resolved from the config file's folder.</li>
               <li><strong>Test in BVE.</strong> Load any scenario that uses this train. The 2D panel disappears and your mesh is drawn at the driver's eye point.</li>
             </ol>
             <pre class="code-block">Train\
-  Vehicle.dat
+  Vehicle.txt
   VehiclePluginUsing.xml
   MVCab3D.dll
   MVCab3D.txt
@@ -143,7 +143,7 @@
           <section class="doc-section">
             <h3>3. Prepare the cab mesh</h3>
             <ul class="doc-list">
-              <li><strong>Format:</strong> DirectX <code>.x</code>, text or binary. Blender can export it with the DirectX exporter; Metasequoia saves <code>.x</code> natively.</li>
+              <li><strong>Format:</strong> DirectX <code>.x</code>, text or binary; Metasequoia saves <code>.x</code> natively. The easiest way is <strong>Blender</strong>: model or import your cab, then export it with the free <a href="https://extensions.blender.org/add-ons/bve-import-export/" target="_blank" rel="noopener">BVE Import/Export add-on</a> (install it from Blender's official Extensions page).</li>
               <li><strong>Units and axes:</strong> metres, with <strong>+X right</strong>, <strong>+Y up</strong> and <strong>+Z forward</strong>.</li>
               <li><strong>Origin:</strong> put <code>(0, 0, 0)</code> between the driver's eyes at normal seated head height, facing forward. Build the desk, walls and windows around that point.</li>
               <li><strong>Layout guide:</strong> desk about 0.7&ndash;0.8 m below the origin, front bulkhead 1&ndash;2 m ahead, side walls 1&ndash;1.5 m out.</li>
@@ -218,7 +218,7 @@
 
           <section class="doc-section">
             <h3>License</h3>
-            <p>MVCab3D is released under the MIT License. BveEX itself is &copy; automatic9045 and is not included in these downloads.</p>
+            <p>MVCab3D is released under the MIT License. Website content &copy; 2026 MoltenVertex. BveEX itself is &copy; automatic9045 and is not included in these downloads.</p>
           </section>
         </div>
 
@@ -229,7 +229,7 @@
           <div class="doc-meta">
             <span>2026年11月1日</span>
             <span>約8分</span>
-            <span class="badge orange">BVE 5/6</span>
+            <span class="badge orange">BVE 5</span>
             <span class="badge teal">BveEX</span>
           </div>
           <p class="doc-lead">MVCab3Dは、平面の2D運転台画像をDirectX <code>.x</code>メッシュに置き換えるプラグインです。メッシュは運転士の眼点に固定され、車両フォルダに一度入れるだけで、その車両を使うすべての路線に表示されます。路線ファイルの編集も、BVE本体の変更も必要ありません。</p>
@@ -252,7 +252,7 @@
                   <tr><th>項目</th><th>要件</th></tr>
                 </thead>
                 <tbody>
-                  <tr><td>BVE Trainsim</td><td>5.x（6.xでも動作）</td></tr>
+                  <tr><td>BVE Trainsim</td><td>5.x（BVE 6は未検証）</td></tr>
                   <tr><td>BveEX</td><td>2.0.8以降</td></tr>
                   <tr><td>.NET Framework</td><td>4.8（Windows 10/11には標準搭載）</td></tr>
                   <tr><td>運転台モデル</td><td>DirectX <code>.x</code>メッシュとテクスチャ</td></tr>
@@ -264,7 +264,7 @@
 
           <section class="doc-section">
             <h3>1. プラグインファイルをダウンロード</h3>
-            <p>このページのダウンロードパネルから次の3ファイルを取得します。</p>
+            <p>このページのダウンロードパネルから<code>MVCab3D.zip</code>を取得して展開します。必要なのは車両用プラグインの3ファイルです。</p>
             <ul class="doc-list">
               <li><code>MVCab3D.dll</code> &mdash; 車両用プラグイン本体。</li>
               <li><code>VehiclePluginUsing.xml</code> &mdash; BveEXにプラグインを読み込ませる設定。</li>
@@ -276,14 +276,14 @@
             <h3>2. 車両ごとに導入</h3>
             <ol class="doc-steps">
               <li><strong>BveEX 2.0.8以降をインストールします。</strong> インストール後にBVEを一度起動し、BveEXのフォルダを初期化させます。</li>
-              <li><strong>車両フォルダを開きます。</strong> 車両の<code>.dat</code>または<code>.txt</code>ファイルがあるフォルダです。</li>
+              <li><strong>車両フォルダを開きます。</strong> 車両の<code>.txt</code>ファイルがあるフォルダです。</li>
               <li><strong>ファイルをコピーします。</strong> <code>MVCab3D.dll</code>、<code>VehiclePluginUsing.xml</code>、<code>MVCab3D.txt</code>を車両ファイルの隣に置きます。</li>
               <li><strong>運転台を追加します。</strong> <code>Cab3D.x</code>と使用するテクスチャを同じフォルダにコピーします。テクスチャは<code>.x</code>ファイルの隣に置いてください。</li>
               <li><strong>設定でメッシュを指定します。</strong> <code>MVCab3D.txt</code>を開き、<code>MeshPath = Cab3D.x</code>にします。相対パスは設定ファイルのフォルダを基準に解決されます。</li>
               <li><strong>BVEでテストします。</strong> この車両を使うシナリオを読み込むと、2Dパネルが消えて運転士の眼点にメッシュが描画されます。</li>
             </ol>
             <pre class="code-block">Train\
-  Vehicle.dat
+  Vehicle.txt
   VehiclePluginUsing.xml
   MVCab3D.dll
   MVCab3D.txt
@@ -293,20 +293,9 @@
           </section>
 
           <section class="doc-section">
-            <h3>3. 路線ごとに導入（代替）</h3>
-            <p>車両フォルダを編集できない場合にのみ使用してください。</p>
-            <ol class="doc-steps">
-              <li><code>MVCab3DMap.dll</code>、<code>MapPluginUsing.xml</code>、<code>MVCab3D.txt</code>、<code>Cab3D.x</code>とテクスチャを、<code>.map</code>ファイルの隣の路線フォルダにコピーします。</li>
-              <li>路線のマップファイルの最上位に、次の1行を追加します。</li>
-            </ol>
-            <pre class="code-block">BveEx.MapPlugin.Load('MVCab3DMap\MapPluginUsing.xml');</pre>
-            <p>BVEを起動して路線を読み込んでください。この構成では車両用プラグインは使いません。</p>
-          </section>
-
-          <section class="doc-section">
-            <h3>4. 運転台メッシュの準備</h3>
+            <h3>3. 運転台メッシュの準備</h3>
             <ul class="doc-list">
-              <li><strong>形式:</strong> DirectX <code>.x</code>（テキストまたはバイナリ）。BlenderはDirectXエクスポーターで出力でき、Metasequoiaは<code>.x</code>を直接保存できます。</li>
+              <li><strong>形式:</strong> DirectX <code>.x</code>（テキストまたはバイナリ）。Metasequoiaは<code>.x</code>を直接保存できます。最も簡単なのは<strong>Blender</strong>で制作し、無償の<a href="https://extensions.blender.org/add-ons/bve-import-export/" target="_blank" rel="noopener">BVE Import/Exportアドオン</a>でエクスポートする方法です（Blender公式Extensionsから入手できます）。</li>
               <li><strong>単位と軸:</strong> メートル単位。<strong>+Xが右</strong>、<strong>+Yが上</strong>、<strong>+Zが前</strong>です。</li>
               <li><strong>原点:</strong> 座席に座ったときの目の高さで、運転士の両目の中間に<code>(0, 0, 0)</code>を置き、前を向けます。机・壁・窓はその点を中心に配置します。</li>
               <li><strong>配置の目安:</strong> 運転台は原点から約0.7〜0.8 m下、前面仕切りは1〜2 m前、側壁は左右1〜1.5 mです。</li>
@@ -317,7 +306,7 @@
           </section>
 
           <section class="doc-section">
-            <h3>5. 設定リファレンス</h3>
+            <h3>4. 設定リファレンス</h3>
             <p><code>MVCab3D.txt</code>はUTF-8のテキストファイルです。1行目は自由なヘッダー、以降は<code>Key = Value</code>形式で、<code>#</code>から始まる行はコメントです。</p>
             <div class="doc-table-wrap">
               <table class="doc-table">
@@ -347,7 +336,7 @@
           </section>
 
           <section class="doc-section">
-            <h3>6. トラブルシューティング</h3>
+            <h3>5. トラブルシューティング</h3>
             <p>まずDLLの隣にある<code>MVCab3D.log</code>を確認してください。プラグインが読み込まれたか、どのメッシュパスを試したかを最も早く確認できます。</p>
             <div class="doc-table-wrap">
               <table class="doc-table">
@@ -355,7 +344,7 @@
                   <tr><th>症状</th><th>対処</th></tr>
                 </thead>
                 <tbody>
-                  <tr><td>何も表示されない</td><td>ログを確認。<code>VehiclePluginUsing.xml</code>の欠落・名前違い、マップ方式の<code>BveEx.MapPlugin.Load(...)</code>行の欠落、<code>MeshPath</code>の誤り、BveEX 2.0.8未満などが原因です。</td></tr>
+                  <tr><td>何も表示されない</td><td>ログを確認。<code>VehiclePluginUsing.xml</code>の欠落・名前違い、<code>MeshPath</code>の誤り、BveEX 2.0.8未満などが原因です。</td></tr>
                   <tr><td>運転台が黒い・暗い</td><td>メッシュ法線を設定してください。Blenderは出力時に含めます。Metasequoiaでは法線を計算します。</td></tr>
                   <tr><td>車外視点でも運転台が浮く</td><td><code>ViewDetection = Panel</code>のままにしてください。</td></tr>
                   <tr><td>視点を動かすと運転台も回る</td><td><code>Anchor = Camera</code>になっています。<code>CameraHome</code>を使ってください。</td></tr>
@@ -369,7 +358,7 @@
           </section>
 
           <section class="doc-section">
-            <h3>7. 既知の制限</h3>
+            <h3>6. 既知の制限</h3>
             <ul class="doc-list">
               <li>静的な形状のみです。マスコン・ブレーキハンドル・可動部はこのバージョンでは対応していません。</li>
               <li>動く3D計器は未対応です。現在は静的な計器をメッシュに作り込んでください。</li>
@@ -381,7 +370,7 @@
 
           <section class="doc-section">
             <h3>ライセンス</h3>
-            <p>MVCab3DはMITライセンスで公開されています。BveEXはautomatic9045氏の著作物であり、このダウンロードには含まれません。</p>
+            <p>MVCab3DはMITライセンスで公開されています。サイトのコンテンツは&copy; 2026 MoltenVertexです。BveEXはautomatic9045氏の著作物であり、このダウンロードには含まれません。</p>
           </section>
         </div>
 
@@ -392,7 +381,7 @@
           <div class="doc-meta">
             <span>1 November 2026</span>
             <span>~8 menit baca</span>
-            <span class="badge orange">BVE 5/6</span>
+            <span class="badge orange">BVE 5</span>
             <span class="badge teal">BveEX</span>
           </div>
           <p class="doc-lead">MVCab3D menggantikan gambar cab 2D datar dengan mesh DirectX <code>.x</code> yang dipasang pada titik mata masinis. Pasang sekali di folder kereta, dan cab 3D akan mengikuti kereta itu di semua rute &mdash; tanpa mengedit rute dan tanpa mengubah BVE itu sendiri.</p>
@@ -403,7 +392,6 @@
               <li>Mesh cab <code>.x</code> milikmu sendiri, digambar setiap frame dan dipasang pada posisi kamera bawaan.</li>
               <li>Panel 2D datar dan jarumnya disembunyikan. Kalau mesh gagal dimuat, panel 2D kembali otomatis supaya kamu tetap bisa mengemudi.</li>
               <li>Klik-kiri-drag untuk melihat sekeliling dan zoom roda mouse bawaan BVE tetap berfungsi. Ada juga free look eksperimental sebagai opsi.</li>
-              <li>Dua cara pasang: plugin kendaraan modular (disarankan) atau plugin map per rute.</li>
               <li>Hanya geometri statis. Gauge, tuas, dan sakelar harus dimodelkan ke dalam mesh.</li>
             </ul>
           </section>
@@ -416,7 +404,7 @@
                   <tr><th>Komponen</th><th>Kebutuhan</th></tr>
                 </thead>
                 <tbody>
-                  <tr><td>BVE Trainsim</td><td>5.x, juga berjalan di 6.x</td></tr>
+                  <tr><td>BVE Trainsim</td><td>5.x (BVE 6 belum diuji)</td></tr>
                   <tr><td>BveEX</td><td>2.0.8 atau lebih baru</td></tr>
                   <tr><td>.NET Framework</td><td>4.8 (sudah ada di Windows 10/11)</td></tr>
                   <tr><td>Model cab</td><td>Mesh DirectX <code>.x</code> beserta teksturnya</td></tr>
@@ -428,26 +416,26 @@
 
           <section class="doc-section">
             <h3>1. Unduh file plugin</h3>
-            <p>Ambil file dari panel unduhan di halaman ini. Untuk cara yang disarankan, kamu perlu pasangan plugin kendaraan. Untuk cadangan per rute, pakai pasangan plugin map.</p>
+            <p>Ambil <code>MVCab3D.zip</code> dari panel unduhan di halaman ini lalu ekstrak. Kamu perlu tiga file plugin kendaraan:</p>
             <ul class="doc-list">
-              <li><strong>Per kereta:</strong> <code>MVCab3D.dll</code>, <code>VehiclePluginUsing.xml</code>, <code>MVCab3D.txt</code>.</li>
-              <li><strong>Per rute:</strong> <code>MVCab3DMap.dll</code>, <code>MapPluginUsing.xml</code>, <code>MVCab3D.txt</code>.</li>
+              <li><code>MVCab3D.dll</code> &mdash; plugin kendaraan.</li>
+              <li><code>VehiclePluginUsing.xml</code> &mdash; perintah agar BveEX memuat plugin.</li>
+              <li><code>MVCab3D.txt</code> &mdash; file konfigurasi.</li>
             </ul>
-            <p class="doc-warn">Jangan aktifkan kedua cara untuk kereta dan rute yang sama. Cab akan digambar dua kali.</p>
           </section>
 
           <section class="doc-section">
             <h3>2. Pasang per kereta (disarankan)</h3>
             <ol class="doc-steps">
               <li><strong>Pasang BveEX 2.0.8 atau lebih baru.</strong> Jalankan BVE sekali setelah instalasi agar BveEX menyiapkan foldernya.</li>
-              <li><strong>Buka folder kereta.</strong> Ini folder yang berisi file <code>.dat</code> atau <code>.txt</code> kendaraan.</li>
+              <li><strong>Buka folder kereta.</strong> Ini folder yang berisi file <code>.txt</code> kendaraan.</li>
               <li><strong>Salin file.</strong> Letakkan <code>MVCab3D.dll</code>, <code>VehiclePluginUsing.xml</code>, dan <code>MVCab3D.txt</code> di samping file kendaraan.</li>
               <li><strong>Tambahkan cab.</strong> Salin <code>Cab3D.x</code> dan semua teksturnya ke folder yang sama. Tekstur harus berada di samping file <code>.x</code>.</li>
               <li><strong>Arahkan konfigurasi ke mesh.</strong> Buka <code>MVCab3D.txt</code> dan set <code>MeshPath = Cab3D.x</code>. Path relatif dihitung dari folder file konfigurasi.</li>
               <li><strong>Uji di BVE.</strong> Muat skenario apa pun yang memakai kereta ini. Panel 2D hilang dan mesh digambar di titik mata masinis.</li>
             </ol>
             <pre class="code-block">Train\
-  Vehicle.dat
+  Vehicle.txt
   VehiclePluginUsing.xml
   MVCab3D.dll
   MVCab3D.txt
@@ -457,20 +445,9 @@
           </section>
 
           <section class="doc-section">
-            <h3>3. Pasang per rute (cadangan)</h3>
-            <p>Gunakan cara ini hanya kalau kamu tidak bisa mengedit folder kereta.</p>
-            <ol class="doc-steps">
-              <li>Salin <code>MVCab3DMap.dll</code>, <code>MapPluginUsing.xml</code>, <code>MVCab3D.txt</code>, <code>Cab3D.x</code>, dan teksturnya ke folder rute, di samping file <code>.map</code>.</li>
-              <li>Tambahkan satu baris ke file map rute, di level teratas:</li>
-            </ol>
-            <pre class="code-block">BveEx.MapPlugin.Load('MVCab3DMap\MapPluginUsing.xml');</pre>
-            <p>Jalankan BVE dan muat rutenya. Jangan pakai plugin kendaraan bersamaan dengan cara ini.</p>
-          </section>
-
-          <section class="doc-section">
-            <h3>4. Menyiapkan mesh cab</h3>
+            <h3>3. Menyiapkan mesh cab</h3>
             <ul class="doc-list">
-              <li><strong>Format:</strong> DirectX <code>.x</code>, teks atau biner. Blender bisa mengekspor lewat DirectX exporter; Metasequoia menyimpan <code>.x</code> secara native.</li>
+              <li><strong>Format:</strong> DirectX <code>.x</code>, teks atau biner; Metasequoia menyimpan <code>.x</code> secara native. Cara termudah pakai <strong>Blender</strong>: buat atau impor cab-nya, lalu ekspor dengan add-on gratis <a href="https://extensions.blender.org/add-ons/bve-import-export/" target="_blank" rel="noopener">BVE Import/Export</a> (pasang dari halaman Extensions resmi Blender).</li>
               <li><strong>Satuan dan sumbu:</strong> meter, dengan <strong>+X ke kanan</strong>, <strong>+Y ke atas</strong>, dan <strong>+Z ke depan</strong>.</li>
               <li><strong>Origin:</strong> letakkan <code>(0, 0, 0)</code> di antara mata masinis pada tinggi kepala saat duduk, menghadap ke depan. Bangun meja, dinding, dan jendela di sekitar titik itu.</li>
               <li><strong>Panduan tata letak:</strong> meja sekitar 0,7&ndash;0,8 m di bawah origin, sekat depan 1&ndash;2 m di depan, dinding samping 1&ndash;1,5 m ke samping.</li>
@@ -481,7 +458,7 @@
           </section>
 
           <section class="doc-section">
-            <h3>5. Referensi konfigurasi</h3>
+            <h3>4. Referensi konfigurasi</h3>
             <p><code>MVCab3D.txt</code> adalah teks UTF-8 biasa. Baris pertama adalah header bebas, lalu baris <code>Key = Value</code>; <code>#</code> memulai komentar.</p>
             <div class="doc-table-wrap">
               <table class="doc-table">
@@ -511,7 +488,7 @@
           </section>
 
           <section class="doc-section">
-            <h3>6. Pemecahan masalah</h3>
+            <h3>5. Pemecahan masalah</h3>
             <p>Periksa <code>MVCab3D.log</code> di samping DLL terlebih dahulu. Itu cara tercepat untuk melihat apakah plugin termuat dan path mesh apa yang dicoba.</p>
             <div class="doc-table-wrap">
               <table class="doc-table">
@@ -519,7 +496,7 @@
                   <tr><th>Gejala</th><th>Solusi</th></tr>
                 </thead>
                 <tbody>
-                  <tr><td>Tidak ada yang muncul</td><td>Periksa log. Penyebab umum: <code>VehiclePluginUsing.xml</code> hilang atau salah nama, baris <code>BveEx.MapPlugin.Load(...)</code> untuk metode map hilang, <code>MeshPath</code> salah, atau BveEX lebih lama dari 2.0.8.</td></tr>
+                  <tr><td>Tidak ada yang muncul</td><td>Periksa log. Penyebab umum: <code>VehiclePluginUsing.xml</code> hilang atau salah nama, <code>MeshPath</code> salah, atau BveEX lebih lama dari 2.0.8.</td></tr>
                   <tr><td>Cab hitam atau tidak terkena cahaya</td><td>Beri normal mesh yang benar. Blender mengekspornya; di Metasequoia, hitung normal.</td></tr>
                   <tr><td>Cab melayang di tampilan luar</td><td>Biarkan <code>ViewDetection = Panel</code>.</td></tr>
                   <tr><td>Cab ikut berputar saat pandangan digeser</td><td>Kamu memakai <code>Anchor = Camera</code>. Gunakan <code>CameraHome</code>.</td></tr>
@@ -533,7 +510,7 @@
           </section>
 
           <section class="doc-section">
-            <h3>7. Batasan yang diketahui</h3>
+            <h3>6. Batasan yang diketahui</h3>
             <ul class="doc-list">
               <li>Hanya geometri statis. Tuas throttle, tuas rem, dan bagian bergerak belum didukung di versi ini.</li>
               <li>Belum ada gauge 3D yang hidup. Untuk sekarang, buat dial statis di dalam mesh.</li>
@@ -545,7 +522,7 @@
 
           <section class="doc-section">
             <h3>Lisensi</h3>
-            <p>MVCab3D dirilis dengan Lisensi MIT. BveEX sendiri &copy; automatic9045 dan tidak disertakan dalam unduhan ini.</p>
+            <p>MVCab3D dirilis dengan Lisensi MIT. Konten situs &copy; 2026 MoltenVertex. BveEX sendiri &copy; automatic9045 dan tidak disertakan dalam unduhan ini.</p>
           </section>
         </div>
 
@@ -559,38 +536,140 @@
           </div>
 
           <div class="lang-panel" data-lang="en" lang="en">
-            <p class="dl-note">Version 1.00 &middot; MIT License</p>
+            <p class="dl-note">Version 0.1.0.0 &middot; MIT License</p>
             <ul class="download-list">
-              <li><a href="downloads/MVCab3D.dll" download><span class="file-type">DLL</span><span><strong>MVCab3D.dll</strong><small>Vehicle plugin (recommended)</small></span></a></li>
-              <li><a href="downloads/VehiclePluginUsing.xml" download><span class="file-type">XML</span><span><strong>VehiclePluginUsing.xml</strong><small>Vehicle wiring file</small></span></a></li>
-              <li><a href="downloads/MVCab3DMap.dll" download><span class="file-type">DLL</span><span><strong>MVCab3DMap.dll</strong><small>Map plugin (per route)</small></span></a></li>
-              <li><a href="downloads/MapPluginUsing.xml" download><span class="file-type">XML</span><span><strong>MapPluginUsing.xml</strong><small>Map wiring file</small></span></a></li>
-              <li><a href="downloads/MVCab3D.txt" download><span class="file-type">TXT</span><span><strong>MVCab3D.txt</strong><small>Configuration template</small></span></a></li>
+              <li><a href="downloads/MVCab3D.zip" download><span class="file-type">ZIP</span><span><strong>MVCab3D.zip</strong><small>Vehicle plugin files</small></span></a></li>
             </ul>
+            <div class="donate-slot">
+              <script type="text/javascript" src="https://storage.sociabuzz.com/storage/js/main/buttononwebsite/index.min.js"></script>
+              <script>
+                sbBoW.draw('moltenvertex', 'RG9uYXRlID8', 'position-top-middle', '#ff9900', '#FFFFFF');
+                (function () {
+                  var slot = document.currentScript ? document.currentScript.closest('.donate-slot') : null;
+                  if (!slot) return;
+                  var tries = 0;
+                  (function grab() {
+                    var wrapper = slot.querySelector(':scope > #wrapperFloatingBtn');
+                    if (!wrapper) {
+                      wrapper = document.querySelector('#wrapperFloatingBtn:not([data-moved])');
+                    }
+                    if (wrapper) {
+                      wrapper.dataset.moved = '1';
+                      wrapper.style.position = 'static';
+                      wrapper.style.zIndex = 'auto';
+                      wrapper.style.width = 'auto';
+                      slot.appendChild(wrapper);
+                    } else if (tries++ < 40) {
+                      setTimeout(grab, 50);
+                    }
+                  })();
+                  /* Modal lives outside the card so it is never clipped and the close button stays clickable */
+                  slot.addEventListener('click', function (e) {
+                    if (e.target.closest('#btnModal')) {
+                      setTimeout(function () {
+                        ['sbModalOverlay', 'sbModal'].forEach(function (id) {
+                          var el = document.getElementById(id);
+                          if (el && el.parentElement !== document.body) document.body.appendChild(el);
+                        });
+                      }, 0);
+                    }
+                  });
+                })();
+              </script>
+            </div>
+            <p class="dl-hash"><span class="hash-label">SHA-256 Checksum</span><code>220311403f20aa91197891a9c1404fd77f1e4ef67c25593a7db196736c0154b6</code></p>
             <p class="dl-note">BveEX is not included. Install BveEX 2.0.8+ first.</p>
           </div>
 
           <div class="lang-panel" data-lang="jp" lang="ja">
-            <p class="dl-note">バージョン 1.00 &middot; MITライセンス</p>
+            <p class="dl-note">バージョン 0.1.0.0 &middot; MITライセンス</p>
             <ul class="download-list">
-              <li><a href="downloads/MVCab3D.dll" download><span class="file-type">DLL</span><span><strong>MVCab3D.dll</strong><small>車両用プラグイン（推奨）</small></span></a></li>
-              <li><a href="downloads/VehiclePluginUsing.xml" download><span class="file-type">XML</span><span><strong>VehiclePluginUsing.xml</strong><small>車両用の読み込み設定</small></span></a></li>
-              <li><a href="downloads/MVCab3DMap.dll" download><span class="file-type">DLL</span><span><strong>MVCab3DMap.dll</strong><small>マッププラグイン（路線単位）</small></span></a></li>
-              <li><a href="downloads/MapPluginUsing.xml" download><span class="file-type">XML</span><span><strong>MapPluginUsing.xml</strong><small>マップ用の読み込み設定</small></span></a></li>
-              <li><a href="downloads/MVCab3D.txt" download><span class="file-type">TXT</span><span><strong>MVCab3D.txt</strong><small>設定テンプレート</small></span></a></li>
+              <li><a href="downloads/MVCab3D.zip" download><span class="file-type">ZIP</span><span><strong>MVCab3D.zip</strong><small>車両用プラグイン一式</small></span></a></li>
             </ul>
+            <div class="donate-slot">
+              <script type="text/javascript" src="https://storage.sociabuzz.com/storage/js/main/buttononwebsite/index.min.js"></script>
+              <script>
+                sbBoW.draw('moltenvertex', 'RG9uYXRlID8', 'position-top-middle', '#ff9900', '#FFFFFF');
+                (function () {
+                  var slot = document.currentScript ? document.currentScript.closest('.donate-slot') : null;
+                  if (!slot) return;
+                  var tries = 0;
+                  (function grab() {
+                    var wrapper = slot.querySelector(':scope > #wrapperFloatingBtn');
+                    if (!wrapper) {
+                      wrapper = document.querySelector('#wrapperFloatingBtn:not([data-moved])');
+                    }
+                    if (wrapper) {
+                      wrapper.dataset.moved = '1';
+                      wrapper.style.position = 'static';
+                      wrapper.style.zIndex = 'auto';
+                      wrapper.style.width = 'auto';
+                      slot.appendChild(wrapper);
+                    } else if (tries++ < 40) {
+                      setTimeout(grab, 50);
+                    }
+                  })();
+                  /* Modal lives outside the card so it is never clipped and the close button stays clickable */
+                  slot.addEventListener('click', function (e) {
+                    if (e.target.closest('#btnModal')) {
+                      setTimeout(function () {
+                        ['sbModalOverlay', 'sbModal'].forEach(function (id) {
+                          var el = document.getElementById(id);
+                          if (el && el.parentElement !== document.body) document.body.appendChild(el);
+                        });
+                      }, 0);
+                    }
+                  });
+                })();
+              </script>
+            </div>
+            <p class="dl-hash"><span class="hash-label">SHA-256 Checksum</span><code>220311403f20aa91197891a9c1404fd77f1e4ef67c25593a7db196736c0154b6</code></p>
             <p class="dl-note">BveEXは含まれません。先にBveEX 2.0.8以降を導入してください。</p>
           </div>
 
           <div class="lang-panel" data-lang="id" lang="id">
-            <p class="dl-note">Versi 1.00 &middot; Lisensi MIT</p>
+            <p class="dl-note">Versi 0.1.0.0 &middot; Lisensi MIT</p>
             <ul class="download-list">
-              <li><a href="downloads/MVCab3D.dll" download><span class="file-type">DLL</span><span><strong>MVCab3D.dll</strong><small>Plugin kendaraan (disarankan)</small></span></a></li>
-              <li><a href="downloads/VehiclePluginUsing.xml" download><span class="file-type">XML</span><span><strong>VehiclePluginUsing.xml</strong><small>File penghubung kendaraan</small></span></a></li>
-              <li><a href="downloads/MVCab3DMap.dll" download><span class="file-type">DLL</span><span><strong>MVCab3DMap.dll</strong><small>Plugin map (per rute)</small></span></a></li>
-              <li><a href="downloads/MapPluginUsing.xml" download><span class="file-type">XML</span><span><strong>MapPluginUsing.xml</strong><small>File penghubung map</small></span></a></li>
-              <li><a href="downloads/MVCab3D.txt" download><span class="file-type">TXT</span><span><strong>MVCab3D.txt</strong><small>Template konfigurasi</small></span></a></li>
+              <li><a href="downloads/MVCab3D.zip" download><span class="file-type">ZIP</span><span><strong>MVCab3D.zip</strong><small>Semua file plugin kendaraan</small></span></a></li>
             </ul>
+            <div class="donate-slot">
+              <script type="text/javascript" src="https://storage.sociabuzz.com/storage/js/main/buttononwebsite/index.min.js"></script>
+              <script>
+                sbBoW.draw('moltenvertex', 'RG9uYXRlID8', 'position-top-middle', '#ff9900', '#FFFFFF');
+                (function () {
+                  var slot = document.currentScript ? document.currentScript.closest('.donate-slot') : null;
+                  if (!slot) return;
+                  var tries = 0;
+                  (function grab() {
+                    var wrapper = slot.querySelector(':scope > #wrapperFloatingBtn');
+                    if (!wrapper) {
+                      wrapper = document.querySelector('#wrapperFloatingBtn:not([data-moved])');
+                    }
+                    if (wrapper) {
+                      wrapper.dataset.moved = '1';
+                      wrapper.style.position = 'static';
+                      wrapper.style.zIndex = 'auto';
+                      wrapper.style.width = 'auto';
+                      slot.appendChild(wrapper);
+                    } else if (tries++ < 40) {
+                      setTimeout(grab, 50);
+                    }
+                  })();
+                  /* Modal lives outside the card so it is never clipped and the close button stays clickable */
+                  slot.addEventListener('click', function (e) {
+                    if (e.target.closest('#btnModal')) {
+                      setTimeout(function () {
+                        ['sbModalOverlay', 'sbModal'].forEach(function (id) {
+                          var el = document.getElementById(id);
+                          if (el && el.parentElement !== document.body) document.body.appendChild(el);
+                        });
+                      }, 0);
+                    }
+                  });
+                })();
+              </script>
+            </div>
+            <p class="dl-hash"><span class="hash-label">SHA-256 Checksum</span><code>220311403f20aa91197891a9c1404fd77f1e4ef67c25593a7db196736c0154b6</code></p>
             <p class="dl-note">BveEX tidak disertakan. Pasang BveEX 2.0.8+ terlebih dahulu.</p>
           </div>
         </div>
@@ -600,10 +679,10 @@
   </main>
 
   <div class="statusbar">
-    <span>MVCab3D v1.00</span>
-    <span>BVE 5/6 &middot; BveEX 2.0.8+</span>
-    <span>MIT License</span>
-    <span id="statusText" style="margin-left:auto">Molten Vertex</span>
+    <span>MVCab3D v0.1.0.0</span>
+    <span>BVE 5 &middot; BveEX 2.0.8+</span>
+    <span>MVCab3D: MIT</span>
+    <span id="statusText" style="margin-left:auto">MoltenVertex</span>
   </div>
 
   <script>
