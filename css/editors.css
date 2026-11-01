@@ -47,12 +47,21 @@
   --theme-arrow: var(--green);
 }
 
+.cab-theme {
+  --theme-primary: var(--orange);
+  --theme-accent: var(--orange);
+  --theme-medallion: var(--orange);
+  --theme-hover: #d88400;
+  --theme-arrow: var(--orange);
+}
+
 /* ── APP SHELL (full-height flex column) ── */
 
 .train-theme,
 .sound-theme,
 .light-theme,
-.route-theme {
+.route-theme,
+.cab-theme {
   font-family: 'Inter', 'Noto Sans JP', sans-serif;
   background: var(--bg);
   color: var(--fg);

@@ -1,0 +1,441 @@
+/* ═══════════════════════════════════════════
+   MVCAB3D — blog / documentation page
+   Load order: tokens.css → components.css →
+               editors.css → style.css
+   ═══════════════════════════════════════════ */
+
+/* The editor shell is full-height; this page scrolls normally. */
+body.doc-page.cab-theme {
+  display: block;
+  height: auto;
+  min-height: 100vh;
+  overflow: visible;
+}
+
+.doc-main {
+  display: block;
+  overflow: visible;
+}
+
+.doc-shell {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 28px 20px 56px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 310px;
+  gap: 22px;
+  align-items: start;
+}
+
+.doc-article {
+  min-width: 0;
+  padding: clamp(24px, 4vw, 48px);
+  animation: fadeUp 0.5s ease both;
+}
+
+.doc-aside {
+  min-width: 0;
+  position: sticky;
+  top: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ── LANGUAGE SWITCH ────────────────────── */
+
+.lang-switch {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.lang-switch .btn {
+  padding: 6px 12px;
+  font-size: 11px;
+}
+
+.lang-btn[aria-pressed="true"] {
+  background: var(--orange);
+  border-color: var(--orange);
+  color: #fff;
+}
+
+.lang-btn[aria-pressed="true"]:hover {
+  background: var(--theme-hover);
+  border-color: var(--theme-hover);
+}
+
+/* Language panels are toggled through <html data-lang="…"> */
+.lang-panel {
+  display: none;
+}
+
+html[data-lang="en"] .lang-panel[data-lang="en"],
+html[data-lang="jp"] .lang-panel[data-lang="jp"],
+html[data-lang="id"] .lang-panel[data-lang="id"] {
+  display: block;
+}
+
+/* ── ARTICLE HEADER ─────────────────────── */
+
+.doc-kicker {
+  margin-bottom: 8px;
+  color: var(--orange);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+}
+
+.doc-article h2 {
+  margin-bottom: 12px;
+  font-family: 'Noto Sans JP', 'Inter', sans-serif;
+  font-size: clamp(26px, 3.4vw, 38px);
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  line-height: 1.2;
+  color: var(--fg);
+}
+
+.doc-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 22px;
+  color: var(--muted);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+}
+
+.doc-meta > span:not(.badge) {
+  padding-right: 8px;
+  border-right: 1px solid var(--border);
+}
+
+.doc-lead {
+  margin-bottom: 32px;
+  padding: 2px 0 2px 16px;
+  border-left: 4px solid var(--orange);
+  color: var(--fg-secondary);
+  font-size: 15px;
+  line-height: 1.85;
+}
+
+/* ── CONTENT ────────────────────────────── */
+
+.doc-section {
+  margin-bottom: 34px;
+}
+
+.doc-section:last-child {
+  margin-bottom: 0;
+}
+
+.doc-section h3 {
+  margin: 0 0 14px;
+  padding: 0 0 8px 12px;
+  border-left: 4px solid var(--orange);
+  border-bottom: 1px solid var(--border);
+  font-family: 'Noto Sans JP', 'Inter', sans-serif;
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  line-height: 1.35;
+  color: var(--fg);
+}
+
+.doc-section p {
+  margin-bottom: 12px;
+  color: var(--fg-secondary);
+  font-size: 13.5px;
+  line-height: 1.8;
+}
+
+.doc-section p:last-child,
+.doc-section ul:last-child,
+.doc-section ol:last-child,
+.doc-section pre:last-child,
+.doc-section .doc-table-wrap:last-child {
+  margin-bottom: 0;
+}
+
+.doc-section a {
+  color: var(--orange);
+  font-weight: 600;
+  text-decoration: none;
+  border-bottom: 1px solid currentColor;
+}
+
+.doc-section a:hover {
+  color: var(--theme-hover);
+}
+
+.doc-list {
+  margin: 0 0 14px;
+  padding-left: 20px;
+}
+
+.doc-list li {
+  margin-bottom: 8px;
+  color: var(--fg-secondary);
+  font-size: 13.5px;
+  line-height: 1.8;
+}
+
+.doc-list li::marker {
+  color: var(--orange);
+}
+
+.doc-list li:last-child {
+  margin-bottom: 0;
+}
+
+/* Numbered install steps */
+.doc-steps {
+  margin: 0 0 18px;
+  padding: 0;
+  list-style: none;
+  counter-reset: doc-step;
+}
+
+.doc-steps > li {
+  position: relative;
+  counter-increment: doc-step;
+  margin-bottom: 14px;
+  padding-left: 38px;
+  color: var(--fg-secondary);
+  font-size: 13.5px;
+  line-height: 1.8;
+}
+
+.doc-steps > li:last-child {
+  margin-bottom: 0;
+}
+
+.doc-steps > li::before {
+  content: counter(doc-step);
+  position: absolute;
+  top: 3px;
+  left: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--orange);
+  color: #fff;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.doc-callout,
+.doc-warn {
+  margin: 16px 0 0;
+  padding: 12px 16px;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--orange);
+  background: var(--hover-bg);
+  color: var(--fg-secondary);
+  font-size: 12.5px;
+  line-height: 1.7;
+}
+
+.doc-warn {
+  border-left-color: var(--red);
+  background: var(--danger-bg);
+}
+
+/* ── TABLES ─────────────────────────────── */
+
+.doc-table-wrap {
+  margin: 0 0 14px;
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  background: var(--sign-white);
+}
+
+.doc-table {
+  width: 100%;
+  min-width: 480px;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.doc-table th {
+  padding: 8px 12px;
+  background: var(--fg);
+  color: var(--sign-white);
+  text-align: left;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.doc-table td {
+  padding: 9px 12px;
+  border-top: 1px solid var(--border);
+  color: var(--fg-secondary);
+  line-height: 1.6;
+  vertical-align: top;
+}
+
+.doc-table tbody tr:nth-child(even) {
+  background: var(--hover-bg);
+}
+
+/* ── CODE ───────────────────────────────── */
+
+.doc-article code {
+  padding: 1px 4px;
+  border: 1px solid var(--border);
+  background: var(--hover-bg);
+  color: var(--fg);
+  font-family: 'JetBrains Mono', 'Consolas', monospace;
+  font-size: 0.88em;
+  word-break: break-word;
+}
+
+.doc-article pre.code-block {
+  margin: 0 0 14px;
+  padding: 14px 16px;
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--orange);
+  background: var(--input-bg);
+  color: var(--fg);
+  font-family: 'JetBrains Mono', 'Consolas', monospace;
+  font-size: 11.5px;
+  line-height: 1.7;
+  white-space: pre;
+}
+
+/* ── DOWNLOAD PANEL ─────────────────────── */
+
+.download-card {
+  overflow: hidden;
+}
+
+.dl-note {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.dl-note:last-child {
+  border-top: 1px solid var(--border);
+  border-bottom: none;
+}
+
+.download-list {
+  margin: 0;
+  padding: 4px 10px;
+  list-style: none;
+}
+
+.download-list li {
+  border-bottom: 1px solid var(--border);
+}
+
+.download-list li:last-child {
+  border-bottom: none;
+}
+
+.download-list a {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 9px 4px;
+  color: var(--fg);
+  text-decoration: none;
+  transition: background 0.15s;
+}
+
+.download-list a:hover {
+  background: var(--hover-bg);
+}
+
+.file-type {
+  flex-shrink: 0;
+  width: 36px;
+  padding: 3px 0;
+  background: var(--orange);
+  color: #fff;
+  text-align: center;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.download-list strong {
+  display: block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.4;
+  word-break: break-all;
+}
+
+.download-list small {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 9.5px;
+  line-height: 1.4;
+}
+
+/* ── RESPONSIVE ─────────────────────────── */
+
+@media (max-width: 980px) {
+  .doc-shell {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .doc-aside {
+    position: static;
+    order: -1;
+  }
+}
+
+@media (max-width: 640px) {
+  .doc-shell {
+    padding: 16px 12px 40px;
+    gap: 14px;
+  }
+
+  .doc-article {
+    padding: 20px 16px;
+  }
+
+  .doc-page .name-board {
+    flex-wrap: wrap;
+    padding: 12px 14px;
+  }
+
+  .doc-page .name-board .title-group {
+    flex-basis: calc(100% - 70px);
+  }
+
+  .lang-switch {
+    width: 100%;
+  }
+
+  .lang-switch .btn {
+    flex: 1;
+  }
+
+  .doc-page .top-bar .meta {
+    display: none;
+  }
+
+  .doc-meta > span:not(.badge) {
+    border-right: none;
+    padding-right: 0;
+  }
+}

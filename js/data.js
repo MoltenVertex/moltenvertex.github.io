@@ -99,13 +99,13 @@ const PROJECTS = [
 
   // ── Under Construction ──
   {
-    name: 'OpenBVE route.csv Editor',
-    href: './routecsveditor/',
-    description: 'A visual configuration editor for BVE route.csv files.',
-    tech: 'HTML/JS',
-    line: 'green',
-    lineName: 'GREEN LINE',
-    platform: '4',
+    name: 'MVCab3D',
+    href: './plugincab3d/',
+    description: 'Blog and installation guide for the MVCab3D static 3D cab plugin for BVE Trainsim 5/6, in English, Japanese, and Indonesian.',
+    tech: 'HTML/Docs',
+    line: 'orange',
+    lineName: 'ORANGE LINE',
+    platform: '6',
     section: 'construction',
   },
 ];
