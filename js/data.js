@@ -82,8 +82,16 @@ const PROJECTS = [
     platform: '3',
     section: 'operational',
   },
-
-
+  {
+    name: 'MVCab3D',
+    href: './plugincab3d/',
+    description: 'Blog and installation guide for the MVCab3D static 3D cab plugin for BVE Trainsim 5/6, in English, Japanese, and Indonesian.',
+    tech: 'HTML/Docs',
+    line: 'orange',
+    lineName: 'ORANGE LINE',
+    platform: '6',
+    section: 'operational',
+  },
 
   // ── In Service ──
   {
@@ -98,14 +106,4 @@ const PROJECTS = [
   },
 
   // ── Under Construction ──
-  {
-    name: 'MVCab3D',
-    href: './plugincab3d/',
-    description: 'Blog and installation guide for the MVCab3D static 3D cab plugin for BVE Trainsim 5/6, in English, Japanese, and Indonesian.',
-    tech: 'HTML/Docs',
-    line: 'orange',
-    lineName: 'ORANGE LINE',
-    platform: '6',
-    section: 'construction',
-  },
 ];
