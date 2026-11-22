@@ -92,6 +92,16 @@ const PROJECTS = [
     platform: '6',
     section: 'operational',
   },
+  {
+    name: 'ReShade for BVE 5/6',
+    href: './reshade/',
+    description: 'Blog and installation guide for adding ReShade post-processing to BVE Trainsim 5 and 6, in English, Japanese, and Indonesian.',
+    tech: 'HTML/Docs',
+    line: 'purple',
+    lineName: 'PURPLE LINE',
+    platform: '7',
+    section: 'operational',
+  },
 
   // ── In Service ──
   {

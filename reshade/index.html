@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en" data-lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ReShade for BVE Trainsim 5/6: Installation Blog</title>
+  <meta name="description" content="Install ReShade on BVE Trainsim 5 and 6. Step-by-step Direct3D 9 setup, shader installation, presets and troubleshooting, in English, Japanese, and Indonesian.">
+  <meta name="theme-color" content="#f0f0f0">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="ReShade for BVE Trainsim 5/6: Installation Blog">
+  <meta property="og:description" content="Give your BVE cab post-processing with ReShade. EN / JP / ID tutorial for BVE 5 and BVE 6.">
+  <meta property="og:url" content="https://moltenvertex.github.io/reshade/">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%239C7DB8'/%3E%3Ctext x='32' y='43' font-family='Arial,sans-serif' font-size='24' font-weight='900' fill='%23ffffff' text-anchor='middle'%3EMV%3C/text%3E%3C/svg%3E">
+  <script>
+    (function () {
+      var supported = ['en', 'jp', 'id'];
+      var saved = null;
+      try { saved = localStorage.getItem('mv-lang'); } catch (e) { }
+      if (supported.indexOf(saved) === -1) {
+        var nav = (navigator.language || 'en').toLowerCase();
+        saved = nav.indexOf('ja') === 0 ? 'jp' : nav.indexOf('id') === 0 ? 'id' : 'en';
+      }
+      document.documentElement.dataset.lang = saved;
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+JP:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500&display=swap">
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/editors.css">
+  <link rel="stylesheet" href="style.css">
+  <script src="../js/theme.js"></script>
+</head>
+
+<body class="cab-theme doc-page">
+
+  <div class="top-bar">
+    <a href="../index.html" class="back-station-chip">&#8592; Station</a>
+    <span>ReShade for BVE</span>
+    <span class="meta">Blog / Tutorial</span>
+  </div>
+
+  <div class="name-board">
+    <div class="station-medallion">
+      <span class="letter">R</span>
+      <span class="number">07</span>
+    </div>
+    <div class="title-group">
+      <h1>ReShade for BVE</h1>
+      <div class="subtitle">Post-processing for BVE Trainsim 5 and 6</div>
+    </div>
+    <div class="lang-switch" role="group" aria-label="Language">
+      <button type="button" class="btn lang-btn" data-lang="en" aria-pressed="true">EN</button>
+      <button type="button" class="btn lang-btn" data-lang="jp" aria-pressed="false">JP</button>
+      <button type="button" class="btn lang-btn" data-lang="id" aria-pressed="false">ID</button>
+    </div>
+  </div>
+
+  <div class="direction-bar">
+    <span class="line-stripe"></span>
+    <span class="arrow">&#8594;</span>
+    <span class="label">Article</span>
+    <span class="dest">Install post-processing &middot; BVE Trainsim 5/6 &middot; Direct3D 9</span>
+  </div>
+
+  <div class="doc-notice-wrap">
+    <div class="card doc-notice">
+      <div class="lang-panel" data-lang="en" lang="en">
+        <span class="notice-tag">Important: read this first</span>
+        <p><strong>Check each route and vehicle creator's rules before you use ReShade.</strong> Most route and train packs come with a readme, licence or usage conditions. See what the creator allows and stick to it. ReShade changes the picture, so it changes how their work looks too. Ignore the rules or use their content the wrong way and expect the creator or other players to curse you out.</p>
+      </div>
+      <div class="lang-panel" data-lang="jp" lang="ja">
+        <span class="notice-tag">重要：まず読んでください</span>
+        <p><strong>ReShadeを使う前に、路線と車両の作者が決めたルールを必ず確認してください。</strong> 多くの路線・車両データにはreadmeやライセンス、利用条件が入っています。作者が許可した範囲で使い、ルールを守ってください。ReShadeは画像を変更するので、作者の作品の見え方も変わります。ルールを無視したり変な使い方をすると、作者や他のプレイヤーにひどく罵られるかもしれません。</p>
+      </div>
+      <div class="lang-panel" data-lang="id" lang="id">
+        <span class="notice-tag">Penting: baca dulu</span>
+        <p><strong>Baca aturan dari tiap pembuat rute dan kereta sebelum pakai ReShade.</strong> Biasanya paket rute dan kereta disertai readme, lisensi, atau syarat penggunaan. Ikuti saja apa yang diizinkan pembuatnya. ReShade mengubah gambar, jadi tampilan karya mereka juga ikut berubah. Kalau aturan diabaikan atau karyanya dipakai sembarangan, jangan heran kalau pembuatnya atau pemain lain memaki kamu.</p>
+      </div>
+    </div>
+  </div>
+
+  <main class="doc-main">
+    <div class="doc-shell">
+
+      <article class="card doc-article">
+
+        <!-- ══════════ ENGLISH ══════════ -->
+        <div class="lang-panel" data-lang="en" lang="en">
+          <div class="doc-kicker">Blog / Tutorial</div>
+          <h2>Give your BVE cab a new look with ReShade</h2>
+          <div class="doc-meta">
+            <span>November 22, 2026</span>
+            <span>~9 min read</span>
+            <span class="badge purple">BVE 5</span>
+            <span class="badge purple">BVE 6</span>
+            <span class="badge teal">ReShade 6</span>
+          </div>
+          <p class="doc-lead">ReShade is a free post-processing injector that adds ambient occlusion, colour grading, sharpening and film grain on top of any DirectX 9 game. BVE Trainsim 5 and 6 both render through Direct3D 9, so a few minutes in the official setup tool is enough to change the whole look of your cab. No route, train or panel files are touched.</p>
+
+          <section class="doc-section">
+            <h3>What ReShade adds</h3>
+            <ul class="doc-list">
+              <li>Colour correction: saturation, contrast, tint and exposure tuned to your own taste.</li>
+              <li>SMAA anti-aliasing that smooths the jagged edges of route objects and cab gauges.</li>
+              <li>Ambient occlusion, depth of field, bloom and vignette for a more photographic image.</li>
+              <li>Film grain, chromatic aberration and sharpening, each toggleable and adjustable.</li>
+              <li>Everything runs on top of BVE's own output. Settings are saved as plain <code>.ini</code> presets you can back up or share.</li>
+            </ul>
+          </section>
+
+          <section class="doc-section">
+            <h3>Before you start</h3>
+            <div class="doc-table-wrap">
+              <table class="doc-table">
+                <thead>
+                  <tr><th>Component</th><th>What to use</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>BVE Trainsim 5.8</td><td><code>BveTs5.exe</code> &middot; 32-bit &middot; Direct3D 9</td></tr>
+                  <tr><td>BVE Trainsim 6.0</td><td><code>BveTs6.exe</code> &middot; 64-bit &middot; Direct3D 9</td></tr>
+                  <tr><td>ReShade</td><td>6.x setup tool from the official site</td></tr>
+                  <tr><td>Runtime</td><td>DirectX 9 End-User Runtime and VC++ redistributable (installed with BVE)</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="doc-callout">ReShade is developed by crosire and released under the BSD 3-clause licence. Download it only from <a href="https://reshade.me/" target="_blank" rel="noopener">reshade.me</a>. Do not install ReShade binaries bundled inside random preset archives.</p>
+            <p class="doc-warn">BVE 5 and BVE 6 use different executables and different bitness. Install ReShade separately for each one you play; one installation does not carry over to the other.</p>
+          </section>
+
+          <section class="doc-section">
+            <h3>1. Download the setup tool</h3>
+            <p>Open <a href="https://reshade.me/" target="_blank" rel="noopener">reshade.me</a> and click <strong>Download ReShade</strong>. Run the downloaded <code>ReShade_Setup_x.x.x.exe</code>. The standard build is enough for BVE; choose the <em>full add-on support</em> build only if you specifically need add-ons.</p>
+            <p>If BVE is installed under <code>Program Files</code>, right-click the setup tool and choose <strong>Run as administrator</strong> so it can write into that folder.</p>
+          </section>
+
+          <section class="doc-section">
+            <h3>2. Point it at the BVE executable</h3>
+            <p>In the setup tool, click <strong>Browse&hellip;</strong> and select the exact <code>.exe</code> you normally launch:</p>
+            <ul class="doc-list">
+              <li><strong>BVE 5:</strong> <code>C:\Program Files (x86)\BveTs5\BveTs5.exe</code></li>
+              <li><strong>BVE 6:</strong> <code>C:\Program Files\BveTs6\BveTs6.exe</code></li>
+            </ul>
+            <p>Those are typical locations only. The real path depends on where you installed BVE. Use the shortcut's <em>Open file location</em> if you are unsure. Then click <strong>Next</strong>.</p>
+          </section>
+
+          <section class="doc-section">
+            <h3>3. Choose Direct3D 9</h3>
+            <p>The installer asks which rendering API the application uses. Select <strong>Direct3D 9</strong> for both BVE 5 and BVE 6. BVE renders with SlimDX (DirectX 9) even though BVE 6 itself is a 64-bit program: the bitness changes the architecture of the ReShade DLL, not the graphics API. The setup tool picks the correct DLL for you.</p>
+            <pre class="code-block">BveTs5\                 BveTs6\
+  BveTs5.exe               BveTs6.exe
+  d3d9.dll                 d3d9.dll
+  ReShade.ini              ReShade.ini
+  ReShade.log              ReShade.log
+  shaders\                 shaders\
+  textures\                textures\</pre>
+            <p>These files land next to the executable. Leave them there. ReShade loads them automatically on every launch.</p>
+          </section>
+
+          <section class="doc-section">
+            <h3>4. Install a shader set</h3>
+            <p>ReShade changes nothing until shaders are installed. On the shader selection step, tick at least one repository and let the setup tool download it. Start small: one or two general shader packs are plenty for a first preset. Finish the wizard and close it.</p>
+            <p>You can add more packs later by running the same setup tool again and choosing <strong>Modify</strong> / <strong>Update</strong> instead of installing from scratch.</p>
+          </section>
+
+          <section class="doc-section">
+            <h3>5. Enable depth capture first (Add-ons tab)</h3>
+            <p>Right after the first install, start BVE, press <code>Home</code>, and open the <strong>Add-ons</strong> tab. Under <strong>Generic Depth</strong>, tick <strong>Copy depth buffer before clear operations</strong> as shown below. This is what gives ReShade access to BVE's depth buffer. Without it, ambient occlusion and depth of field simply will not work.</p>
+            <p class="doc-callout">The built-in <strong>Generic Depth</strong> add-on ships with the standard ReShade build, so you do not need the full add-on support build just for this. Leave <em>Copy depth buffer before fullscreen draw calls</em> unchecked unless depth effects still fail in fullscreen mode. The change applies immediately; reload the scenario if the buffer list does not refresh.</p>
+          </section>
+
+          <section class="doc-section">
+            <h3>6. First launch and your first preset</h3>
+            <ol class="doc-steps">
+              <li><strong>Start BVE normally</strong> and load a scenario with a cab view.</li>
+              <li><strong>Press <code>Home</code></strong> to open the ReShade overlay. If nothing appears, click inside the BVE window first.</li>
+              <li><strong>Tick a few effects</strong> in the Home &rarr; Effects list, for example SMAA and a colour correction pass.</li>
+              <li><strong>Adjust the sliders</strong> until the image looks right from the driver's seat.</li>
+              <li><strong>Save the preset</strong> with the Save button. The <code>.ini</code> file is written next to the BVE executable.</li>
+              <li><strong>Press <code>Home</code> again</strong> to hide the overlay. The effects stay active.</li>
+            </ol>
+            <p>No restart is needed. You can switch presets at any time from the overlay while driving.</p>
+          </section>
+
+          <section class="doc-section">
+            <h3>7. Settings worth checking</h3>
+            <div class="doc-table-wrap">
+              <table class="doc-table">
+                <thead>
+                  <tr><th>Setting</th><th>Suggested</th><th>Why</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>Overlay toggle key</td><td><code>Home</code></td><td>Shows or hides the ReShade UI.</td></tr>
+                  <tr><td>Depth buffer</td><td>Generic Depth &rarr; <em>Copy depth buffer before clear operations</em></td><td>Enable it on the Add-ons tab right after install; required for ambient occlusion and depth of field.</td></tr>
+                  <tr><td>SMAA quality</td><td>High</td><td>Inexpensive edge smoothing for route objects and gauges.</td></tr>
+                  <tr><td>Active effects</td><td>Under ~20 passes</td><td>Keeps frame rate stable on older machines.</td></tr>
+                  <tr><td>Preset</td><td>Save as <code>.ini</code></td><td>Easy to back up or share with other players.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="doc-section">
+            <h3>8. Troubleshooting</h3>
+            <div class="doc-table-wrap">
+              <table class="doc-table">
+                <thead>
+                  <tr><th>Symptom</th><th>Fix</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>BVE crashes on startup</td><td>Wrong API selected. Rerun the setup tool and choose Direct3D 9. If you installed the add-on build, switch back to the standard one.</td></tr>
+                  <tr><td>Overlay does not appear</td><td>Press <code>Home</code>, click inside the BVE window, and try windowed or borderless mode instead of exclusive fullscreen.</td></tr>
+                  <tr><td>"Failed to initialize" message</td><td>Run the setup tool as administrator and reinstall the DirectX 9 End-User Runtime.</td></tr>
+                  <tr><td>Depth effects look flat</td><td>Open the Add-ons tab and tick <em>Copy depth buffer before clear operations</em> under Generic Depth, then reload the scenario.</td></tr>
+                  <tr><td>Large FPS drop</td><td>Disable depth of field and ambient occlusion first, then lower SMAA quality. Save a lighter preset.</td></tr>
+                  <tr><td>Preset will not save</td><td>BVE's folder is write-protected. Run BVE as administrator or install it outside <code>Program Files</code>.</td></tr>
+                  <tr><td>Broke it after an update</td><td>Rerun the same setup tool. It detects the existing install and offers <strong>Uninstall</strong> or <strong>Modify</strong>.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="doc-section">
+            <h3>9. Uninstall ReShade</h3>
+            <p>Use the same setup tool you installed with. Run <code>ReShade_Setup_x.x.x.exe</code>, pick the BVE executable you want to clean up, and choose <strong>Direct3D 9</strong>. Once the tool detects the existing installation it shows an <strong>Uninstall</strong> button instead of the install options. Click it and wait until it finishes.</p>
+            <ul class="doc-list">
+              <li>Repeat for the other BVE version. BVE 5 and BVE 6 are installed separately.</li>
+              <li>If BVE sits in <code>Program Files</code>, run the setup tool as administrator.</li>
+              <li>Afterwards, check the executable's folder. If <code>d3d9.dll</code>, <code>ReShade.ini</code>, <code>ReShade.log</code>, <code>shaders</code> or <code>textures</code> are still there, delete them manually.</li>
+              <li>Save any preset <code>.ini</code> files you want to keep before removing those folders.</li>
+            </ul>
+            <p>Launch BVE once after uninstalling to confirm the overlay is gone and the game still runs normally.</p>
+          </section>
+
+          <section class="doc-section">
+            <h3>Known limitations</h3>
+            <ul class="doc-list">
+              <li>Depth buffer extraction on Direct3D 9 is not perfect; a few depth-based effects can look wrong in some scenarios.</li>
+              <li>ReShade costs some performance. Older PCs may need a smaller preset to keep the frame rate up.</li>
+              <li>BVE 5 is a 32-bit application, so very large presets can run into memory limits sooner than on BVE 6.</li>
+              <li>BVE's own screenshot function may not include ReShade effects; use ReShade's screenshot shortcut instead.</li>
+              <li>This guide is not affiliated with mackoy (BVE Trainsim) or crosire (ReShade).</li>
+            </ul>
+          </section>
+
+          <section class="doc-section">
+            <h3>Credits</h3>
+            <p>ReShade is &copy; crosire and licensed under BSD 3-clause. BVE Trainsim is &copy; mackoy. Website content &copy; 2026 MoltenVertex.</p>
+          </section>
+        </div>
+
+        <!-- ══════════ JAPANESE ══════════ -->
+        <div class="lang-panel" data-lang="jp" lang="ja">
+          <div class="doc-kicker">ブログ / チュートリアル</div>
+          <h2>ReShadeでBVEの運転台の見た目を変える</h2>
+          <div class="doc-meta">
+            <span>2026年11月22日</span>
+            <span>約9分</span>
+            <span class="badge purple">BVE 5</span>
+            <span class="badge purple">BVE 6</span>
+            <span class="badge teal">ReShade 6</span>
+          </div>
+          <p class="doc-lead">ReShadeはDirectX 9対応ゲームにポストエフェクトを重ねられる無料のインジェクタです。BVE Trainsim 5と6はどちらもDirect3D 9で描画しているため、公式セットアップツールで数分設定するだけで運転台の印象を大きく変えられます。路線・車両・パネルファイルを編集する必要はありません。</p>
+
+          <section class="doc-section">
+            <h3>ReShadeでできること</h3>
+            <ul class="doc-list">
+              <li>彩度・コントラスト・色調・露出を好みに合わせて調整する色補正。</li>
+              <li>路線のオブジェクトや計器のギザギザを滑らかにするSMAAアンチエイリアス。</li>
+              <li>アンビエントオクルージョン、被写界深度、ブルーム、ビネットなど、写真のような描写。</li>
+              <li>フィルムグレイン、色収差、シャープネス。それぞれ個別にON/OFFと調整が可能です。</li>
+              <li>すべてBVEの出力の上に重なるだけです。設定は<code>.ini</code>プリセットとして保存でき、バックアップや共有も簡単です。</li>
+            </ul>
+          </section>
+
+          <section class="doc-section">
+            <h3>はじめる前に</h3>
+            <div class="doc-table-wrap">
+              <table class="doc-table">
+                <thead>
+                  <tr><th>項目</th><th>内容</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>BVE Trainsim 5.8</td><td><code>BveTs5.exe</code> &middot; 32ビット &middot; Direct3D 9</td></tr>
+                  <tr><td>BVE Trainsim 6.0</td><td><code>BveTs6.exe</code> &middot; 64ビット &middot; Direct3D 9</td></tr>
+                  <tr><td>ReShade</td><td>公式サイトの6.xセットアップツール</td></tr>
+                  <tr><td>ランタイム</td><td>DirectX 9エンドユーザーランタイムとVC++再頒布可能パッケージ（BVEと一緒に導入済み）</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="doc-callout">ReShadeはcrosire氏が開発し、BSD 3-clauseライセンスで公開されています。<a href="https://reshade.me/" target="_blank" rel="noopener">reshade.me</a>からのみダウンロードし、プリセット配布サイトに同梱されたReShade本体は使わないでください。</p>
+            <p class="doc-warn">BVE 5とBVE 6は実行ファイルもビット数も異なります。プレイするバージョンそれぞれに個別に導入してください。一方の設定はもう一方には引き継がれません。</p>
+          </section>
+
+          <section class="doc-section">
+            <h3>1. セットアップツールをダウンロード</h3>
+            <p><a href="https://reshade.me/" target="_blank" rel="noopener">reshade.me</a>を開き、<strong>Download ReShade</strong>をクリックします。ダウンロードした<code>ReShade_Setup_x.x.x.exe</code>を実行してください。BVEには通常版で十分です。<em>full add-on support</em>版は、アドオンが明確に必要な場合だけ選びます。</p>
+            <p>BVEが<code>Program Files</code>配下にある場合は、セットアップツールを右クリックして<strong>管理者として実行</strong>を選び、フォルダへの書き込みを許可してください。</p>
+          </section>
+
+          <section class="doc-section">
+            <h3>2. BVEの実行ファイルを指定</h3>
+            <p>セットアップツールで<strong>Browse&hellip;</strong>をクリックし、普段起動している<code>.exe</code>を選びます。</p>
+            <ul class="doc-list">
+              <li><strong>BVE 5:</strong> <code>C:\Program Files (x86)\BveTs5\BveTs5.exe</code></li>
+              <li><strong>BVE 6:</strong> <code>C:\Program Files\BveTs6\BveTs6.exe</code></li>
+            </ul>
+            <p>これらは一般的なパスの例です。実際の場所はインストール先によって異なります。わからない場合はショートカットの<em>ファイルの場所を開く</em>を使ってください。その後<strong>Next</strong>をクリックします。</p>
+          </section>
+
+          <section class="doc-section">
+            <h3>3. Direct3D 9を選択</h3>
+            <p>描画APIを選ぶ画面では、BVE 5・BVE 6のどちらでも<strong>Direct3D 9</strong>を選びます。BVEはSlimDX（DirectX 9）で描画します。BVE 6が64ビットアプリケーションでも、変わるのはReShadeのDLLのアーキテクチャだけで、グラフィックAPIは同じです。適切なDLLはセットアップツールが自動で選びます。</p>
+            <pre class="code-block">BveTs5\                 BveTs6\
+  BveTs5.exe               BveTs6.exe
+  d3d9.dll                 d3d9.dll
+  ReShade.ini              ReShade.ini
+  ReShade.log              ReShade.log
+  shaders\                 shaders\
+  textures\                textures\</pre>
+            <p>これらのファイルは実行ファイルの隣に置かれます。起動ごとに自動で読み込まれるので、そのままにしておいてください。</p>
+          </section>
+
+          <section class="doc-section">
+            <h3>4. シェーダーをインストール</h3>
+            <p>シェーダーがないとReShadeは何も変化させません。シェーダー選択の画面でリポジトリを1つ以上チェックし、ダウンロードさせます。最初は汎用シェーダーパックを1〜2個だけにしておくのがおすすめです。ウィザードを完了して閉じます。</p>
+            <p>あとから追加したい場合は、同じセットアップツールをもう一度起動し、新規インストールではなく<strong>Modify</strong>または<strong>Update</strong>を選んでください。</p>
+          </section>
+
+          <section class="doc-section">
+            <h3>5. まず深度バッファの取得を有効にする（Add-onsタブ）</h3>
+            <p>初回インストールの直後にBVEを起動し、<code>Home</code>でオーバーレイを開いて<strong>Add-ons</strong>タブに移動します。<strong>Generic Depth</strong>の<strong>Copy depth buffer before clear operations</strong>にチェックを入れてください。これがないとReShadeがBVEの深度バッファを取得できず、アンビエントオクルージョンや被写界深度は動作しません。</p>
+            <p class="doc-callout">組み込みの<strong>Generic Depth</strong>アドオンは標準ビルドにも含まれているため、この設定だけならfull add-on supportビルドは不要です。フルスクリーンでも深度が効かない場合以外は、<em>Copy depth buffer before fullscreen draw calls</em>はオフのままで構いません。変更はすぐに反映されます。一覧が更新されない場合はシナリオを読み込み直してください。</p>
+          </section>
+
+          <section class="doc-section">
+            <h3>6. 初回起動とプリセット作成</h3>
+            <ol class="doc-steps">
+              <li><strong>BVEをいつも通り起動</strong>し、運転台視点のシナリオを読み込みます。</li>
+              <li><strong><code>Home</code>キー</strong>でReShadeのオーバーレイを開きます。何も出ない場合は、まずBVEのウィンドウ内をクリックしてください。</li>
+              <li><strong>エフェクトをいくつかチェック</strong>します（Home &rarr; Effects）。まずはSMAAと色補正などがおすすめです。</li>
+              <li><strong>スライダーを調整</strong>し、運転席から見て自然な画質にします。</li>
+              <li><strong>Saveボタンでプリセットを保存</strong>します。<code>.ini</code>ファイルがBVEの実行ファイルの隣に作られます。</li>
+              <li><strong>もう一度<code>Home</code>を押す</strong>とオーバーレイが消え、エフェクトは適用されたままになります。</li>
+            </ol>
+            <p>再起動は不要です。運転中でもオーバーレイからプリセットを切り替えられます。</p>
+          </section>
+
+          <section class="doc-section">
+            <h3>7. 確認しておきたい設定</h3>
+            <div class="doc-table-wrap">
+              <table class="doc-table">
+                <thead>
+                  <tr><th>設定</th><th>推奨</th><th>理由</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>オーバーレイ切替キー</td><td><code>Home</code></td><td>ReShadeのUIを表示・非表示にします。</td></tr>
+                  <tr><td>深度バッファ</td><td>Generic Depth &rarr; <em>Copy depth buffer before clear operations</em></td><td>インストール直後にAdd-onsタブで有効にします。AOと被写界深度に必須です。</td></tr>
+                  <tr><td>SMAA品質</td><td>High</td><td>路線オブジェクトや計器の輪郭を低コストで滑らかにします。</td></tr>
+                  <tr><td>有効なエフェクト</td><td>約20パス以下</td><td>古いPCでもフレームレートを安定させます。</td></tr>
+                  <tr><td>プリセット</td><td><code>.ini</code>で保存</td><td>バックアップや他のプレイヤーとの共有が簡単です。</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="doc-section">
+            <h3>8. トラブルシューティング</h3>
+            <div class="doc-table-wrap">
+              <table class="doc-table">
+                <thead>
+                  <tr><th>症状</th><th>対処</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>起動時にBVEがクラッシュする</td><td>APIの選択ミスです。セットアップツールを再実行してDirect3D 9を選びます。アドオン版を入れた場合は通常版に戻してください。</td></tr>
+                  <tr><td>オーバーレイが出ない</td><td><code>Home</code>を押し、BVEのウィンドウ内をクリックします。排他フルスクリーンではなくウィンドウ／ボーダーレスも試してください。</td></tr>
+                  <tr><td>初期化に失敗する</td><td>セットアップツールを管理者として実行し、DirectX 9エンドユーザーランタイムを再インストールします。</td></tr>
+                  <tr><td>深度エフェクトが平面的</td><td>Add-onsタブのGeneric Depthで<em>Copy depth buffer before clear operations</em>にチェックを入れ、シナリオを読み込み直してください。</td></tr>
+                  <tr><td>FPSが大きく下がる</td><td>まず被写界深度とアンビエントオクルージョンを無効にし、SMAA品質も下げます。軽いプリセットを保存してください。</td></tr>
+                  <tr><td>プリセットが保存されない</td><td>BVEのフォルダが書き込み禁止です。BVEを管理者として実行するか、<code>Program Files</code>以外にインストールします。</td></tr>
+                  <tr><td>更新後に動作しなくなった</td><td>同じセットアップツールを再実行します。既存の導入を検出し、<strong>Uninstall</strong>または<strong>Modify</strong>を選べます。</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="doc-section">
+            <h3>9. ReShadeをアンインストールする</h3>
+            <p>インストール時に使ったセットアップツールをもう一度実行します。<code>ReShade_Setup_x.x.x.exe</code>を起動し、削除したいBVEの実行ファイルを選んで<strong>Direct3D 9</strong>を指定します。既存のインストールが検出されると、インストールではなく<strong>Uninstall</strong>ボタンが表示されます。それをクリックして完了まで待ちます。</p>
+            <ul class="doc-list">
+              <li>BVE 5とBVE 6は別々に導入しているので、もう一方も同じ手順で削除します。</li>
+              <li>BVEが<code>Program Files</code>にある場合は、セットアップツールを管理者として実行してください。</li>
+              <li>終了後、実行ファイルのフォルダを確認します。<code>d3d9.dll</code>、<code>ReShade.ini</code>、<code>ReShade.log</code>、<code>shaders</code>、<code>textures</code>が残っていれば手動で削除します。</li>
+              <li>フォルダを消す前に、残したいプリセットの<code>.ini</code>ファイルを退避させておきます。</li>
+            </ul>
+            <p>アンインストール後にBVEを一度起動し、オーバーレイが消えて通常どおり動くことを確認してください。</p>
+          </section>
+
+          <section class="doc-section">
+            <h3>既知の制限</h3>
+            <ul class="doc-list">
+              <li>Direct3D 9の深度バッファ取得は完全ではなく、シナリオによっては深度依存のエフェクトがおかしくなることがあります。</li>
+              <li>ReShadeは多少の性能を消費します。古いPCでは軽いプリセットが必要です。</li>
+              <li>BVE 5は32ビットアプリケーションのため、大きなプリセットではBVE 6より早くメモリ上限に達することがあります。</li>
+              <li>BVE標準のスクリーンショットにはReShadeのエフェクトが写らない場合があります。ReShadeのスクリーンショット機能を使ってください。</li>
+              <li>このガイドはmackoy氏（BVE Trainsim）およびcrosire氏（ReShade）とは無関係です。</li>
+            </ul>
+          </section>
+
+          <section class="doc-section">
+            <h3>クレジット</h3>
+            <p>ReShadeは&copy; crosire、BSD 3-clauseライセンスです。BVE Trainsimは&copy; mackoy。サイトのコンテンツは&copy; 2026 MoltenVertexです。</p>
+          </section>
+        </div>
+
+        <!-- ══════════ INDONESIAN ══════════ -->
+        <div class="lang-panel" data-lang="id" lang="id">
+          <div class="doc-kicker">Blog / Tutorial</div>
+          <h2>Beri tampilan baru untuk cab BVE dengan ReShade</h2>
+          <div class="doc-meta">
+            <span>22 November 2026</span>
+            <span>~9 menit baca</span>
+            <span class="badge purple">BVE 5</span>
+            <span class="badge purple">BVE 6</span>
+            <span class="badge teal">ReShade 6</span>
+          </div>
+          <p class="doc-lead">ReShade adalah injector post-processing gratis yang menambahkan ambient occlusion, color grading, sharpening, dan film grain di atas game DirectX 9. BVE Trainsim 5 dan 6 sama-sama merender lewat Direct3D 9, jadi beberapa menit di setup tool resmi sudah cukup untuk mengubah tampilan cab kamu. File rute, kereta, atau panel tidak perlu disentuh.</p>
+
+          <section class="doc-section">
+            <h3>Yang ditambahkan ReShade</h3>
+            <ul class="doc-list">
+              <li>Koreksi warna: saturasi, kontras, tint, dan exposure sesuai selera kamu.</li>
+              <li>Anti-aliasing SMAA yang menghaluskan tepian objek rute dan gauge cab.</li>
+              <li>Ambient occlusion, depth of field, bloom, dan vignette agar gambar lebih foto-realistik.</li>
+              <li>Film grain, chromatic aberration, dan sharpening, semuanya bisa menyala/mati dan diatur sendiri.</li>
+              <li>Semua berjalan di atas keluaran BVE sendiri. Pengaturan disimpan sebagai preset <code>.ini</code> yang bisa dicadangkan atau dibagikan.</li>
+            </ul>
+          </section>
+
+          <section class="doc-section">
+            <h3>Sebelum mulai</h3>
+            <div class="doc-table-wrap">
+              <table class="doc-table">
+                <thead>
+                  <tr><th>Komponen</th><th>Yang dipakai</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>BVE Trainsim 5.8</td><td><code>BveTs5.exe</code> &middot; 32-bit &middot; Direct3D 9</td></tr>
+                  <tr><td>BVE Trainsim 6.0</td><td><code>BveTs6.exe</code> &middot; 64-bit &middot; Direct3D 9</td></tr>
+                  <tr><td>ReShade</td><td>Setup tool 6.x dari situs resmi</td></tr>
+                  <tr><td>Runtime</td><td>DirectX 9 End-User Runtime dan VC++ redistributable (sudah terpasang bersama BVE)</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="doc-callout">ReShade dikembangkan oleh crosire dan dirilis dengan lisensi BSD 3-clause. Unduh hanya dari <a href="https://reshade.me/" target="_blank" rel="noopener">reshade.me</a>. Jangan pasang biner ReShade yang ikut dibundling dalam arsip preset sembarangan.</p>
+            <p class="doc-warn">BVE 5 dan BVE 6 memakai executable dan bitness yang berbeda. Pasang ReShade terpisah untuk masing-masing yang kamu mainkan; instalasi di satu versi tidak terbawa ke versi lainnya.</p>
+          </section>
+
+          <section class="doc-section">
+            <h3>1. Unduh setup tool</h3>
+            <p>Buka <a href="https://reshade.me/" target="_blank" rel="noopener">reshade.me</a> lalu klik <strong>Download ReShade</strong>. Jalankan <code>ReShade_Setup_x.x.x.exe</code> yang terunduh. Build standar sudah cukup untuk BVE; pilih build <em>full add-on support</em> hanya kalau kamu memang membutuhkan add-on.</p>
+            <p>Kalau BVE terpasang di bawah <code>Program Files</code>, klik kanan setup tool dan pilih <strong>Run as administrator</strong> supaya bisa menulis ke folder tersebut.</p>
+          </section>
+
+          <section class="doc-section">
+            <h3>2. Arahkan ke executable BVE</h3>
+            <p>Di setup tool, klik <strong>Browse&hellip;</strong> dan pilih <code>.exe</code> yang biasa kamu jalankan:</p>
+            <ul class="doc-list">
+              <li><strong>BVE 5:</strong> <code>C:\Program Files (x86)\BveTs5\BveTs5.exe</code></li>
+              <li><strong>BVE 6:</strong> <code>C:\Program Files\BveTs6\BveTs6.exe</code></li>
+            </ul>
+            <p>Itu cuma contoh lokasi umum. Path aslinya tergantung tempat kamu menginstal BVE. Pakai <em>Open file location</em> pada shortcut kalau ragu. Lalu klik <strong>Next</strong>.</p>
+          </section>
+
+          <section class="doc-section">
+            <h3>3. Pilih Direct3D 9</h3>
+            <p>Saat installer menanyakan API rendering, pilih <strong>Direct3D 9</strong> untuk BVE 5 maupun BVE 6. BVE merender dengan SlimDX (DirectX 9) meski BVE 6 sendiri berupa aplikasi 64-bit: bitness hanya mengubah arsitektur DLL ReShade, bukan API grafisnya. Setup tool otomatis memilih DLL yang tepat.</p>
+            <pre class="code-block">BveTs5\                 BveTs6\
+  BveTs5.exe               BveTs6.exe
+  d3d9.dll                 d3d9.dll
+  ReShade.ini              ReShade.ini
+  ReShade.log              ReShade.log
+  shaders\                 shaders\
+  textures\                textures\</pre>
+            <p>File-file ini diletakkan di samping executable. Jangan dipindah, ReShade memuatnya otomatis setiap kali dijalankan.</p>
+          </section>
+
+          <section class="doc-section">
+            <h3>4. Pasang kumpulan shader</h3>
+            <p>ReShade tidak mengubah apa pun sebelum shader terpasang. Pada langkah pemilihan shader, centang minimal satu repository dan biarkan setup tool mengunduhnya. Mulai dari kecil: satu atau dua paket shader umum sudah cukup untuk preset pertama. Selesaikan wizard dan tutup.</p>
+            <p>Kamu bisa menambah paket lain nanti dengan menjalankan setup tool yang sama lalu memilih <strong>Modify</strong> / <strong>Update</strong>, bukan instal ulang dari awal.</p>
+          </section>
+
+          <section class="doc-section">
+            <h3>5. Aktifkan depth buffer lebih dulu (tab Add-ons)</h3>
+            <p>Setelah instalasi pertama, jalankan BVE, tekan <code>Home</code>, lalu buka tab <strong>Add-ons</strong>. Di bawah <strong>Generic Depth</strong>, centang <strong>Copy depth buffer before clear operations</strong>. Ini yang memberi ReShade akses ke depth buffer BVE. Tanpanya, ambient occlusion dan depth of field tidak akan bekerja.</p>
+            <p class="doc-callout">Add-on <strong>Generic Depth</strong> sudah bawaan dalam build standar ReShade, jadi kamu tidak perlu build full add-on support hanya untuk ini. Biarkan <em>Copy depth buffer before fullscreen draw calls</em> tidak dicentang kecuali efek depth masih bermasalah dalam mode fullscreen. Perubahan langsung berlaku; muat ulang skenario kalau daftar buffer tidak refresh.</p>
+          </section>
+
+          <section class="doc-section">
+            <h3>6. Jalankan pertama dan preset pertama</h3>
+            <ol class="doc-steps">
+              <li><strong>Jalankan BVE seperti biasa</strong> dan muat skenario dengan tampilan cab.</li>
+              <li><strong>Tekan <code>Home</code></strong> untuk membuka overlay ReShade. Kalau tidak muncul, klik dulu di dalam jendela BVE.</li>
+              <li><strong>Centang beberapa efek</strong> di Home &rarr; Effects, misalnya SMAA dan satu pass koreksi warna.</li>
+              <li><strong>Atur slider</strong> sampai gambar terlihat enak dari kursi masinis.</li>
+              <li><strong>Simpan preset</strong> dengan tombol Save. File <code>.ini</code> ditulis di samping executable BVE.</li>
+              <li><strong>Tekan <code>Home</code> lagi</strong> untuk menyembunyikan overlay. Efek tetap aktif.</li>
+            </ol>
+            <p>Tidak perlu restart. Preset bisa diganti kapan saja dari overlay selagi kamu mengemudi.</p>
+          </section>
+
+          <section class="doc-section">
+            <h3>7. Pengaturan yang perlu dicek</h3>
+            <div class="doc-table-wrap">
+              <table class="doc-table">
+                <thead>
+                  <tr><th>Pengaturan</th><th>Saran</th><th>Alasan</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>Tombol overlay</td><td><code>Home</code></td><td>Menampilkan atau menyembunyikan UI ReShade.</td></tr>
+                  <tr><td>Depth buffer</td><td>Generic Depth &rarr; <em>Copy depth buffer before clear operations</em></td><td>Aktifkan di tab Add-ons setelah instalasi; wajib untuk AO dan depth of field.</td></tr>
+                  <tr><td>Kualitas SMAA</td><td>High</td><td>Menghaluskan tepian objek rute dan gauge dengan biaya rendah.</td></tr>
+                  <tr><td>Efek aktif</td><td>Di bawah ~20 pass</td><td>Menjaga frame rate tetap stabil di PC lama.</td></tr>
+                  <tr><td>Preset</td><td>Simpan sebagai <code>.ini</code></td><td>Mudah dicadangkan atau dibagikan ke pemain lain.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="doc-section">
+            <h3>8. Pemecahan masalah</h3>
+            <div class="doc-table-wrap">
+              <table class="doc-table">
+                <thead>
+                  <tr><th>Gejala</th><th>Solusi</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>BVE crash saat startup</td><td>API salah dipilih. Jalankan ulang setup tool dan pilih Direct3D 9. Kalau memakai build add-on, kembalikan ke build standar.</td></tr>
+                  <tr><td>Overlay tidak muncul</td><td>Tekan <code>Home</code>, klik di dalam jendela BVE, dan coba mode windowed/borderless alih-alih fullscreen eksklusif.</td></tr>
+                  <tr><td>Pesan "failed to initialize"</td><td>Jalankan setup tool sebagai administrator dan pasang ulang DirectX 9 End-User Runtime.</td></tr>
+                  <tr><td>Efek depth terlihat datar</td><td>Buka tab Add-ons, centang <em>Copy depth buffer before clear operations</em> di Generic Depth, lalu muat ulang skenario.</td></tr>
+                  <tr><td>FPS turun drastis</td><td>Matikan depth of field dan ambient occlusion lebih dulu, lalu turunkan kualitas SMAA. Simpan preset yang lebih ringan.</td></tr>
+                  <tr><td>Preset tidak tersimpan</td><td>Folder BVE bersifat write-protected. Jalankan BVE sebagai administrator atau pasang di luar <code>Program Files</code>.</td></tr>
+                  <tr><td>Rusak setelah update</td><td>Jalankan ulang setup tool yang sama. Ia mendeteksi instalasi yang ada dan menawarkan <strong>Uninstall</strong> atau <strong>Modify</strong>.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="doc-section">
+            <h3>9. Uninstall ReShade</h3>
+            <p>Pakai setup tool yang sama seperti saat instalasi. Jalankan <code>ReShade_Setup_x.x.x.exe</code>, pilih executable BVE yang mau dibersihkan, lalu pilih <strong>Direct3D 9</strong>. Begitu tool mendeteksi instalasi yang ada, tombol <strong>Uninstall</strong> akan muncul menggantikan opsi install. Klik dan tunggu sampai selesai.</p>
+            <ul class="doc-list">
+              <li>Ulangi untuk versi BVE lainnya. Instalasi BVE 5 dan BVE 6 terpisah.</li>
+              <li>Kalau BVE ada di <code>Program Files</code>, jalankan setup tool sebagai administrator.</li>
+              <li>Setelah selesai, cek folder executable. Kalau <code>d3d9.dll</code>, <code>ReShade.ini</code>, <code>ReShade.log</code>, <code>shaders</code>, atau <code>textures</code> masih ada, hapus manual.</li>
+              <li>Simpan dulu file preset <code>.ini</code> yang mau kamu simpan sebelum menghapus foldernya.</li>
+            </ul>
+            <p>Jalankan BVE sekali setelah uninstall untuk memastikan overlay hilang dan game tetap berjalan normal.</p>
+          </section>
+
+          <section class="doc-section">
+            <h3>Batasan yang diketahui</h3>
+            <ul class="doc-list">
+              <li>Ekstraksi depth buffer pada Direct3D 9 tidak sempurna; beberapa efek berbasis depth bisa terlihat salah di sebagian skenario.</li>
+              <li>ReShade memakan sedikit performa. PC lama mungkin perlu preset yang lebih ringan.</li>
+              <li>BVE 5 adalah aplikasi 32-bit, jadi preset sangat besar bisa lebih cepat menyentuh batas memori dibanding BVE 6.</li>
+              <li>Fitur screenshot bawaan BVE mungkin tidak menyertakan efek ReShade; gunakan shortcut screenshot milik ReShade.</li>
+              <li>Panduan ini tidak berafiliasi dengan mackoy (BVE Trainsim) maupun crosire (ReShade).</li>
+            </ul>
+          </section>
+
+          <section class="doc-section">
+            <h3>Kredit</h3>
+            <p>ReShade &copy; crosire dan berlisensi BSD 3-clause. BVE Trainsim &copy; mackoy. Konten situs &copy; 2026 MoltenVertex.</p>
+          </section>
+        </div>
+
+      </article>
+
+      <aside class="doc-aside">
+        <div class="card download-card">
+          <div class="panel-header">
+            <span class="line-badge">Links</span>
+            <span class="panel-title">Official Resources</span>
+          </div>
+
+          <div class="lang-panel" data-lang="en" lang="en">
+            <p class="dl-note">ReShade 6.x &middot; BSD 3-clause &middot; Free</p>
+            <ul class="download-list">
+              <li><a href="https://reshade.me/" target="_blank" rel="noopener" class="is-external"><span class="file-type">WEB</span><span><strong>reshade.me</strong><small>Setup tool and documentation</small></span></a></li>
+              <li><a href="https://bvets.net/en" target="_blank" rel="noopener" class="is-external"><span class="file-type">WEB</span><span><strong>BVE Trainsim</strong><small>Official BVE 5 / BVE 6 site</small></span></a></li>
+            </ul>
+            <p class="dl-note">API: Direct3D 9 &middot; Overlay key: Home &middot; Install per executable.</p>
+          </div>
+
+          <div class="lang-panel" data-lang="jp" lang="ja">
+            <p class="dl-note">ReShade 6.x &middot; BSD 3-clause &middot; 無料</p>
+            <ul class="download-list">
+              <li><a href="https://reshade.me/" target="_blank" rel="noopener" class="is-external"><span class="file-type">WEB</span><span><strong>reshade.me</strong><small>セットアップツールとドキュメント</small></span></a></li>
+              <li><a href="https://bvets.net/ja" target="_blank" rel="noopener" class="is-external"><span class="file-type">WEB</span><span><strong>BVE Trainsim</strong><small>BVE 5 / BVE 6 公式サイト</small></span></a></li>
+            </ul>
+            <p class="dl-note">API: Direct3D 9 &middot; オーバーレイ: Home &middot; 実行ファイルごとに導入。</p>
+          </div>
+
+          <div class="lang-panel" data-lang="id" lang="id">
+            <p class="dl-note">ReShade 6.x &middot; BSD 3-clause &middot; Gratis</p>
+            <ul class="download-list">
+              <li><a href="https://reshade.me/" target="_blank" rel="noopener" class="is-external"><span class="file-type">WEB</span><span><strong>reshade.me</strong><small>Setup tool dan dokumentasi</small></span></a></li>
+              <li><a href="https://bvets.net/en" target="_blank" rel="noopener" class="is-external"><span class="file-type">WEB</span><span><strong>BVE Trainsim</strong><small>Situs resmi BVE 5 / BVE 6</small></span></a></li>
+            </ul>
+            <p class="dl-note">API: Direct3D 9 &middot; Tombol overlay: Home &middot; Pasang per executable.</p>
+          </div>
+        </div>
+      </aside>
+
+    </div>
+  </main>
+
+  <div class="statusbar">
+    <span>ReShade 6.x</span>
+    <span>BVE 5 &middot; BVE 6 &middot; Direct3D 9</span>
+    <span>ReShade: BSD 3-clause</span>
+    <span id="statusText" style="margin-left:auto">MoltenVertex</span>
+  </div>
+
+  <script>
+    (function () {
+      var root = document.documentElement;
+      var buttons = document.querySelectorAll('.lang-btn');
+      var langMap = { en: 'en', jp: 'ja', id: 'id' };
+
+      function applyLanguage(lang) {
+        if (!langMap[lang]) lang = 'en';
+        root.dataset.lang = lang;
+        root.lang = langMap[lang];
+        buttons.forEach(function (button) {
+          button.setAttribute('aria-pressed', button.dataset.lang === lang ? 'true' : 'false');
+        });
+      }
+
+      buttons.forEach(function (button) {
+        button.addEventListener('click', function () {
+          var lang = button.dataset.lang;
+          applyLanguage(lang);
+          try { localStorage.setItem('mv-lang', lang); } catch (e) { }
+        });
+      });
+
+      applyLanguage(root.dataset.lang || 'en');
+    })();
+  </script>
+
+</body>
+
+</html>
