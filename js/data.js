@@ -93,6 +93,16 @@ const PROJECTS = [
     section: 'operational',
   },
   {
+    name: 'MVquickload',
+    href: './mvquickload/',
+    description: 'Blog and download page for the MVquickload BveEX extension that speeds up BVE Trainsim 5/6 route loading, in English, Japanese, and Indonesian.',
+    tech: 'HTML/Docs',
+    line: 'green',
+    lineName: 'GREEN LINE',
+    platform: '8',
+    section: 'operational',
+  },
+  {
     name: 'ReShade for BVE 5/6',
     href: './reshade/',
     description: 'Blog and installation guide for adding ReShade post-processing to BVE Trainsim 5 and 6, in English, Japanese, and Indonesian.',

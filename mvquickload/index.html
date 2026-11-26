@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en" data-lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MVquickload: Faster route loading for BVE Trainsim 5/6</title>
+  <meta name="description" content="MVquickload is a BveEX extension that speeds up BVE Trainsim 5 and 6 route loading by parsing .x meshes and textures in parallel. Download the DLL and drop it into the BveEX Extensions folder.">
+  <meta name="theme-color" content="#f0f0f0">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="MVquickload: Faster route loading for BVE Trainsim 5/6">
+  <meta property="og:description" content="One DLL, no config: faster route loading for BVE 5 and 6. Guide in English, Japanese, and Indonesian.">
+  <meta property="og:url" content="https://moltenvertex.github.io/mvquickload/">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23009944'/%3E%3Ctext x='32' y='43' font-family='Arial,sans-serif' font-size='24' font-weight='900' fill='%23ffffff' text-anchor='middle'%3EMV%3C/text%3E%3C/svg%3E">
+  <script>
+    (function () {
+      var supported = ['en', 'jp', 'id'];
+      var saved = null;
+      try { saved = localStorage.getItem('mv-lang'); } catch (e) { }
+      if (supported.indexOf(saved) === -1) {
+        var nav = (navigator.language || 'en').toLowerCase();
+        saved = nav.indexOf('ja') === 0 ? 'jp' : nav.indexOf('id') === 0 ? 'id' : 'en';
+      }
+      document.documentElement.dataset.lang = saved;
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+JP:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500&display=swap">
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <link rel="stylesheet" href="../css/editors.css">
+  <link rel="stylesheet" href="style.css">
+  <script src="../js/theme.js"></script>
+</head>
+
+<body class="cab-theme doc-page">
+
+  <div class="top-bar">
+    <a href="../index.html" class="back-station-chip">&#8592; Station</a>
+    <span>MVquickload</span>
+    <span class="meta">Blog / Download</span>
+  </div>
+
+  <div class="name-board">
+    <div class="station-medallion">
+      <span class="letter">Q</span>
+      <span class="number">08</span>
+    </div>
+    <div class="title-group">
+      <h1>MVquickload</h1>
+      <div class="subtitle">Faster route loading for BVE Trainsim 5/6</div>
+    </div>
+    <div class="lang-switch" role="group" aria-label="Language">
+      <button type="button" class="btn lang-btn" data-lang="en" aria-pressed="true">EN</button>
+      <button type="button" class="btn lang-btn" data-lang="jp" aria-pressed="false">JP</button>
+      <button type="button" class="btn lang-btn" data-lang="id" aria-pressed="false">ID</button>
+    </div>
+  </div>
+
+  <div class="direction-bar">
+    <span class="line-stripe"></span>
+    <span class="arrow">&#8594;</span>
+    <span class="label">Article</span>
+    <span class="dest">Faster loading &middot; BVE Trainsim 5/6 &middot; BveEX extension</span>
+  </div>
+
+  <main class="doc-main">
+    <div class="doc-shell">
+
+      <article class="card doc-article">
+
+        <!-- ══════════ ENGLISH ══════════ -->
+        <div class="lang-panel" data-lang="en" lang="en">
+          <div class="doc-kicker">Blog / Download</div>
+          <h2>Make BVE load your routes faster</h2>
+          <div class="doc-meta">
+            <span>November 26, 2026</span>
+            <span>~5 min read</span>
+            <span class="badge green">BVE 5</span>
+            <span class="badge green">BVE 6</span>
+            <span class="badge teal">BveEX</span>
+          </div>
+          <p class="doc-lead">MVquickload is a small BveEX extension that gets a route's 3D objects and textures ready while BVE is still starting up. Download one DLL, drop it into the BveEX Extensions folder, and busy routes load quicker. Nothing in your route or train files needs to change.</p>
+
+          <section class="doc-section">
+            <h3>What it does</h3>
+            <ul class="doc-list">
+              <li>It reads the route's <code>.x</code> model files ahead of time, using several CPU cores at once, and has them ready before BVE asks for them.</li>
+              <li>Duplicate textures are sorted out in the background too, so the same image doesn't have to be decoded over and over.</li>
+              <li>Anything it can't handle just goes through BVE as usual, so you won't lose any objects.</li>
+              <li>It doesn't touch object placement or the cab. Your route looks exactly the same. It just opens sooner.</li>
+            </ul>
+          </section>
+
+          <section class="doc-section">
+            <h3>Before you start</h3>
+            <div class="doc-table-wrap">
+              <table class="doc-table">
+                <thead>
+                  <tr><th>Component</th><th>Requirement</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>BVE Trainsim</td><td>5.x (tested on 5.8) or 6.x</td></tr>
+                  <tr><td>BveEX</td><td>2.0 or newer, already installed</td></tr>
+                  <tr><td>.NET Framework</td><td>4.8, already on Windows 10 and 11</td></tr>
+                  <tr><td>Setup</td><td>No config needed. BveEX picks it up automatically.</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="doc-callout">BveEX is made by automatic9045 and isn't included here. Grab it from the <a href="https://github.com/automatic9045/BveEX/releases" target="_blank" rel="noopener">official releases page</a> first, then open BVE once so BveEX can create its folders.</p>
+          </section>
+
+          <section class="doc-section">
+            <h3>1. Download and unzip</h3>
+            <p>Grab <code>MVQuickLoad.zip</code> from the panel on this page and extract it somewhere easy to find, like your Desktop. Inside is a single file, <code>MVQuickLoad.dll</code>. There's no config file and nothing else to set up.</p>
+          </section>
+
+          <section class="doc-section">
+            <h3>2. Put it in place</h3>
+            <ol class="doc-steps">
+              <li><strong>Close BVE first.</strong> You can't replace a DLL while BVE is using it.</li>
+              <li><strong>Open the BveEX Extensions folder.</strong> With a standard install it's <code>C:\Users\Public\Documents\BveEx\2.0\Extensions</code>.</li>
+              <li><strong>Paste the DLL in there.</strong> That's it. The result is shown below.</li>
+              <li><strong>Start BVE and open a route.</strong> MVquickload works quietly in the background. There's no menu or switch to turn on.</li>
+            </ol>
+            <pre class="code-block">C:\Users\Public\Documents\BveEx\2.0\Extensions\
+   MVQuickLoad.dll</pre>
+            <p class="doc-warn">Don't leave two versions in the folder. If you still have an older <code>MVquickload.dll</code>, a <code>.disabled</code> file, or a renamed backup, remove it first. Two copies doing the same job will clash.</p>
+          </section>
+
+          <section class="doc-section">
+            <h3>3. See if it helped</h3>
+            <p>Try the same route a few times with the DLL in and out. Routes with lots of 3D structures and unique textures tend to benefit most; short routes may feel the same. This build is deliberately silent, so don't expect a log file.</p>
+          </section>
+
+          <section class="doc-section">
+            <h3>Troubleshooting</h3>
+            <div class="doc-table-wrap">
+              <table class="doc-table">
+                <thead>
+                  <tr><th>Symptom</th><th>What to do</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>No difference at all</td><td>The route might be small, or the delay might be coming from your graphics card rather than file loading. Try a structure-heavy route.</td></tr>
+                  <tr><td>BVE won't start</td><td>Make sure BveEX 2.0+ and .NET Framework 4.8 are installed, and that there's only one MVquickload DLL in Extensions.</td></tr>
+                  <tr><td>Can't tell it's installed</td><td>That's normal. Check the folder above. The DLL must sit directly in <code>Extensions</code>, not in a subfolder.</td></tr>
+                  <tr><td>Something looks off in a route</td><td>Files MVquickload can't read are handled by BVE as usual. Take the DLL out and reload to see if the problem is with the route itself.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="doc-section">
+            <h3>About</h3>
+            <p>MVquickload v1.0.0.0 is made by MoltenVertex. Website content &copy; 2026 MoltenVertex. BveEX is by automatic9045 and isn't included in this download.</p>
+          </section>
+        </div>
+
+        <!-- ══════════ JAPANESE ══════════ -->
+        <div class="lang-panel" data-lang="jp" lang="ja">
+          <div class="doc-kicker">ブログ / ダウンロード</div>
+          <h2>BVEの路線読み込みを、もっと速く</h2>
+          <div class="doc-meta">
+            <span>2026年11月26日</span>
+            <span>約5分</span>
+            <span class="badge green">BVE 5</span>
+            <span class="badge green">BVE 6</span>
+            <span class="badge teal">BveEX</span>
+          </div>
+          <p class="doc-lead">MVquickloadは、BVEが路線を開くときの待ち時間を短くする小さなBveEX拡張です。DLLをExtensionsフォルダに入れるだけで、構造物の多い路線もスムーズに読み込めます。路線や車両のファイルを書き換える必要はありません。</p>
+
+          <section class="doc-section">
+            <h3>できること</h3>
+            <ul class="doc-list">
+              <li>路線の<code>.x</code>モデルを先に読み込み、複数のCPUコアを使ってBVEが使える状態に整えます。</li>
+              <li>同じテクスチャが何度も出てくる場合は裏で整理して、無駄な読み込みを減らします。</li>
+              <li>うまく扱えないファイルはそのままBVEに任せるので、物件が消えることはありません。</li>
+              <li>物件の配置や運転台には影響しません。見た目は同じまま、開くのが早くなるだけです。</li>
+            </ul>
+          </section>
+
+          <section class="doc-section">
+            <h3>はじめる前に</h3>
+            <div class="doc-table-wrap">
+              <table class="doc-table">
+                <thead>
+                  <tr><th>項目</th><th>要件</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>BVE Trainsim</td><td>5.x（5.8で確認）または 6.x</td></tr>
+                  <tr><td>BveEX</td><td>2.0以降をインストール済みであること</td></tr>
+                  <tr><td>.NET Framework</td><td>4.8（Windows 10/11なら最初から入っています）</td></tr>
+                  <tr><td>設定</td><td>不要です。BveEXが自動で読み込みます。</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="doc-callout">BveEXはautomatic9045氏が作ったローダーで、ここには含まれません。先に<a href="https://github.com/automatic9045/BveEX/releases" target="_blank" rel="noopener">公式リリースページ</a>から入れてください。入れたあとBVEを一度起動すると、必要なフォルダが作られます。</p>
+          </section>
+
+          <section class="doc-section">
+            <h3>1. ダウンロードして解凍</h3>
+            <p>このページのダウンロードパネルから<code>MVQuickLoad.zip</code>を取得し、デスクトップなど分かりやすい場所で解凍してください。中にあるのは<code>MVQuickLoad.dll</code>ひとつだけです。設定ファイルも特に準備も必要ありません。</p>
+          </section>
+
+          <section class="doc-section">
+            <h3>2. 拡張を入れる</h3>
+            <ol class="doc-steps">
+              <li><strong>先にBVEを閉じます。</strong> 起動中のDLLは上書きできません。</li>
+              <li><strong>BveEXのExtensionsフォルダを開きます。</strong> 標準なら<code>C:\Users\Public\Documents\BveEx\2.0\Extensions</code>です。</li>
+              <li><strong>そこにDLLを置きます。</strong> 配置は下のとおりです。</li>
+              <li><strong>BVEを起動して路線を開きます。</strong> MVquickloadは裏で動くだけで、メニューや表示は増えません。</li>
+            </ol>
+            <pre class="code-block">C:\Users\Public\Documents\BveEx\2.0\Extensions\
+   MVQuickLoad.dll</pre>
+            <p class="doc-warn">古いDLLを残したままにしないでください。<code>MVquickload.dll</code>や<code>.disabled</code>ファイル、名前を変えたバックアップがあれば先に消してください。同じ働きをする2つのDLLが一緒にあると競合します。</p>
+          </section>
+
+          <section class="doc-section">
+            <h3>3. 効いているか確認する</h3>
+            <p>同じ路線をDLLあり・なしで何度か開いて、時間を比べてみてください。構造物や固有のテクスチャが多い路線ほど差が出やすく、短い路線ではほぼ変わらないこともあります。このビルドはログを出さない作りなので、ログファイルは作られません。</p>
+          </section>
+
+          <section class="doc-section">
+            <h3>トラブルシューティング</h3>
+            <div class="doc-table-wrap">
+              <table class="doc-table">
+                <thead>
+                  <tr><th>症状</th><th>対処</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>読み込みが速くならない</td><td>路線が小さいか、時間がかかっているのがファイル読み込みではなくグラボ側かもしれません。構造物の多い路線で比べてみてください。</td></tr>
+                  <tr><td>BVEが起動しない</td><td>BveEX 2.0以降と.NET Framework 4.8が入っているか、ExtensionsにMVquickloadのDLLが1つだけか確認してください。</td></tr>
+                  <tr><td>入ったか分からない</td><td>それが普通です。上のフォルダを確認してください。DLLは<code>Extensions</code>の直下に置きます。</td></tr>
+                  <tr><td>路線の見た目がおかしい</td><td>MVquickloadが扱えないファイルはBVEがそのまま処理します。DLLを外して開き直し、路線側の問題か確かめてください。</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="doc-section">
+            <h3>について</h3>
+            <p>MVquickload v1.0.0.0はMoltenVertexによるものです。サイトのコンテンツは&copy; 2026 MoltenVertexです。BveEXはautomatic9045氏によるもので、このダウンロードには含まれません。</p>
+          </section>
+        </div>
+
+        <!-- ══════════ INDONESIAN ══════════ -->
+        <div class="lang-panel" data-lang="id" lang="id">
+          <div class="doc-kicker">Blog / Download</div>
+          <h2>Bikin BVE lebih cepat membuka rute</h2>
+          <div class="doc-meta">
+            <span>26 November 2026</span>
+            <span>~5 menit baca</span>
+            <span class="badge green">BVE 5</span>
+            <span class="badge green">BVE 6</span>
+            <span class="badge teal">BveEX</span>
+          </div>
+          <p class="doc-lead">MVquickload itu ekstensi BveEX kecil yang menyiapkan objek 3D dan tekstur rute pas BVE masih sibuk loading. Cukup unduh satu DLL, taruh di folder Extensions, dan rute berat jadi lebih cepat kebuka. Nggak ada file rute atau kereta yang perlu diubah.</p>
+
+          <section class="doc-section">
+            <h3>Yang dilakukan</h3>
+            <ul class="doc-list">
+              <li>Model <code>.x</code> rute dibaca lebih awal pakai beberapa core CPU, lalu disiapkan sebelum BVE memakainya.</li>
+              <li>Tekstur yang kembar dibenahi juga, jadi gambar yang sama nggak perlu dibaca berulang kali.</li>
+              <li>File yang nggak bisa ditangani tetap diserahkan ke BVE seperti biasa, jadi nggak ada objek yang hilang.</li>
+              <li>Penempatan objek dan cab nggak berubah. Rutenya tetap kelihatan sama, cuma lebih cepat siap.</li>
+            </ul>
+          </section>
+
+          <section class="doc-section">
+            <h3>Sebelum mulai</h3>
+            <div class="doc-table-wrap">
+              <table class="doc-table">
+                <thead>
+                  <tr><th>Komponen</th><th>Kebutuhan</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>BVE Trainsim</td><td>5.x (diuji di 5.8) atau 6.x</td></tr>
+                  <tr><td>BveEX</td><td>2.0 atau lebih baru, sudah terpasang</td></tr>
+                  <tr><td>.NET Framework</td><td>4.8, sudah ada di Windows 10/11</td></tr>
+                  <tr><td>Setting</td><td>Nggak ada. BveEX yang deteksi sendiri.</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="doc-callout">BveEX dibuat automatic9045 dan nggak ikut di unduhan ini. Pasang dulu dari <a href="https://github.com/automatic9045/BveEX/releases" target="_blank" rel="noopener">halaman rilis resminya</a>. Setelah itu jalankan BVE sekali supaya foldernya kebentuk.</p>
+          </section>
+
+          <section class="doc-section">
+            <h3>1. Unduh dan ekstrak</h3>
+            <p>Ambil <code>MVQuickLoad.zip</code> dari panel di halaman ini, lalu ekstrak ke tempat yang gampang dicari, misalnya Desktop. Isinya cuma satu file, <code>MVQuickLoad.dll</code>. Nggak ada file konfigurasi atau hal lain yang perlu disiapkan.</p>
+          </section>
+
+          <section class="doc-section">
+            <h3>2. Taruh di tempatnya</h3>
+            <ol class="doc-steps">
+              <li><strong>Tutup BVE dulu.</strong> DLL yang sedang dipakai nggak bisa ditimpa.</li>
+              <li><strong>Buka folder Extensions BveEX.</strong> Kalau standar, lokasinya <code>C:\Users\Public\Documents\BveEx\2.0\Extensions</code>.</li>
+              <li><strong>Tempel DLL-nya di sana.</strong> Selesai, nggak ada langkah khusus.</li>
+              <li><strong>Jalankan BVE dan buka rute.</strong> MVquickload jalan diam-diam, nggak ada menu atau tombol yang perlu diaktifkan.</li>
+            </ol>
+            <pre class="code-block">C:\Users\Public\Documents\BveEx\2.0\Extensions\
+   MVQuickLoad.dll</pre>
+            <p class="doc-warn">Jangan biarkan dua versi bersamaan. Kalau masih ada <code>MVquickload.dll</code> lama, file <code>.disabled</code>, atau backup dengan nama lain, hapus dulu. Dua DLL dengan fungsi sama bakal bertabrakan.</p>
+          </section>
+
+          <section class="doc-section">
+            <h3>3. Cek hasilnya</h3>
+            <p>Coba buka rute yang sama beberapa kali, dengan dan tanpa DLL. Rute yang banyak struktur dan tekstur unik biasanya paling kerasa, rute pendek bisa saja nggak berubah. Build ini memang sengaja nggak nulis log, jadi jangan cari file log.</p>
+          </section>
+
+          <section class="doc-section">
+            <h3>Pemecahan masalah</h3>
+            <div class="doc-table-wrap">
+              <table class="doc-table">
+                <thead>
+                  <tr><th>Gejala</th><th>Yang bisa dilakukan</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>Nggak ada bedanya</td><td>Mungkin rutenya kecil, atau yang bikin lama bukan baca file tapi urusan grafis. Coba bandingkan di rute yang banyak strukturnya.</td></tr>
+                  <tr><td>BVE error pas mulai</td><td>Pastikan BveEX 2.0+ dan .NET 4.8 terpasang, dan cuma ada satu DLL MVquickload di Extensions.</td></tr>
+                  <tr><td>Nggak kelihatan kepasang</td><td>Wajar kok. Cek folder di atas, DLL-nya harus langsung di dalam <code>Extensions</code>.</td></tr>
+                  <tr><td>Ada objek yang tampak aneh</td><td>File yang nggak bisa ditangani MVquickload tetap diproses BVE seperti biasa. Coba lepas DLL-nya dan buka ulang buat mastiin masalahnya bukan dari rutenya.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="doc-section">
+            <h3>Tentang</h3>
+            <p>MVquickload v1.0.0.0 dibuat MoltenVertex. Konten situs &copy; 2026 MoltenVertex. BveEX dibuat automatic9045 dan nggak ikut di unduhan ini.</p>
+          </section>
+        </div>
+
+      </article>
+
+      <aside class="doc-aside">
+        <div class="card download-card">
+          <div class="panel-header">
+            <span class="line-badge">Files</span>
+            <span class="panel-title">Downloads</span>
+          </div>
+
+          <div class="lang-panel" data-lang="en" lang="en">
+            <p class="dl-note">Version 1.0.0.0 &middot; BveEX extension</p>
+            <ul class="download-list">
+              <li><a href="downloads/MVQuickLoad.zip" download><span class="file-type">ZIP</span><span><strong>MVQuickLoad.zip</strong><small>Contains MVQuickLoad.dll · BVE 5/6</small></span></a></li>
+            </ul>
+            <p class="dl-hash"><span class="hash-label">SHA-256 Checksum (ZIP)</span><code>fece200f9637076df71e641afa837b34badac55be8e0c7afa8c2c930b5d8d166</code></p>
+            <p class="dl-note">BveEX isn't included. Install BveEX 2.0+ first, then copy the DLL into <code>C:\Users\Public\Documents\BveEx\2.0\Extensions</code>.</p>
+            <div class="donate-slot">
+              <script type="text/javascript" src="https://storage.sociabuzz.com/storage/js/main/buttononwebsite/index.min.js"></script>
+              <script>
+                sbBoW.draw('moltenvertex', 'U3VwcG9ydCBNZSE=', 'position-top-middle', '#ff9900', '#FFFFFF');
+                (function () {
+                  var slot = document.currentScript ? document.currentScript.closest('.donate-slot') : null;
+                  if (!slot) return;
+                  var tries = 0;
+                  (function grab() {
+                    var wrapper = slot.querySelector(':scope > #wrapperFloatingBtn');
+                    if (!wrapper) {
+                      wrapper = document.querySelector('#wrapperFloatingBtn:not([data-moved])');
+                    }
+                    if (wrapper) {
+                      wrapper.dataset.moved = '1';
+                      wrapper.style.position = 'static';
+                      wrapper.style.zIndex = 'auto';
+                      wrapper.style.width = 'auto';
+                      slot.appendChild(wrapper);
+                    } else if (tries++ < 40) {
+                      setTimeout(grab, 50);
+                    }
+                  })();
+                  /* Modal lives outside the card so it is never clipped and the close button stays clickable */
+                  slot.addEventListener('click', function (e) {
+                    if (e.target.closest('#btnModal')) {
+                      setTimeout(function () {
+                        ['sbModalOverlay', 'sbModal'].forEach(function (id) {
+                          var el = document.getElementById(id);
+                          if (el && el.parentElement !== document.body) document.body.appendChild(el);
+                        });
+                      }, 0);
+                    }
+                  });
+                })();
+              </script>
+            </div>
+          </div>
+
+          <div class="lang-panel" data-lang="jp" lang="ja">
+            <p class="dl-note">バージョン 1.0.0.0 &middot; BveEX拡張</p>
+            <ul class="download-list">
+              <li><a href="downloads/MVQuickLoad.zip" download><span class="file-type">ZIP</span><span><strong>MVQuickLoad.zip</strong><small>MVQuickLoad.dll 入り · BVE 5/6</small></span></a></li>
+            </ul>
+            <p class="dl-hash"><span class="hash-label">SHA-256 チェックサム (ZIP)</span><code>fece200f9637076df71e641afa837b34badac55be8e0c7afa8c2c930b5d8d166</code></p>
+            <div class="donate-slot">
+              <script type="text/javascript" src="https://storage.sociabuzz.com/storage/js/main/buttononwebsite/index.min.js"></script>
+              <script>
+                sbBoW.draw('moltenvertex', '44K144Od44O844OI44GX44Gm44GP44Gg44GV44GE', 'position-top-middle', '#ff9900', '#FFFFFF');
+                (function () {
+                  var slot = document.currentScript ? document.currentScript.closest('.donate-slot') : null;
+                  if (!slot) return;
+                  var tries = 0;
+                  (function grab() {
+                    var wrapper = slot.querySelector(':scope > #wrapperFloatingBtn');
+                    if (!wrapper) {
+                      wrapper = document.querySelector('#wrapperFloatingBtn:not([data-moved])');
+                    }
+                    if (wrapper) {
+                      wrapper.dataset.moved = '1';
+                      wrapper.style.position = 'static';
+                      wrapper.style.zIndex = 'auto';
+                      wrapper.style.width = 'auto';
+                      slot.appendChild(wrapper);
+                    } else if (tries++ < 40) {
+                      setTimeout(grab, 50);
+                    }
+                  })();
+                  /* Modal lives outside the card so it is never clipped and the close button stays clickable */
+                  slot.addEventListener('click', function (e) {
+                    if (e.target.closest('#btnModal')) {
+                      setTimeout(function () {
+                        ['sbModalOverlay', 'sbModal'].forEach(function (id) {
+                          var el = document.getElementById(id);
+                          if (el && el.parentElement !== document.body) document.body.appendChild(el);
+                        });
+                      }, 0);
+                    }
+                  });
+                })();
+              </script>
+            </div>
+          </div>
+
+          <div class="lang-panel" data-lang="id" lang="id">
+            <p class="dl-note">Versi 1.0.0.0 &middot; Ekstensi BveEX</p>
+            <ul class="download-list">
+              <li><a href="downloads/MVQuickLoad.zip" download><span class="file-type">ZIP</span><span><strong>MVQuickLoad.zip</strong><small>Isinya MVQuickLoad.dll · BVE 5/6</small></span></a></li>
+            </ul>
+            <p class="dl-hash"><span class="hash-label">SHA-256 Checksum (ZIP)</span><code>fece200f9637076df71e641afa837b34badac55be8e0c7afa8c2c930b5d8d166</code></p>
+            <p class="dl-note">BveEX nggak ikut. Pasang BveEX 2.0+ dulu, lalu taruh DLL-nya di <code>C:\Users\Public\Documents\BveEx\2.0\Extensions</code>.</p>
+            <div class="donate-slot">
+              <script type="text/javascript" src="https://storage.sociabuzz.com/storage/js/main/buttononwebsite/index.min.js"></script>
+              <script>
+                sbBoW.draw('moltenvertex', 'RHVrdW5nIFNheWEh', 'position-top-middle', '#ff9900', '#FFFFFF');
+                (function () {
+                  var slot = document.currentScript ? document.currentScript.closest('.donate-slot') : null;
+                  if (!slot) return;
+                  var tries = 0;
+                  (function grab() {
+                    var wrapper = slot.querySelector(':scope > #wrapperFloatingBtn');
+                    if (!wrapper) {
+                      wrapper = document.querySelector('#wrapperFloatingBtn:not([data-moved])');
+                    }
+                    if (wrapper) {
+                      wrapper.dataset.moved = '1';
+                      wrapper.style.position = 'static';
+                      wrapper.style.zIndex = 'auto';
+                      wrapper.style.width = 'auto';
+                      slot.appendChild(wrapper);
+                    } else if (tries++ < 40) {
+                      setTimeout(grab, 50);
+                    }
+                  })();
+                  /* Modal lives outside the card so it is never clipped and the close button stays clickable */
+                  slot.addEventListener('click', function (e) {
+                    if (e.target.closest('#btnModal')) {
+                      setTimeout(function () {
+                        ['sbModalOverlay', 'sbModal'].forEach(function (id) {
+                          var el = document.getElementById(id);
+                          if (el && el.parentElement !== document.body) document.body.appendChild(el);
+                        });
+                      }, 0);
+                    }
+                  });
+                })();
+              </script>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+    </div>
+  </main>
+
+  <div class="statusbar">
+    <span>MVquickload v1.0.0.0</span>
+    <span>BVE 5 / BVE 6 &middot; BveEX 2.0+</span>
+    <span>MVquickload by MoltenVertex</span>
+    <span id="statusText" style="margin-left:auto">MoltenVertex</span>
+  </div>
+
+  <script>
+    (function () {
+      var root = document.documentElement;
+      var buttons = document.querySelectorAll('.lang-btn');
+      var langMap = { en: 'en', jp: 'ja', id: 'id' };
+
+      function applyLanguage(lang) {
+        if (!langMap[lang]) lang = 'en';
+        root.dataset.lang = lang;
+        root.lang = langMap[lang];
+        buttons.forEach(function (button) {
+          button.setAttribute('aria-pressed', button.dataset.lang === lang ? 'true' : 'false');
+        });
+      }
+
+      buttons.forEach(function (button) {
+        button.addEventListener('click', function () {
+          var lang = button.dataset.lang;
+          applyLanguage(lang);
+          try { localStorage.setItem('mv-lang', lang); } catch (e) { }
+        });
+      });
+
+      applyLanguage(root.dataset.lang || 'en');
+    })();
+  </script>
+
+</body>
+
+</html>
